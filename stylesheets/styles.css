@@ -1,0 +1,90 @@
+body
+{
+    font-size:0.9em;
+    margin:0em;
+    padding:0em;
+}
+
+div.page
+{
+    font-size:1em;
+    margin:auto;
+    max-width:60em;
+}
+
+h1 {font-size:1.3em; color:green;}
+h2 {font-size:1.2em; color:green;}
+h3 {font-size:1em;}
+div.psl {margin-left:1em;}
+span.descriptor {color:gray;}
+
+table, tr, td
+{
+    border: 1px solid gray;
+    border-collapse: collapse;
+}
+
+div.not-impl
+{
+    background-color:red;
+}
+
+div.image
+{
+    margin:1em;
+    padding:4em 2em;
+    border: green 1px solid;
+}
+
+ul.BULLET {list-style-type:disc;}
+ul.SQUARE {list-style-type:square;}
+ul.NONE {list-style-type:none;}
+ul.NDASH {list-style-type:circle;}
+
+div.note, div.example
+{
+    padding: 1em;
+    margin: 1em;
+    border: blue 1px solid;
+}
+
+div.sidfrag, div.titleblock, div.footerblock
+{
+    border: green 1px solid;
+    padding: 1em;
+    margin: 1em;
+}
+
+div.titleblock
+{
+    text-align:center;
+}
+
+div.links
+{
+    text-align:right;
+}
+
+p.du
+{
+    color: #E0E0FF;
+    border-top: solid #E0E0FF 1px;
+    /* display: none; */
+}
+
+div.index h1
+{
+    border-top: solid green 1px;
+    margin-top: 2em;
+    padding-top: 1em;
+}
+
+div.index h2
+{
+    margin-left: 2em;
+}
+
+div.index p
+{
+    margin-left: 4em;
+}
