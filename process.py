@@ -166,7 +166,7 @@ class PageFactory:
 
     def __create_fragment__(self, filename):
         return subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "fragment.xsl", data_dir + filename],
-                                stdout=subprocess.PIPE).communicate()[0]
+                                stdout=subprocess.PIPE).communicate()[0].replace('xmlns="http://www.w3.org/1999/xhtml" ', "", 1)
 
 
     def __make_filename__(self, sid):
