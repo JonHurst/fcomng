@@ -165,7 +165,7 @@ class PageFactory:
 
 
     def __create_fragment__(self, filename):
-        return subprocess.Popen(["xsltproc", xsl_dir + "fragment.xsl", data_dir + filename],
+        return subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "fragment.xsl", data_dir + filename],
                                 stdout=subprocess.PIPE).communicate()[0]
 
 
