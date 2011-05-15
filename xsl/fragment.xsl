@@ -57,10 +57,12 @@
   </div>
 </xsl:template>
 
+
 <xsl:template match="description">
     <h1><xsl:value-of select="title"/></h1>
     <xsl:apply-templates select="descbody|descitem"/>
 </xsl:template>
+
 
 <xsl:template match="descitem">
   <div class="descitem">
@@ -69,15 +71,18 @@
   </div>
 </xsl:template>
 
+
 <xsl:template match="descbody">
   <xsl:apply-templates select="para|unlist|numlist|warning|caution|
 			       note|table|graphref|graphref|launcher|
 			       equal|desc-cond|whatif|equation|example"/>
 </xsl:template>
 
+
 <xsl:template match="para">
   <p><xsl:apply-templates select="node()"/></p>
 </xsl:template>
+
 
 <xsl:template match="unlist">
   <xsl:apply-templates select="para"/>
@@ -89,6 +94,7 @@
   </xsl:element>
 </xsl:template>
 
+
 <xsl:template match="numlist">
   <xsl:apply-templates select="para"/>
   <xsl:element name="ol">
@@ -99,6 +105,7 @@
   </xsl:element>
 </xsl:template>
 
+
 <xsl:template match="item">
   <li>
     <xsl:apply-templates select="para|unlist|numlist|warning|caution|
@@ -106,6 +113,7 @@
 				 equal|equation"/>
   </li>
 </xsl:template>
+
 
 <xsl:template match="graphref">
   <xsl:variable name="ref" select="interactive-graphic/illustration/sheet/fileref/@href"/>
@@ -119,12 +127,14 @@
   </div>
 </xsl:template>
 
+
 <xsl:template match="note">
   <div class="note">
     <h2>Note</h2>
     <xsl:apply-templates/>
   </div>
 </xsl:template>
+
 
 <xsl:template match="example">
   <div class="example">
@@ -155,6 +165,7 @@
       <xsl:text> is not implemented yet!</xsl:text></p>
   </div>
 </xsl:template>
+
 
 <xsl:template match="measure">
   <xsl:value-of select="."/>
