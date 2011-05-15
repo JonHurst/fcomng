@@ -3,7 +3,32 @@
 
 <xsl:output method="html"/>
 
+<xsl:variable name="test-mode" select="0"/>
+
+
 <xsl:template match="/">
+  <xsl:choose>
+    <xsl:when test="$test-mode">
+      <html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+	  <title>Test</title>
+	  <link rel="stylesheet" type="text/css" href="../stylesheets/styles.css"/>
+	</head>
+	<body>
+	  <div class="page">
+	    <xsl:call-template name="fragment"/>
+	  </div>
+	</body>
+      </html>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:call-template name="fragment"/>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
+
+<xsl:template name="fragment">
   <div class="fragment">
   <xsl:choose>
     <xsl:when test="description">
