@@ -22,13 +22,13 @@ titleblock = """\
 <h2>%(sid)s</h2>
 <h1>%(title)s</h1>
 <h2>%(subtitle)s</h2>
-<div class="links"><a href="%(next)s">Next</a></div>
+<div class="links"><a href="index.html">Index</a> | <a href="%(next)s">Next</a></div>
 </div>
 """
 
 footerblock="""\
 <div class="footerblock">
-<div class="links"><a href="%(next)s">Next</a></div>
+<div class="links"><a href="index.html">Index</a> | <a href="%(next)s">Next</a></div>
 </div>
 """
 
