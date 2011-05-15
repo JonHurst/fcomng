@@ -96,9 +96,22 @@
   </div>
 </xsl:template>
 
+
+<xsl:template match="equal">
+  <table class="equal"><tr>
+    <td class="equ-l">
+      <p><xsl:apply-templates select="equ-l"/></p>
+    </td>
+    <td class="equ-r">
+      <xsl:apply-templates select="equ-r"/>
+    </td>
+  </tr></table>
+</xsl:template>
+
+
 <xsl:template match="warning|caution|
-		     table|launcher|
-		     equal|equation|desc-cond|whatif|equation">
+		     launcher|
+		     equation|desc-cond|whatif|footnotes">
   <div class="not-impl">
     <p>
       <xsl:value-of select="name()"/>

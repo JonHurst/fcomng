@@ -88,3 +88,24 @@ div.index p
 {
     margin-left: 4em;
 }
+
+table.equal
+{
+    width:100%;
+}
+
+table.equal td
+{
+    padding:0.5em 1em;
+}
+
+
+table.equal td.equ-l
+{
+    width:35%;
+}
+
+td, th
+{
+    padding:2px 3px;
+}
