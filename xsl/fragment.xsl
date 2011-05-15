@@ -1,9 +1,21 @@
 <?xml version="1.0"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
+<xsl:import href="lib.xsl"/>
+<xsl:import href="table.xsl"/>
+
 <xsl:output method="html"/>
+<xsl:param name="stylesheet.result.type" select="'xhtml'"/>
+
+<xsl:template name="anchor"/>
 
 <xsl:variable name="test-mode" select="0"/>
+
+<xsl:variable name="table.frame.border.style" select="'solid'"/>
+<xsl:variable name="table.frame.border.color" select="'gray'"/>
+<xsl:variable name="table.frame.border.thickness" select="'1px'"/>
+<xsl:variable name="default.table.frame" select="'all'"/>
+<xsl:param name="table.borders.with.css" select="0"/>
 
 
 <xsl:template match="/">
