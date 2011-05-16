@@ -141,7 +141,11 @@ class PageFactory:
 
     def make_index(self, pl):
         sid_list = pl.get_sids()
-        page = "<div class='index'>"
+        page = ("<div class='titleblock'>"
+                "<h1>FCOM-NG XHTML Version</h1>"
+                "<h2>Proof of concept</h2>"
+                "</div>"
+                "<div class='index'>")
         for s in sid_list:
             if len(s) == 1:
                 page += "<h1>" + pl.get_title(s) + "</h1>"
