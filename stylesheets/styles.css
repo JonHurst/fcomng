@@ -18,10 +18,15 @@ h3 {font-size:1em;}
 div.psl {margin-left:1em;}
 span.descriptor {color:gray;}
 
-table, tr, td, th
+table
+{
+    margin:auto;
+    border-collapse: collapse;
+}
+
+tr, td, th
 {
     border: 1px solid gray;
-    border-collapse: collapse;
 }
 
 div.not-impl
