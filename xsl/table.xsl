@@ -24,10 +24,6 @@
       </colgroup>
     </xsl:variable>
 
-    <xsl:attribute name="width">
-      <xsl:text>100%</xsl:text>
-    </xsl:attribute>
-
     <xsl:copy-of select="$colgroup"/>
 
     <xsl:apply-templates select="thead"/>
