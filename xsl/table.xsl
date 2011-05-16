@@ -36,10 +36,13 @@
 
 <xsl:template match="colspec"/>
 
+
 <xsl:template match="spanspec"/>
+
 
 <xsl:template match="thead|tfoot">
   <xsl:element name="{local-name(.)}" namespace="http://www.w3.org/1999/xhtml">
+
     <xsl:if test="@align">
       <xsl:attribute name="align">
         <xsl:value-of select="@align"/>
@@ -61,6 +64,7 @@
 
   </xsl:element>
 </xsl:template>
+
 
 <xsl:template match="tbody">
   <tbody>
