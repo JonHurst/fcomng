@@ -93,13 +93,21 @@ div.index p
 table.equal
 {
     width:100%;
+    margin: 2px 0;
 }
+
 
 table.equal td
 {
-    padding:0.5em 1em;
+    padding:0 1em;
+    margin:0;
 }
 
+table.equal p
+{
+    padding:0;
+    margin:2px;;
+}
 
 table.equal td.equ-l
 {
@@ -108,7 +116,7 @@ table.equal td.equ-l
 
 td, th
 {
-    padding:2px 3px;
+    padding:2px 0.5em;
 }
 
 div.fragment > p, div.fragment > ul, div.fragment > ol,
