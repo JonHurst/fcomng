@@ -124,7 +124,7 @@
         <xsl:message>Warning: overlapped row contains content!</xsl:message>
       </xsl:if>
 
-      <!-- <tr><xsl:comment> This row intentionally left blank </xsl:comment></tr> -->
+      <tr><td style="display:none;"><xsl:comment>Intentionally blank</xsl:comment></td></tr>
 
       <xsl:apply-templates select="following-sibling::row[1]">
         <xsl:with-param name="spans">
