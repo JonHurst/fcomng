@@ -184,4 +184,5 @@ h1.sectionheading
 ul, ol
 {
    margin-left: 2em;
+   padding-left:0em
 }
