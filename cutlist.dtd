@@ -1,0 +1,17 @@
+<!ENTITY % fragtypes (description|normalproc|limitation|abnormalproc|emergencyproc|performance|synthesisitem)>
+<!ELEMENT page (section+)>
+<!ATTLIST page
+	  title #REQUIRED
+	  subtitle #IMPLIED
+	  next #IMPLIED
+	  prev #IMPLIED
+>
+<!ELEMENT section filename*>
+<!ATTLIST section
+	   sid ID #REQUIRED
+	   title #IMPLIED
+>
+<!ELEMENT filename EMPTY>
+<!ATTLIST filename
+	  href CDATA #REQUIRED
+>

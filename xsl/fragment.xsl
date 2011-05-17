@@ -16,42 +16,11 @@
 
 <xsl:key name="ftnote-ids" match="ftnote" use="@lid"/>
 
-<xsl:template match="/">
-  <xsl:choose>
-    <xsl:when test="$test-mode">
-      <html>
-	<head>
-	  <title>Test</title>
-	  <link rel="stylesheet" type="text/css" href="../stylesheets/styles.css"/>
-	</head>
-	<body>
-	  <div class="page">
-	    <xsl:call-template name="fragment"/>
-	  </div>
-	</body>
-      </html>
-    </xsl:when>
-    <xsl:otherwise>
-      <xsl:call-template name="fragment"/>
-    </xsl:otherwise>
-  </xsl:choose>
-</xsl:template>
 
-
-<xsl:template name="fragment">
+<xsl:template name="description">
   <div class="fragment">
-  <xsl:choose>
-    <xsl:when test="description">
-      <xsl:apply-templates select="description"/>
-    </xsl:when>
-    <xsl:otherwise>
-      <div class="not-impl"><p>
-	<xsl:text>Root element "</xsl:text>
-	<xsl:value-of select="name(*)"/>
-	<xsl:text>" is not implemented yet!</xsl:text>
-      </p></div>
-    </xsl:otherwise>
-  </xsl:choose>
+    **TEST**
+    <xsl:apply-templates/>
   </div>
 </xsl:template>
 

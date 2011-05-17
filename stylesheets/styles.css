@@ -12,22 +12,30 @@ div.page
     max-width:65em;
 }
 
-h1 {font-size:1.3em; color:green;}
+h1 {font-size:1.3em; color:green; margin-top:1em; margin-bottom:0.5em;}
 h2 {font-size:1.2em; color:green;}
 h3 {font-size:1em;}
-div.psl {margin-left:1em;}
-span.descriptor {color:gray;}
+
 
 table
 {
     border-collapse: collapse;
-    width:100%
+    width:100%;
+    margin-top:0.5em;
+    margin-bottom:0.5em;
 }
 
 tr, td, th
 {
     border: 1px solid gray;
 }
+
+td, th
+{
+    padding:2px 0.5em;
+}
+
+
 
 div.not-impl
 {
@@ -60,19 +68,7 @@ div.caution
     border: red 2px solid;
 }
 
-div.sidfrag, div.titleblock, div.footerblock
-{
-    border: green 1px solid;
-    padding: 1em;
-    margin: 1em;
-}
-
-div.titleblock
-{
-    text-align:center;
-}
-
-div.links
+div.titleblock, div.footerblock
 {
     text-align:center;
 }
@@ -102,52 +98,38 @@ div.index p
     margin-left: 4em;
 }
 
-table.equal
-{
-    width:100%;
-    margin: 2px 0;
-}
-
-
-table.equal td
-{
-    padding:0 1em;
-    margin:0;
-}
-
-table.equal p
-{
-    padding:0;
-    margin:2px;;
-}
-
 table.equal td.equ-l
 {
     width:35%;
 }
 
-td, th
+div.section, div.pageindex, div.titleblock, div.footerblock
 {
-    padding:2px 0.5em;
+    border:green solid 1px;
+    margin: 0.5em 0;
+    padding:1em 2em;
 }
 
-div.fragment > p, div.fragment > ul, div.fragment > ol,
-div.fragment > div.descitem, div.fragment > div.note,
-div.fragment > div.example, div.fragment > div.desccond
+div.section > *
 {
-    margin-left:7em;
-    margin-right:5em;
-
+    padding-left:7em;
+    padding-right:5em;
 }
 
-div.descitem
+div.section > h1
 {
-    margin-left:3em;
+    padding-left: 0;
 }
 
-div.descitem h1
+div.section > table
 {
-    font-size:1.15em;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+div.section > table.equal
+{
+    padding-left:7em;
 }
 
 span.ifinst
@@ -185,4 +167,21 @@ div.footnotetext
 {
     margin-left:4em;
     margin-top: -2em;
+}
+
+div.pageindex p
+{
+    margin-top:0em;
+    margin-bottom:0em;
+}
+
+h1.sectionheading
+{
+    text-decoration:underline;
+    margin-bottom:2em;
+}
+
+ul, ol
+{
+   margin-left: 2em;
 }

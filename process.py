@@ -69,11 +69,7 @@ class ProcessList:
 
 
     def get_dus(self, sid):
-        retval = []
-        sidlist = [sid,] + self.__offspring__(sid)
-        for s in sidlist:
-            retval += [X[0][1] for X in self.__dict__[s][1][1:]]
-        return retval
+        return [X[0][1] for X in self.__dict__[sid][1][1:]]
 
 
     def __offspring__(self, sid):
@@ -111,32 +107,39 @@ class PageFactory:
         self.pagelist = self.pl.level_list(3)
         self.make_index(self.pl)
         for c, sid in enumerate(self.pagelist):
-            self.make_page(c, sid)
+            prevsid, nextsid = None, None
+            if c > 0:
+                prevsid = self.pagelist[c - 1]
+            if c < len(self.pagelist) - 1:
+                nextsid = self.pagelist[c + 1]
+            self.make_page(c, sid ,prevsid, nextsid)
 
 
-    def make_page(self, c, sid):
+    def __build_sid_list__(self, sid):
+        retval = [sid, ]
+        for s in self.pl.get_children(sid):
+            retval += self.__build_sid_list__(s)
+        return retval
+
+
+    def make_page(self, c, sid, prevsid, nextsid):
         filename = self.__make_filename__(sid)
         print "Creating:", filename
-        title = self.pl.get_title(sid)
-        if len(sid) > 1:
-            title = self.pl.get_title(sid[:-1])
-        next = sid
-        if (c + 1) < len(self.pagelist):
-            next = self.pagelist[c + 1]
-        page = html_templates.titleblock % {"sid": ".".join(sid),
-                                            "title": title,
-                                            "subtitle": self.pl.get_title(sid),
-                                            "next": self.__make_filename__(next)}
-        sidfrag = ""
-        for du in self.pl.get_dus(sid):
-            sidfrag += "<p class='du'>" + du + "</p>"
-            sidfrag += self.__create_fragment__(du)
-        if sidfrag:
-            page += '<div class="sidfrag">' + sidfrag + "</div>"
-        page += html_templates.footerblock % {"next": self.__make_filename__(next)}
+        root_element = et.Element("page", {"title": self.pl.get_title(sid[:1])})
+        if prevsid: root_element.set("prev", ".".join(prevsid) + ".html")
+        if nextsid: root_element.set("next", ".".join(nextsid) + ".html")
+        if len(sid) > 1: root_element.set("subtitle", self.pl.get_title(sid[:2]))
+        for s in self.__build_sid_list__(sid):
+            current = et.SubElement(root_element, "section", {"sid": ".".join(s),
+                                                              "title": self.pl.get_title(s)})
+            for du in self.pl.get_dus(s):
+                et.SubElement(current, "filename", {"href": data_dir + du[2:]})
+        page = et.tostring(root_element, "utf-8")
         of = open(output_dir + filename, "w")
-        of.write(html_templates.page % {"title": ".".join(sid) + " " + self.pl.get_title(sid),
-                                        "fragments": page})
+        of.write(subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "page.xsl", "-"],
+                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE
+                                  ).communicate(page)[0])
+        return
 
 
     def make_index(self, pl):
@@ -165,12 +168,6 @@ class PageFactory:
         of = open(output_dir + "index.html", "w")
         of.write(html_templates.page % {"title": "Index",
                                         "fragments": page})
-
-
-
-    def __create_fragment__(self, filename):
-        return subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "fragment.xsl", data_dir + filename],
-                                stdout=subprocess.PIPE).communicate()[0].replace('xmlns="http://www.w3.org/1999/xhtml" ', "", 1)
 
 
     def __make_filename__(self, sid):
