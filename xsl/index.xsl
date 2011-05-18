@@ -3,9 +3,10 @@
 		xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 		xmlns="http://www.w3.org/1999/xhtml">
 
-<xsl:output method="html"
+<xsl:output method="xml"
 	    doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"
 	    doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN"
+	    encoding="utf-8"
 	    version="1.0"/>
 
 <xsl:template match="index">
@@ -52,12 +53,12 @@
 
 
 <xsl:template match="a">
-  <p><xsl:copy-of select="."/></p>
+  <p><a><xsl:copy-of select="@href"/><xsl:value-of select="."/></a></p>
 </xsl:template>
 
 
-<xsl:template match="h1|h2">
-  <xsl:copy-of select="."/>
+<xsl:template match="h1">
+  <h1><xsl:value-of select="."/></h1>
 </xsl:template>
 
 </xsl:stylesheet>
