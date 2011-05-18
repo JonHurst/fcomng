@@ -59,9 +59,9 @@ class FCOMMeta:
         data_files = []
         for s in elem.findall("du-sol"):
             data_file = s.find("sol-content-ref").attrib["href"]
-            data_files.append(data_file)
-            section.add_du(tuple(data_files))
             self.du_meta[data_file] = s.find("sol-mdata-ref").attrib["href"]
+            data_files.append(data_file)
+        section.add_du(tuple(data_files))
 
 
     def __process_group__(self, elem, section):
