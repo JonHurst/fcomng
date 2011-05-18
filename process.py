@@ -13,8 +13,8 @@ xsl_dir = "xsl/"
 
 class FCOMMeta:
 
-
     class Section:
+
         def __init__(self, title):
             self.title = title
             self.children = []
@@ -28,12 +28,36 @@ class FCOMMeta:
         def add_du(self, du_filename):
             self.du_list.append(du_filename)
 
+    class Aircraft:
+
+        def __init__(self, aat):
+            self.aircraft = {}
+            self.fleets = {}
+            for a in aat.findall("aircraft-item"):
+                self.aircraft[a.attrib["msn"]] = a.attrib["acn"]
+                m = a.attrib["aircraft-model"]
+                if not self.fleets.has_key(m):
+                    self.fleets[m] = set()
+                self.fleets[m].add(a.attrib["msn"])
+
+
+        def dump(self):
+            for k in self.fleets.keys():
+                print "\n", k, "fleet: "
+                for a in self.fleets[k]:
+                    if self.aircraft[a]:
+                        print self.aircraft[a]
+                    else:
+                        print a
+
 
     def __init__(self, control_file):
         self.sections = {}
         self.du_meta = {}
         self.top_level_sids = []
         self.control = et.ElementTree(None, control_file)
+        self.global_meta = et. ElementTree(None, control_file.replace(".xml", "_mdata.xml"))
+        self.aircraft = self.Aircraft(self.global_meta.find("aat"))
         for psl in self.control.getroot().findall("psl"):
             self.top_level_sids.append((psl.attrib["pslcode"],))
             self.__process_psl__(psl, ())
@@ -124,6 +148,8 @@ class FCOMMeta:
         du_keys.sort()
         for k in du_keys:
             print k, self.du_meta[k]
+        print "\n\nAircraft:\n=========\n"
+        self.aircraft.dump()
 
 
 class FCOMFactory:
