@@ -158,7 +158,11 @@ class FCOMFactory:
             current = et.SubElement(root_element, "section", {"sid": ".".join(s),
                                                               "title": self.fcm.get_title(s)})
             for du in self.fcm.get_dus(s):
-                et.SubElement(current, "filename", {"href": data_dir + du[0]})
+                et.SubElement(current, "filename", {"href": data_dir + du[0],
+                                                    "type": "main"})
+                for alt in du[1:]:
+                    et.SubElement(current, "filename", {"href": data_dir + alt,
+                                                        "type": "alt"})
         page = et.tostring(root_element, "utf-8")
         of = open(output_dir + filename, "w")
         of.write(subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "page.xsl", "-"],

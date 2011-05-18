@@ -113,27 +113,34 @@ div.index
     padding-left:5em;
 }
 
-div.section > *
+div.main > *, div.alternate > *
 {
     padding-left:7em;
     padding-right:5em;
 }
 
-div.section > h1
+div.main > h1, div.alternate > h1
 {
     padding-left: 0;
 }
 
-div.section > table
+div.main > table, div.alternate > table
 {
     padding-left: 0;
     padding-right: 0;
 }
 
-div.section > table.equal
+div.main > table.equal, div.alternate > table.equal
 {
     padding-left:7em;
 }
+
+
+div.alternate
+{
+    background: #E0E0E0;
+}
+
 
 span.ifinst
 {
@@ -188,4 +195,27 @@ ul, ol
 {
    margin-left: 2em;
    padding-left:0em
+}
+
+div.folded *
+{
+    display:none;
+    background:white;
+    border-bottom:1px gray solid;
+}
+
+a.showme
+{
+    display:none;
+    padding: 0.25em;
+}
+
+div.folded a.showme
+{
+    display:block;
+}
+
+hr.multidu-sep
+{
+    color:#E0E0E0;
 }
