@@ -101,8 +101,7 @@ class FCOMMeta:
         retval = []
         for s in self.get_all_sids():
             if len(s) > prune: continue
-            children = self.get_children(s)
-            if not children:
+            if len(s) == prune or not self.get_children(s):
                 retval.append(s)
         return retval
 
