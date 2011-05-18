@@ -29,11 +29,12 @@ class FCOMMeta:
             self.du_list.append(du_filename)
 
 
-    def __init__(self, rootelement):
+    def __init__(self, control_file):
         self.sections = {}
         self.du_meta = {}
         self.top_level_sids = []
-        for psl in rootelement.findall("psl"):
+        self.control = et.ElementTree(None, control_file)
+        for psl in self.control.getroot().findall("psl"):
             self.top_level_sids.append((psl.attrib["pslcode"],))
             self.__process_psl__(psl, ())
 
@@ -214,8 +215,7 @@ class FCOMFactory:
 
 
 def main():
-    t = et.ElementTree(None, control_file)
-    fcm = FCOMMeta(t.getroot())
+    fcm = FCOMMeta(control_file)
     ff = FCOMFactory(fcm)
     ff.build_fcom()
 
