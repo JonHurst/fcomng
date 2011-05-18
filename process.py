@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# coding=utf-8
 
 import html_templates
 import xml.etree.ElementTree
@@ -172,15 +173,22 @@ class FCOMFactory:
         tb.start("book", {"title": self.fcm.get_title(pagelist[0][:1]),
                           "id": pagelist[0][0]})
         prev_section = pagelist[0][:1]
+        title_level = 3
         for p in pagelist:
             if p[:1] != prev_section[:1]:
                 tb.end("book")
                 tb.start("book", {"title": self.fcm.get_title(p[:1]),
                                   "id": p[0]})
+                title_level = 3
             if len(p) > 2 and p[:2] != prev_section[:2]:
                 tb.start("h1", {})
                 tb.data(self.fcm.get_title(p[:2]))
                 tb.end("h1")
+            if len(p) == 2 and (title_level == 2 or len(prev_section) == 3):
+                tb.start("h1", {})
+                tb.data(self.fcm.get_title(p))
+                tb.end("h1")
+                title_level = 2
             tb.start("a", {"href": self.__make_filename__(p)})
             tb.data(".".join(p) + ": " + self.fcm.get_title(p))
             tb.end("a")
