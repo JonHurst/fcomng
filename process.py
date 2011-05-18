@@ -132,8 +132,8 @@ class FCOMFactory:
 
 
     def build_fcom(self):
-        self.pagelist = self.fcm.get_leaves()
-        # self.make_index(self.pl)
+        self.pagelist = self.fcm.get_leaves(3)
+        self.make_index(self.pagelist)
         for c, sid in enumerate(self.pagelist):
             prevsid, nextsid = None, None
             if c > 0:
@@ -165,6 +165,34 @@ class FCOMFactory:
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(page)[0])
         return
+
+
+    def make_index(self, pagelist):
+        tb = et.TreeBuilder()
+        tb.start("index", {})
+        tb.start("book", {"title": self.fcm.get_title(pagelist[0][:1]),
+                          "id": pagelist[0][0]})
+        prev_section = pagelist[0][:1]
+        for p in pagelist:
+            if p[:1] != prev_section[:1]:
+                tb.end("book")
+                tb.start("book", {"title": self.fcm.get_title(p[:1]),
+                                  "id": p[0]})
+            if len(p) > 2 and p[:2] != prev_section[:2]:
+                tb.start("h1", {})
+                tb.data(self.fcm.get_title(p[:2]))
+                tb.end("h1")
+            tb.start("a", {"href": self.__make_filename__(p)})
+            tb.data(".".join(p) + ": " + self.fcm.get_title(p))
+            tb.end("a")
+            prev_section = p
+        tb.end("book")
+        tb.end("index")
+        page = et.tostring(tb.close(), "utf-8")
+        of = open(output_dir + "index.html", "w")
+        of.write(subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "index.xsl", "-"],
+                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE
+                                  ).communicate(page)[0])
 
 
     def __make_filename__(self, sid):

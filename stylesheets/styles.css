@@ -80,11 +80,9 @@ p.du
     /* display: none; */
 }
 
-div.index h1
+div.index h1.title
 {
-    border-top: solid green 1px;
-    margin-top: 2em;
-    padding-top: 1em;
+    text-align:center;
 }
 
 div.index h2
@@ -103,7 +101,7 @@ table.equal td.equ-l
     width:35%;
 }
 
-div.section, div.pageindex, div.titleblock, div.footerblock
+div.section, div.pageindex, div.titleblock, div.footerblock, div.index
 {
     border:green solid 1px;
     margin: 0.5em 0;
