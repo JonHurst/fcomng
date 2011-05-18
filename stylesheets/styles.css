@@ -138,9 +138,13 @@ div.main > table.equal, div.alternate > table.equal
 
 div.alternate
 {
-    background: #E0E0E0;
+    background: #F0FFF0;
 }
 
+div.main, div.alternate
+{
+    border-top: dotted green 1px;
+}
 
 span.ifinst
 {
@@ -200,14 +204,18 @@ ul, ol
 div.folded *
 {
     display:none;
-    background:white;
-    border-bottom:1px gray solid;
+}
+
+a.showme, a.hideme
+{
+    padding: 1em;
+    display: block;
+    text-align:right;
 }
 
 a.showme
 {
     display:none;
-    padding: 0.25em;
 }
 
 div.folded a.showme
@@ -215,7 +223,7 @@ div.folded a.showme
     display:block;
 }
 
-hr.multidu-sep
+div.folded a.hideme
 {
-    color:#E0E0E0;
+    display:none;
 }

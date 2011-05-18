@@ -84,15 +84,12 @@
     <xsl:when test="@type = 'alt'">
       <div class="alternate folded">
 	<xsl:apply-templates select="document(@href)"/>
-	<a class="hideme" href="#" onclick="hidedu(this); return false">Hide</a>
+	<a class="hideme" href="#" onclick="hidedu(this); return false">Hide alternative DU</a>
 	<a class="showme" href="#" onclick="showdu(this); return false">Show alternative DU</a>
       </div>
     </xsl:when>
     <xsl:otherwise>
       <div class="main">
-	<xsl:if test="following-sibling::filename[1]/@type = 'alt'">
-	  <hr class="multidu-sep"/>
-	</xsl:if>
 	<xsl:apply-templates select="document(@href)"/>
       </div>
     </xsl:otherwise>
