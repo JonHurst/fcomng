@@ -108,6 +108,11 @@ div.section, div.pageindex, div.titleblock, div.footerblock, div.index
     padding:1em 2em;
 }
 
+div.index
+{
+    padding-left:5em;
+}
+
 div.section > *
 {
     padding-left:7em;
