@@ -19,8 +19,8 @@
     <body>
       <div class="page">
 	<div class="titleblock">
-	  <h1>easyJet FCOM NG - XHTML version</h1>
-	  <h2>Proof of concept</h2>
+	  <h1>easyJet FCOM NG - XHTML version - G-EJAR build</h1>
+	  <h2>Version 0.1 (Proof of concept)</h2>
 	</div>
 	<div class="index">
 	  <xsl:for-each select="book">

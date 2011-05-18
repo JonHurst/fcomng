@@ -7,6 +7,7 @@ et = xml.etree.ElementTree
 import subprocess
 
 control_file = "fcom/DATA/XML_N_FCOM_EZY_TF_N_EU_CA_20110407.xml"
+msn = "2412"
 output_dir = "html/"
 data_dir= "fcom/DATA/"
 xsl_dir = "xsl/"
@@ -51,13 +52,43 @@ class FCOMMeta:
                         print a
 
 
+    class DUMetaQuery:
+
+        def __init__(self, fnd):
+            self.du_filename = ""
+            self.msns = []
+            self.filename_dict = fnd
+
+
+        def get_ac_list(self, filename):
+            if filename != self.du_filename:
+                self.scan_dumeta(filename)
+            return self.msns
+
+
+        def scan_dumeta(self, filename):
+            e = et.ElementTree(None, data_dir + self.filename_dict[filename])
+            m = (e.find("effect").
+                 find("aircraft-ranges").
+                 find("effact").
+                 find("aircraft-range").
+                 text.split(" "))
+            self.msns = []
+            for msn in m:
+                while len(msn) != 4:
+                    self.msns.append(msn[:4])
+                    msn = msn[4:]
+                self.msns.append(msn)
+
+
     def __init__(self, control_file):
         self.sections = {}
-        self.du_meta = {}
+        self.du_meta_filenames = {}
         self.top_level_sids = []
         self.control = et.ElementTree(None, control_file)
         self.global_meta = et. ElementTree(None, control_file.replace(".xml", "_mdata.xml"))
         self.aircraft = self.Aircraft(self.global_meta.find("aat"))
+        self.du_metaquery = self.DUMetaQuery(self.du_meta_filenames)
         for psl in self.control.getroot().findall("psl"):
             self.top_level_sids.append((psl.attrib["pslcode"],))
             self.__process_psl__(psl, ())
@@ -84,7 +115,7 @@ class FCOMMeta:
         data_files = []
         for s in elem.findall("du-sol"):
             data_file = s.find("sol-content-ref").attrib["href"]
-            self.du_meta[data_file] = s.find("sol-mdata-ref").attrib["href"]
+            self.du_meta_filenames[data_file] = s.find("sol-mdata-ref").attrib["href"]
             data_files.append(data_file)
         section.add_du(tuple(data_files))
 
@@ -132,6 +163,13 @@ class FCOMMeta:
         return retval
 
 
+    def affected(self, msn, du_filename):
+        ac_list = self.du_metaquery.get_ac_list(du_filename)
+        if msn in ac_list:
+            return True
+        return False
+
+
     def dump(self):
         print "Sections:\n==========\n"
         for s in self.get_all_sids():
@@ -150,6 +188,8 @@ class FCOMMeta:
             print k, self.du_meta[k]
         print "\n\nAircraft:\n=========\n"
         self.aircraft.dump()
+        print "\n\nAircraft list test\n"
+        print self.affected("4556", "./DU/00000284.0001001.xml")
 
 
 class FCOMFactory:
@@ -158,7 +198,7 @@ class FCOMFactory:
         self.fcm = fcm #instance of FCOMMeta
 
 
-    def build_fcom(self):
+    def build_fcom(self, msn):
         self.pagelist = self.fcm.get_leaves(3)
         self.make_index(self.pagelist)
         for c, sid in enumerate(self.pagelist):
@@ -167,14 +207,14 @@ class FCOMFactory:
                 prevsid = self.pagelist[c - 1]
             if c < len(self.pagelist) - 1:
                 nextsid = self.pagelist[c + 1]
-            self.make_page(c, sid ,prevsid, nextsid)
+            self.make_page(c, sid ,prevsid, nextsid, msn)
 
 
     def __build_sid_list__(self, sid):
         return [sid, ] + self.fcm.get_descendants(sid)
 
 
-    def make_page(self, c, sid, prevsid, nextsid):
+    def make_page(self, c, sid, prevsid, nextsid, msn):
         filename = self.__make_filename__(sid)
         print "Creating:", filename
         root_element = et.Element("page", {"title": self.fcm.get_title(sid[:1])})
@@ -185,11 +225,19 @@ class FCOMFactory:
             current = et.SubElement(root_element, "section", {"sid": ".".join(s),
                                                               "title": self.fcm.get_title(s)})
             for du in self.fcm.get_dus(s):
-                et.SubElement(current, "filename", {"href": data_dir + du[0],
-                                                    "type": "main"})
-                for alt in du[1:]:
-                    et.SubElement(current, "filename", {"href": data_dir + alt,
-                                                        "type": "alt"})
+                if len(du) == 1:
+                    et.SubElement(current, "filename", {"href": data_dir + du[0],
+                                                        "type": "main"})
+                else:
+                    for c, f in enumerate(du):
+                        if self.fcm.affected(msn, f):
+                            break
+                    et.SubElement(current, "filename", {"href": data_dir + du[c],
+                                                        "type": "main"})
+                    alternates = du[:c] + du[c+1:]
+                    for a in alternates:
+                        et.SubElement(current, "filename", {"href": data_dir + a,
+                                                            "type": "alt"})
         page = et.tostring(root_element, "utf-8")
         of = open(output_dir + filename, "w")
         of.write(subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "page.xsl", "-"],
@@ -243,7 +291,7 @@ class FCOMFactory:
 def main():
     fcm = FCOMMeta(control_file)
     ff = FCOMFactory(fcm)
-    ff.build_fcom()
+    ff.build_fcom(msn)
 
 
 main()

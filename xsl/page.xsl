@@ -83,8 +83,8 @@
   <xsl:choose>
     <xsl:when test="@type = 'alt'">
       <div class="alternate folded">
-	<xsl:apply-templates select="document(@href)"/>
 	<a class="hideme" href="#" onclick="hidedu(this); return false">Hide alternative DU</a>
+	<xsl:apply-templates select="document(@href)"/>
 	<a class="showme" href="#" onclick="showdu(this); return false">Show alternative DU</a>
       </div>
     </xsl:when>
