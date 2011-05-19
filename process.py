@@ -42,6 +42,21 @@ class FCOMMeta:
                 self.fleets[m].add(a.attrib["msn"])
 
 
+        def applies(self, msnlist):
+            retval = []
+            msnset = set(msnlist)
+            fleets = self.fleets.keys()
+            fleets.sort()
+            for f in fleets:
+                if self.fleets[f] <= msnset:
+                    retval.append(f + " fleet")
+                    msnset = msnset.difference(self.fleets[f])
+            remaining = [self.aircraft[X] for X in list(msnset)]
+            remaining.sort()
+            retval += remaining
+            return ", ".join(retval)
+
+
         def dump(self):
             for k in self.fleets.keys():
                 print "\n", k, "fleet: "
@@ -170,6 +185,11 @@ class FCOMMeta:
         return False
 
 
+    def applies(self, du_filename):
+        ac_list = self.du_metaquery.get_ac_list(du_filename)
+        return self.aircraft.applies(ac_list)
+
+
     def dump(self):
         print "Sections:\n==========\n"
         for s in self.get_all_sids():
@@ -190,6 +210,8 @@ class FCOMMeta:
         self.aircraft.dump()
         print "\n\nAircraft list test\n"
         print self.affected("4556", "./DU/00000284.0001001.xml")
+        print self.applies("./DU/00000284.0001001.xml")
+        print self.applies("./DU/00000879.0002001.xml")
 
 
 class FCOMFactory:
