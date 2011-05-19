@@ -34,9 +34,13 @@ class FCOMMeta:
         def __init__(self, aat):
             self.aircraft = {}
             self.fleets = {}
+            self.pseudofleets = {}
             for a in aat.findall("aircraft-item"):
                 if a.attrib["acn"]:
                     self.aircraft[a.attrib["msn"]] = a.attrib["acn"]
+                    if not self.pseudofleets.has_key(a.attrib["acn"][:-1] + "*"):
+                        self.pseudofleets[a.attrib["acn"][:-1] + "*"] = set()
+                    self.pseudofleets[a.attrib["acn"][:-1] + "*"].add(a.attrib["msn"])
                 else:
                     self.aircraft[a.attrib["msn"]] = a.attrib["msn"]
                 m = a.attrib["aircraft-model"]
@@ -46,18 +50,21 @@ class FCOMMeta:
 
 
         def applies(self, msnlist):
-            retval = []
             msnset = set(msnlist)
-            fleets = self.fleets.keys()
-            fleets.sort()
-            for f in fleets:
+            fleets = []
+            for f in self.fleets.keys():
                 if self.fleets[f] <= msnset:
-                    retval.append(f + " fleet")
+                    fleets.append(f + " fleet")
                     msnset = msnset.difference(self.fleets[f])
-            remaining = [self.aircraft[X] for X in list(msnset)]
+            pseudofleets = []
+            for p in self.pseudofleets.keys():
+                if self.pseudofleets[p] <= msnset:
+                    pseudofleets.append(p)
+                    msnset = msnset.difference(self.pseudofleets[p])
+            remaining = pseudofleets + [self.aircraft[X] for X in list(msnset)]
             remaining.sort()
-            retval += remaining
-            return ", ".join(retval)
+            fleets.sort()
+            return ", ".join(fleets + remaining)
 
 
         def msn_to_reg(self, msn):
