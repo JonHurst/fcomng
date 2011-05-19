@@ -21,22 +21,24 @@
     </head>
     <body>
       <div class="page">
+	  <table><tr><th>easyJet</th><th>FCOM</th><th>A319/A320</th>
+	  <th><xsl:value-of select="@acft"/></th>
+	  <td align="center">
+	  <a>
+	    <xsl:attribute name="href"><xsl:value-of select="@prev"/></xsl:attribute>
+	  Prev</a>
+	  <xsl:text> | </xsl:text>
+	  <a href="index.html">Index</a>
+	  <xsl:text> | </xsl:text>
+	  <a>
+	    <xsl:attribute name="href"><xsl:value-of select="@next"/></xsl:attribute>
+	  Next</a></td>
+	</tr></table>
 	<div class="titleblock">
-	  <h1><xsl:value-of select="@title"/>: <xsl:value-of select="@subtitle"/></h1>
+	  <h1><xsl:value-of select="@title"/></h1>
 	  <xsl:if test="@subtitle">
-	    <h2>[<xsl:value-of select="@acft"/>]</h2>
+	    <h2><xsl:value-of select="@subtitle"/></h2>
 	  </xsl:if>
-	  <p>
-	    <a>
-	      <xsl:attribute name="href"><xsl:value-of select="@prev"/></xsl:attribute>
-	    Prev</a>
-	    <xsl:text> | </xsl:text>
-	    <a href="index.html">Index</a>
-	    <xsl:text> | </xsl:text>
-	    <a>
-	      <xsl:attribute name="href"><xsl:value-of select="@next"/></xsl:attribute>
-	    Next</a>
-	  </p>
 	</div>
 	<xsl:if test="count(section) > 1">
 	  <div class="pageindex">
