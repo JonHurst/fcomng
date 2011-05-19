@@ -84,6 +84,8 @@
     <xsl:when test="@type = 'alt'">
       <div class="alternate folded">
 	<a class="hideme" href="#" onclick="hidedu(this); return false">Hide alternative DU</a>
+	<!-- Uncomment line below to insert du filenames for debugging -->
+	<!-- <p class="duname"><xsl:value-of select="@href"/></p> -->
 	<xsl:apply-templates select="document(@href)"/>
 	<a class="showme" href="#" onclick="showdu(this); return false">Show alternative DU</a>
       </div>
