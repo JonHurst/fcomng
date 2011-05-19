@@ -35,7 +35,10 @@ class FCOMMeta:
             self.aircraft = {}
             self.fleets = {}
             for a in aat.findall("aircraft-item"):
-                self.aircraft[a.attrib["msn"]] = a.attrib["acn"]
+                if a.attrib["acn"]:
+                    self.aircraft[a.attrib["msn"]] = a.attrib["acn"]
+                else:
+                    self.aircraft[a.attrib["msn"]] = a.attrib["msn"]
                 m = a.attrib["aircraft-model"]
                 if not self.fleets.has_key(m):
                     self.fleets[m] = set()
@@ -55,6 +58,10 @@ class FCOMMeta:
             remaining.sort()
             retval += remaining
             return ", ".join(retval)
+
+
+        def msn_to_reg(self, msn):
+            return self.aircraft[msn]
 
 
         def dump(self):
@@ -83,17 +90,16 @@ class FCOMMeta:
 
         def scan_dumeta(self, filename):
             e = et.ElementTree(None, data_dir + self.filename_dict[filename])
-            m = (e.find("effect").
-                 find("aircraft-ranges").
-                 find("effact").
-                 find("aircraft-range").
-                 text.split(" "))
-            self.msns = []
-            for msn in m:
-                while len(msn) != 4:
-                    self.msns.append(msn[:4])
-                    msn = msn[4:]
-                self.msns.append(msn)
+            m = e.find("effect").find("aircraft-ranges").find("effact").find("aircraft-range")
+            if not et.iselement(m):
+                self.msns = None
+            else:
+                self.msns = []
+                for msn in m.text.split(" "):
+                    while len(msn) != 4:
+                        self.msns.append(msn[:4])
+                        msn = msn[4:]
+                    self.msns.append(msn)
 
 
     def __init__(self, control_file):
@@ -180,14 +186,17 @@ class FCOMMeta:
 
     def affected(self, msn, du_filename):
         ac_list = self.du_metaquery.get_ac_list(du_filename)
-        if msn in ac_list:
+        if not ac_list or msn in ac_list:
             return True
         return False
 
 
     def applies(self, du_filename):
         ac_list = self.du_metaquery.get_ac_list(du_filename)
-        return self.aircraft.applies(ac_list)
+        if not ac_list:
+            return "Whole fleet"
+        else:
+            return self.aircraft.applies(ac_list)
 
 
     def dump(self):
@@ -239,33 +248,43 @@ class FCOMFactory:
     def make_page(self, c, sid, prevsid, nextsid, msn):
         filename = self.__make_filename__(sid)
         print "Creating:", filename
-        root_element = et.Element("page", {"title": self.fcm.get_title(sid[:1])})
-        if prevsid: root_element.set("prev", ".".join(prevsid) + ".html")
-        if nextsid: root_element.set("next", ".".join(nextsid) + ".html")
-        if len(sid) > 1: root_element.set("subtitle", self.fcm.get_title(sid[:2]))
+        tb = et.TreeBuilder()
+        page_attributes = {"title": self.fcm.get_title(sid[:1]),
+                           "acft": self.fcm.aircraft.msn_to_reg(msn)}
+        if len(sid) > 1: page_attributes["subtitle"] = self.fcm.get_title(sid[:2])
+        if prevsid: page_attributes["prev"] = ".".join(prevsid) + ".html"
+        if nextsid: page_attributes["next"] = ".".join(nextsid) + ".html"
+        tb.start("page", page_attributes)
         for s in self.__build_sid_list__(sid):
-            current = et.SubElement(root_element, "section", {"sid": ".".join(s),
-                                                              "title": self.fcm.get_title(s)})
-            for du in self.fcm.get_dus(s):
-                if len(du) == 1:
-                    et.SubElement(current, "filename", {"href": data_dir + du[0],
-                                                        "type": "main"})
+            tb.start("section", {"sid": ".".join(s),
+                                 "title": self.fcm.get_title(s)})
+            for dul in self.fcm.get_dus(s):
+                main_du = 0
+                while not self.fcm.affected(msn, dul[main_du]):
+                    main_du += 1
+                    if main_du == len(dul): break
+                if main_du == len(dul):
+                    tb.start("du", {"href": ""})
                 else:
-                    for c, f in enumerate(du):
-                        if self.fcm.affected(msn, f):
-                            break
-                    et.SubElement(current, "filename", {"href": data_dir + du[c],
-                                                        "type": "main"})
-                    alternates = du[:c] + du[c+1:]
-                    for a in alternates:
-                        et.SubElement(current, "filename", {"href": data_dir + a,
-                                                            "type": "alt"})
-        page = et.tostring(root_element, "utf-8")
+                    tb.start("du", {"href": data_dir + dul[main_du]})
+                    if self.fcm.applies(dul[main_du]) != "Whole fleet":
+                        tb.start("applies", {})
+                        tb.data(self.fcm.applies(dul[main_du]))
+                        tb.end("applies")
+                for adu in (dul[:main_du] + dul[main_du+1:]):
+                    tb.start("adu", {"href": data_dir + adu})
+                    tb.start("applies", {})
+                    tb.data(self.fcm.applies(adu))
+                    tb.end("applies")
+                    tb.end("adu")
+                tb.end("du")
+            tb.end("section")
+        tb.end("page")
+        page = et.tostring(tb.close(), "utf-8")
         of = open(output_dir + filename, "w")
         of.write(subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "page.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(page)[0])
-        return
 
 
     def make_index(self, pagelist):

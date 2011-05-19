@@ -46,7 +46,9 @@
 
 
 <xsl:template match="title">
-  <h1><xsl:apply-templates/></h1>
+  <xsl:if test=".. != /">
+    <h1><xsl:apply-templates/></h1>
+  </xsl:if>
 </xsl:template>
 
 

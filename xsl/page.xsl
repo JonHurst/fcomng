@@ -79,23 +79,33 @@
 </xsl:template>
 
 
-<xsl:template match="filename">
-  <xsl:choose>
-    <xsl:when test="@type = 'alt'">
-      <div class="alternate folded">
-	<a class="hideme" href="#" onclick="hidedu(this); return false">Hide alternative DU</a>
-	<!-- Uncomment line below to insert du filenames for debugging -->
-	<!-- <p class="duname"><xsl:value-of select="@href"/></p> -->
+<xsl:template match="du">
+  <div class="main">
+    <xsl:choose>
+      <xsl:when test="@href != ''">
+	<h1><xsl:value-of select="document(@href)//title"/></h1>
+	<xsl:if test="applies">
+	  <p class="applies">Applies to: <xsl:value-of select="applies"/></p>
+	</xsl:if>
 	<xsl:apply-templates select="document(@href)"/>
-	<a class="showme" href="#" onclick="showdu(this); return false">Show alternative DU</a>
-      </div>
-    </xsl:when>
-    <xsl:otherwise>
-      <div class="main">
-	<xsl:apply-templates select="document(@href)"/>
-      </div>
-    </xsl:otherwise>
-  </xsl:choose>
+      </xsl:when>
+      <xsl:otherwise>
+	<h1><xsl:value-of select="document(adu/@href)//title"/></h1>
+	<p>DU does not apply to <xsl:value-of select="/page/@acft"/>.</p>
+      </xsl:otherwise>
+    </xsl:choose>
+    <p class="duident"><xsl:value-of select="@href"/></p>
+  </div>
+  <xsl:for-each select="adu">
+    <div class="alternate folded">
+      <a class="showme" href="#" onclick="showdu(this); return false">Show alternative DU</a>
+      <a class="hideme" href="#" onclick="hidedu(this); return false">Hide alternative DU</a>
+      <h1><xsl:value-of select="document(@href)//title"/></h1>
+      <p class="applies">Applies to: <xsl:value-of select="applies"/></p>
+      <xsl:apply-templates select="document(@href)"/>
+      <p class="duident"><xsl:value-of select="@href"/></p>
+    </div>
+  </xsl:for-each>
 </xsl:template>
 
 </xsl:stylesheet>

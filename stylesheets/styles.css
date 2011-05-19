@@ -214,6 +214,13 @@ a.showme, a.hideme
     text-align:right;
 }
 
+a.hideme
+{
+    padding-bottom: 0;
+    margin-bottom:-1em;
+}
+
+
 a.showme
 {
     display:none;
@@ -225,6 +232,18 @@ div.folded a.showme
 }
 
 div.folded a.hideme
+{
+    display:none;
+}
+
+p.applies, p.duident
+{
+    color: gray;
+    padding-left:2em;
+    font-size: 0.9em;
+}
+
+p.duident
 {
     display:none;
 }
