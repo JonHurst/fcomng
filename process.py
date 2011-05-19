@@ -182,10 +182,10 @@ class FCOMMeta:
         for l in self.get_leaves():
             print ".".join(l), ": ", self.get_title(l)
         print "\n\nMeta:\n=====\n"
-        du_keys = self.du_meta.keys()
+        du_keys = self.du_meta_filenames.keys()
         du_keys.sort()
         for k in du_keys:
-            print k, self.du_meta[k]
+            print k, self.du_meta_filenames[k]
         print "\n\nAircraft:\n=========\n"
         self.aircraft.dump()
         print "\n\nAircraft list test\n"
