@@ -17,14 +17,6 @@
 <xsl:key name="ftnote-ids" match="ftnote" use="@lid"/>
 
 
-<xsl:template name="description">
-  <div class="fragment">
-    **TEST**
-    <xsl:apply-templates/>
-  </div>
-</xsl:template>
-
-
 <xsl:template match="descitem">
   <div class="descitem">
     <xsl:apply-templates/>
