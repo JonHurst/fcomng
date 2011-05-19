@@ -14,7 +14,7 @@
 <xsl:template match="page">
   <html>
     <head>
-      <title></title>
+      <title><xsl:value-of select="@title"/>: <xsl:value-of select="@subtitle"/></title>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
       <script type="text/javascript" src="../scripts/script.js"></script>
       <link rel="stylesheet" type="text/css" href="../stylesheets/styles.css"/>
@@ -22,9 +22,9 @@
     <body>
       <div class="page">
 	<div class="titleblock">
-	  <h1><xsl:value-of select="@title"/></h1>
+	  <h1><xsl:value-of select="@title"/>: <xsl:value-of select="@subtitle"/></h1>
 	  <xsl:if test="@subtitle">
-	    <h2><xsl:value-of select="@subtitle"/></h2>
+	    <h2>[<xsl:value-of select="@acft"/>]</h2>
 	  </xsl:if>
 	  <p>
 	    <a>
