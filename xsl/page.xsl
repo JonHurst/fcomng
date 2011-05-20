@@ -76,6 +76,15 @@
   <div class="section">
     <xsl:attribute name="id">sid<xsl:value-of select="@sid"/></xsl:attribute>
     <h1 class="sectionheading"><xsl:value-of select="@sid"/>: <xsl:value-of select="@title"/></h1>
+    <xsl:if test="count(du) &gt; 1">
+      <div class="duindex">
+	<xsl:for-each select="du">
+	  <p><a>
+	    <xsl:attribute name="href">#duid<xsl:value-of select="@href"/></xsl:attribute>
+	  <xsl:value-of select="document(@href)//title"/></a></p>
+	</xsl:for-each>
+      </div>
+    </xsl:if>
     <xsl:apply-templates/>
   </div>
 </xsl:template>
@@ -83,6 +92,7 @@
 
 <xsl:template match="du">
   <div class="main">
+    <xsl:attribute name="id">duid<xsl:value-of select="@href"/></xsl:attribute>
     <xsl:choose>
       <xsl:when test="@href != ''">
 	<h1><xsl:value-of select="document(@href)//title"/></h1>
