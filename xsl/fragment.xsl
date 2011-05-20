@@ -131,6 +131,21 @@
 </xsl:template>
 
 
+<xsl:template match="comment">
+  <xsl:choose>
+    <xsl:when test="note">
+      <xsl:apply-templates/>
+    </xsl:when>
+    <xsl:otherwise>
+      <div class="note">
+	<h2>Comment</h2>
+	<xsl:apply-templates/>
+      </div>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
+
 <xsl:template match="example">
   <div class="example">
     <h2>Example</h2>
@@ -209,9 +224,20 @@
 </xsl:template>
 
 
+<xsl:template match="lit-limit">
+  <p><strong><xsl:apply-templates/></strong></p>
+</xsl:template>
+
+
+<xsl:template match="perf-value">
+    <p><strong><xsl:apply-templates select="perf"/>:</strong>  <xsl:apply-templates  select="value"/></p>
+</xsl:template>
+
+
 <xsl:template match="description|table|equ-l|equ-r|abb|
 		     descbody|row-header|tech-label|
-		     ex-desc-cond">
+		     ex-desc-cond|limitation|limitbody|
+		     perf|value|limititem|limit">
   <xsl:apply-templates/>
 </xsl:template>
 
