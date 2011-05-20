@@ -80,8 +80,17 @@
       <div class="duindex">
 	<xsl:for-each select="du">
 	  <p><a>
-	    <xsl:attribute name="href">#duid<xsl:value-of select="@href"/></xsl:attribute>
-	  <xsl:value-of select="document(@href)//title"/></a></p>
+	    <xsl:choose>
+	      <xsl:when test="@href != ''">
+		<xsl:attribute name="href">#duid<xsl:value-of select="@href"/></xsl:attribute>
+		<xsl:value-of select="document(@href)//title"/>
+	      </xsl:when>
+	      <xsl:otherwise>
+		<xsl:attribute name="href">#duid<xsl:value-of select="adu/@href"/></xsl:attribute>
+		<xsl:value-of select="document(adu/@href)//title"/>
+	      </xsl:otherwise>
+	    </xsl:choose>
+	  </a></p>
 	</xsl:for-each>
       </div>
     </xsl:if>
@@ -92,9 +101,9 @@
 
 <xsl:template match="du">
   <div class="main">
-    <xsl:attribute name="id">duid<xsl:value-of select="@href"/></xsl:attribute>
     <xsl:choose>
       <xsl:when test="@href != ''">
+	<xsl:attribute name="id">duid<xsl:value-of select="@href"/></xsl:attribute>
 	<h1><xsl:value-of select="document(@href)//title"/></h1>
 	<xsl:if test="applies">
 	  <p class="applies">Applies to: <xsl:value-of select="applies"/></p>
@@ -102,6 +111,7 @@
 	<xsl:apply-templates select="document(@href)"/>
       </xsl:when>
       <xsl:otherwise>
+	<xsl:attribute name="id">duid<xsl:value-of select="adu/@href"/></xsl:attribute>
 	<h1><xsl:value-of select="document(adu/@href)//title"/></h1>
 	<p>DU does not apply to <xsl:value-of select="/page/@acft"/>.</p>
       </xsl:otherwise>
