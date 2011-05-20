@@ -87,7 +87,15 @@
 <xsl:template match="graphref">
   <xsl:variable name="ref" select="interactive-graphic/illustration/sheet/fileref/@href"/>
   <div class="image">
-    <p><xsl:value-of select="$ref"/></p>
+    <p>
+      Image:
+      <a>
+	<xsl:attribute name="href">
+	  ../fcom/DATA/DU/<xsl:value-of select="$ref"/>
+	</xsl:attribute>
+	<xsl:value-of select="$ref"/>
+      </a>
+    </p>
   <!-- <xsl:element name="img" use-attribute-sets="imgsrc"> -->
   <!--   <xsl:attribute name="src"> -->
   <!--     <xsl:value-of select="concat($ref, '.png')"/> -->
