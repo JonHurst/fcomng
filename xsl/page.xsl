@@ -84,12 +84,12 @@
 	      <xsl:when test="@href != ''">
 		<xsl:attribute name="href">#duid<xsl:value-of select="substring-after(@href,
 		'/DU/')"/></xsl:attribute>
-		<xsl:value-of select="document(@href)//title"/>
+		<xsl:value-of select="@title"/>
 	      </xsl:when>
 	      <xsl:otherwise>
 		<xsl:attribute name="href">#duid<xsl:value-of select="substring-after(adu/@href,
 		'/DU/')"/></xsl:attribute>
-		<xsl:value-of select="document(adu/@href)//title"/>
+		<xsl:value-of select="adu/@title"/>
 	      </xsl:otherwise>
 	    </xsl:choose>
 	  </a></p>
@@ -115,7 +115,7 @@
       <xsl:when test="@href != ''">
 	<xsl:attribute name="id">duid<xsl:value-of select="substring-after(@href,
 	'/DU/')"/></xsl:attribute>
-	<h1><xsl:value-of select="document(@href)//title"/></h1>
+	<h1><xsl:value-of select="@title"/></h1>
 	<xsl:if test="applies">
 	  <p class="applies">Applies to: <xsl:value-of select="applies"/></p>
 	</xsl:if>
@@ -124,7 +124,7 @@
       <xsl:otherwise>
 	<xsl:attribute name="id">duid<xsl:value-of select="substring-after(adu/@href,
 	'/DU/')"/></xsl:attribute>
-	<h1><xsl:value-of select="document(adu/@href)//title"/></h1>
+	<h1><xsl:value-of select="adu/@title"/></h1>
 	<p>DU does not apply to <xsl:value-of select="/page/@acft"/>.</p>
       </xsl:otherwise>
     </xsl:choose>
@@ -139,7 +139,7 @@
     <div class="alternate folded">
       <a class="showme" href="#" onclick="showdu(this); return false">Show alternative DU</a>
       <a class="hideme" href="#" onclick="hidedu(this); return false">Hide alternative DU</a>
-      <h1><xsl:value-of select="document(@href)//title"/></h1>
+      <h1><xsl:value-of select="@title"/></h1>
       <p class="applies">Applies to: <xsl:value-of select="applies"/></p>
       <xsl:apply-templates select="document(@href)"/>
       <p class="duident"><xsl:value-of select="@href"/></p>

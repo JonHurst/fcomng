@@ -121,6 +121,7 @@ class FCOMMeta:
 
     def __init__(self, control_file):
         self.sections = {}
+        self.du_titles = {}
         self.du_meta_filenames = {}
         self.top_level_sids = []
         self.control = et.ElementTree(None, control_file)
@@ -155,6 +156,7 @@ class FCOMMeta:
             data_file = s.find("sol-content-ref").attrib["href"]
             self.du_meta_filenames[data_file] = s.find("sol-mdata-ref").attrib["href"]
             data_files.append(data_file)
+            self.du_titles[data_file] = elem.find("title").text
         section.add_du(tuple(data_files))
 
 
@@ -166,6 +168,10 @@ class FCOMMeta:
 
     def get_title(self, sid):
         return self.sections[sid].title
+
+
+    def get_du_title(self, du_filename):
+        return self.du_titles[du_filename]
 
 
     def get_dus(self, sid):
@@ -242,6 +248,11 @@ class FCOMMeta:
         print self.affected("4556", "./DU/00000284.0001001.xml")
         print self.applies("./DU/00000284.0001001.xml")
         print self.applies("./DU/00000879.0002001.xml")
+        print "\n\nDU titles:\n==========\n"
+        du_titles_keys = self.du_titles.keys()
+        du_titles_keys.sort()
+        for k in du_titles_keys:
+            print k, self.du_titles[k]
 
 
 class FCOMFactory:
@@ -285,12 +296,14 @@ class FCOMFactory:
                     main_du += 1
                     if main_du == len(dul): break
                 if main_du == len(dul):
-                    du_attrib = {"href": ""}
+                    du_attrib = {"href": "",
+                                 "title": self.fcm.get_du_title(dul[0])}
                     if self.fcm.is_tdu(dul[0]):
                         du_attrib["tdu"] = "tdu"
                     tb.start("du", du_attrib)
                 else:
-                    du_attrib = {"href": data_dir + dul[main_du]}
+                    du_attrib = {"href": data_dir + dul[main_du],
+                                 "title": self.fcm.get_du_title(dul[main_du])}
                     if self.fcm.is_tdu(dul[main_du]):
                         du_attrib["tdu"] = "tdu"
                     tb.start("du", du_attrib)
@@ -299,7 +312,8 @@ class FCOMFactory:
                         tb.data(self.fcm.applies(dul[main_du]))
                         tb.end("applies")
                 for adu in (dul[:main_du] + dul[main_du+1:]):
-                    tb.start("adu", {"href": data_dir + adu})
+                    tb.start("adu", {"href": data_dir + adu,
+                                     "title": self.fcm.get_du_title(adu)})
                     tb.start("applies", {})
                     tb.data(self.fcm.applies(adu))
                     tb.end("applies")
