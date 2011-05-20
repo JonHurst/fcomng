@@ -142,7 +142,12 @@
       <h1><xsl:value-of select="@title"/></h1>
       <p class="applies">Applies to: <xsl:value-of select="applies"/></p>
       <xsl:apply-templates select="document(@href)"/>
-      <p class="duident"><xsl:value-of select="@href"/></p>
+      <p class="duident">
+	<a>
+	  <xsl:attribute name="href">../<xsl:value-of select="@href"/></xsl:attribute>
+	  <xsl:value-of select="@href"/>
+	</a>
+      </p>
     </div>
   </xsl:for-each>
 </xsl:template>
