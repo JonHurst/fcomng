@@ -124,7 +124,12 @@
 	<p>DU does not apply to <xsl:value-of select="/page/@acft"/>.</p>
       </xsl:otherwise>
     </xsl:choose>
-    <p class="duident"><xsl:value-of select="@href"/></p>
+    <p class="duident">
+      <a>
+	<xsl:attribute name="href">../<xsl:value-of select="@href"/></xsl:attribute>
+	<xsl:value-of select="@href"/>
+      </a>
+    </p>
   </div>
   <xsl:for-each select="adu">
     <div class="alternate folded">
