@@ -100,7 +100,15 @@
 
 
 <xsl:template match="du">
-  <div class="main">
+  <div>
+    <xsl:choose>
+      <xsl:when test="@tdu">
+	<xsl:attribute name="class">main tdu</xsl:attribute>
+      </xsl:when>
+      <xsl:otherwise>
+	<xsl:attribute name="class">main</xsl:attribute>
+      </xsl:otherwise>
+    </xsl:choose>
     <xsl:choose>
       <xsl:when test="@href != ''">
 	<xsl:attribute name="id">duid<xsl:value-of select="@href"/></xsl:attribute>

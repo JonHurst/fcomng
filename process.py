@@ -87,6 +87,7 @@ class FCOMMeta:
             self.du_filename = ""
             self.msns = []
             self.filename_dict = fnd
+            self.tdu = False
 
 
         def get_ac_list(self, filename):
@@ -94,9 +95,17 @@ class FCOMMeta:
                 self.scan_dumeta(filename)
             return self.msns
 
+        def is_tdu(self, filename):
+            if filename != self.du_filename:
+                self.scan_dumeta(filename)
+            return self.tdu
+
 
         def scan_dumeta(self, filename):
             e = et.ElementTree(None, data_dir + self.filename_dict[filename])
+            self.tdu = False
+            if e.getroot().attrib["tdu"] == "true":
+                self.tdu = True
             m = e.find("effect").find("aircraft-ranges").find("effact").find("aircraft-range")
             if not et.iselement(m):
                 self.msns = None
@@ -206,6 +215,10 @@ class FCOMMeta:
             return self.aircraft.applies(ac_list)
 
 
+    def is_tdu(self, du_filename):
+        return self.du_metaquery.is_tdu(du_filename)
+
+
     def dump(self):
         print "Sections:\n==========\n"
         for s in self.get_all_sids():
@@ -271,9 +284,15 @@ class FCOMFactory:
                     main_du += 1
                     if main_du == len(dul): break
                 if main_du == len(dul):
-                    tb.start("du", {"href": ""})
+                    du_attrib = {"href": ""}
+                    if self.fcm.is_tdu(dul[0]):
+                        du_attrib["tdu"] = "tdu"
+                    tb.start("du", du_attrib)
                 else:
-                    tb.start("du", {"href": data_dir + dul[main_du]})
+                    du_attrib = {"href": data_dir + dul[main_du]}
+                    if self.fcm.is_tdu(dul[main_du]):
+                        du_attrib["tdu"] = "tdu"
+                    tb.start("du", du_attrib)
                     if self.fcm.applies(dul[main_du]) != "Whole fleet":
                         tb.start("applies", {})
                         tb.data(self.fcm.applies(dul[main_du]))
