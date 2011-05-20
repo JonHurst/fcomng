@@ -86,6 +86,7 @@
 
 <xsl:template match="graphref">
   <xsl:variable name="ref" select="interactive-graphic/illustration/sheet/fileref/@href"/>
+  <xsl:variable name="companion" select="interactive-graphic/illustration/sheet/gcompanionref/@href"/>
   <div class="image">
     <p>
       Image:
@@ -94,6 +95,15 @@
 	  ../fcom/DATA/DU/<xsl:value-of select="$ref"/>
 	</xsl:attribute>
 	<xsl:value-of select="$ref"/>
+      </a>
+    </p>
+    <p>
+      Companion:
+      <a>
+	<xsl:attribute name="href">
+	  ../fcom/DATA/DU/<xsl:value-of select="$companion"/>
+	</xsl:attribute>
+	<xsl:value-of select="$companion"/>
       </a>
     </p>
   <!-- <xsl:element name="img" use-attribute-sets="imgsrc"> -->
