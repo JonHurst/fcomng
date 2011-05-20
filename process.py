@@ -26,8 +26,9 @@ class FCOMMeta:
             self.children.append(sid)
 
 
-        def add_du(self, du_filename):
-            self.du_list.append(du_filename)
+        def add_du(self, du_filename_tuple):
+            self.du_list.append(du_filename_tuple)
+
 
     class Aircraft:
 
