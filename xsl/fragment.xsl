@@ -162,7 +162,7 @@
     </xsl:when>
     <xsl:otherwise>
       <a class="footnoteref">
-	<xsl:attribute name="href">#fnid<xsl:value-of select="key('ftnote-ids', @ref)/@code"/></xsl:attribute>
+	<xsl:attribute name="href">#fnid<xsl:value-of select="generate-id(key('ftnote-ids', @ref))"/></xsl:attribute>
 	(<xsl:value-of select="count(key('ftnote-ids', @ref)/preceding-sibling::ftnote) + 1"/>)
       </a>
     </xsl:otherwise>
@@ -179,7 +179,7 @@
 
 <xsl:template match="ftnote">
   <span class="footnotenum">
-  <xsl:attribute name="id">fnid<xsl:value-of select="@code"/></xsl:attribute>
+  <xsl:attribute name="id">fnid<xsl:value-of select="generate-id()"/></xsl:attribute>
   (<xsl:number/>)
   </span>
   <div class="footnotetext"><xsl:apply-templates/></div>
