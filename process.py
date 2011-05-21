@@ -281,7 +281,7 @@ class FCOMFactory:
         filename = self.__make_filename__(sid)
         print "Creating:", filename
         tb = et.TreeBuilder()
-        page_attributes = {"title": self.fcm.get_title(sid[:1]) + ": " + self.fcm.get_title(sid[:2]),
+        page_attributes = {"title": "[" + ".".join(sid) + "] " +self.fcm.get_title(sid[:1]) + ": " + self.fcm.get_title(sid[:2]),
                            "acft": self.fcm.aircraft.msn_to_reg(msn)}
         if len(sid) > 2: page_attributes["subtitle"] = self.fcm.get_title(sid[:3])
         if prevsid: page_attributes["prev"] = ".".join(prevsid) + ".html"
