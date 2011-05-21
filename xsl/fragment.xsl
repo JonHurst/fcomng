@@ -187,14 +187,28 @@
 
 
 <xsl:template match="equal">
-  <table class="equal"><tr>
-    <td class="equ-l">
-      <p><xsl:apply-templates select="equ-l"/></p>
-    </td>
-    <td class="equ-r">
-      <xsl:apply-templates select="equ-r"/>
-    </td>
-  </tr></table>
+  <xsl:if test="not(preceding-sibling::equal)">
+    <table class="equal">
+      <tr>
+	<th class="equ-l">
+	  <xsl:apply-templates select="equ-l"/>
+	</th>
+	<td class="equ-r">
+	  <xsl:apply-templates select="equ-r"/>
+	</td>
+      </tr>
+      <xsl:for-each select="following-sibling::equal">
+	<tr>
+	  <th class="equ-l">
+	    <xsl:apply-templates select="equ-l"/>
+	  </th>
+	  <td class="equ-r">
+	    <xsl:apply-templates select="equ-r"/>
+	  </td>
+	</tr>
+      </xsl:for-each>
+    </table>
+  </xsl:if>
 </xsl:template>
 
 
