@@ -108,6 +108,13 @@ h3
 /*Tables*/
 /************************************************************/
 
+div.table
+{
+    width:100%;
+    overflow-x:auto;
+}
+
+
 table
 {
     border-collapse: collapse;
@@ -254,7 +261,7 @@ div.main > h1, div.alternate > h1
     margin-left: 1em;
 }
 
-div.main > table, div.alternate > table,
+div.main > div.table, div.alternate > div.table,
 div.main > div.image, div.alternate > div.image,
 div.main > div.footnotes, div.alternate > div.footnotes
 {

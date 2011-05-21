@@ -248,10 +248,18 @@
 </xsl:template>
 
 
-<xsl:template match="description|table|equ-l|equ-r|abb|
+<xsl:template match="table">
+  <div class="table">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="description|equ-l|equ-r|abb|
 		     descbody|row-header|tech-label|
 		     ex-desc-cond|limitation|limitbody|
-		     perf|value|limititem|limit">
+		     perf|value|limititem|limit|
+		     performance|perfbody|perfitem">
   <xsl:apply-templates/>
 </xsl:template>
 
