@@ -1,29 +1,117 @@
+*/*css reset*/
+{
+    margin:0;
+    padding:0;
+}
+
+/************************************************************/
+/*Top Level elements*/
+/************************************************************/
+
 body
 {
     font-size:0.8em;
     font-family: verdana, sans;
-    margin:0em;
-    padding:0em;
 }
 
 div.page
 {
     font-size:1em;
     margin:auto;
-    max-width:65em;
+    max-width:70em;
+    line-height:1.3em;
 }
 
-h1 {font-size:1.3em; color:green; margin-top:1em; margin-bottom:0.5em;}
-h2 {font-size:1.2em; color:green;}
-h3 {font-size:1em;}
+div.section, div.pageindex, div.titleblock, div.footerblock, div.index
+{
+    border:green solid 1px;
+    padding:1em;
+    margin-top:1em;
+}
 
+div.titleblock, div.footerblock
+{
+    text-align:center;
+}
+
+div.main, div.alternate
+{
+    border-top: dotted green 1px;
+    padding-bottom: 2em;
+}
+
+div.alternate
+{
+    background: #F0FFF0;
+}
+
+div.descitem
+{
+    margin-left: 1.5em;
+}
+
+div.index
+{
+    padding-bottom:2em;
+}
+
+div.duindex
+{
+    margin-bottom: 1.5em;
+}
+
+/************************************************************/
+/*Headings*/
+/************************************************************/
+
+h1, h2, h3
+{
+    color: #005000;
+}
+
+h1
+{
+    font-size:1.3em;
+    margin-top:1em;
+    margin-bottom:1em;
+}
+
+h1.sectionheading
+{
+    text-decoration:underline;
+    margin-bottom:1.5em;
+}
+
+div.index h1.title
+{
+    text-align:center;
+    margin-bottom:2em;
+
+}
+
+div.index h1
+{
+    margin-left:4em;
+}
+
+h2
+{
+    font-size:1.2em;
+}
+
+h3
+{
+    font-size:1em;
+}
+
+/************************************************************/
+/*Tables*/
+/************************************************************/
 
 table
 {
     border-collapse: collapse;
     width:100%;
-    margin-top:0.5em;
-    margin-bottom:0.5em;
 }
 
 tr, td, th
@@ -33,174 +121,91 @@ tr, td, th
 
 td, th
 {
-    padding:2px 0.5em;
+    padding: 0.25em 0.5em;
 }
 
-
-
-div.not-impl
+div.footnotes
 {
-    background-color:red;
+    border: 1px solid gray;
+    width:80%;
+    margin-top: -1px;
+    padding-left:1em;
 }
 
-div.image
+div.footnotetext
 {
-    margin:1em;
-    padding:4em 2em;
-    border: green 1px solid;
+    margin-left:3em;
+    margin-top:-2em;
 }
+
+/************************************************************/
+/*Lists*/
+/************************************************************/
 
 ul.BULLET {list-style-type:disc;}
 ul.SQUARE {list-style-type:square;}
 ul.NONE {list-style-type:none;}
 ul.NDASH {list-style-type:circle;}
 
+li
+{
+    margin-left: 2em;
+}
+
+/************************************************************/
+/*Paragraphs*/
+/************************************************************/
+
+p
+{
+    margin-top:1em;
+    margin-bottom:1em;
+}
+
+div.pageindex p, div.duindex p
+{
+    margin-top:0;
+    margin-bottom:0;
+    margin-left:3em;
+}
+
+div.index p
+{
+    margin: 0 0 0 8em;
+}
+
+p.applies
+{
+    color: gray;
+    font-size: 0.9em;
+    margin-left: 5em;
+}
+
+/************************************************************/
+/*Cautions, notes, examples etc.
+/************************************************************/
+
+div.note, div.example, div.caution
+{
+    padding: 0.25em 0.5em;
+    margin: 1em;
+}
+
+
 div.note, div.example
 {
-    padding: 1em;
-    margin: 1em;
     border: blue 1px solid;
 }
 
 div.caution
 {
-    padding: 1em;
-    margin: 1em;
     border: red 2px solid;
 }
 
-div.titleblock, div.footerblock
-{
-    text-align:center;
-}
 
-p.du
-{
-    color: #E0E0FF;
-    border-top: solid #E0E0FF 1px;
-    /* display: none; */
-}
-
-div.index h1.title
-{
-    text-align:center;
-}
-
-div.index h2
-{
-    margin-left: 2em;
-}
-
-div.index p
-{
-    margin: 1px 0;
-    margin-left: 4em;
-}
-
-table.equal td.equ-l
-{
-    width:35%;
-}
-
-div.section, div.pageindex, div.titleblock, div.footerblock, div.index
-{
-    border:green solid 1px;
-    margin: 0.5em 0;
-    padding:1em 2em;
-}
-
-div.index
-{
-    padding-left:5em;
-}
-
-div.main > *, div.alternate > *
-{
-    padding-left:7em;
-    padding-right:5em;
-}
-
-div.main > h1, div.alternate > h1
-{
-    padding-left: 0;
-}
-
-div.main > table, div.alternate > table
-{
-    padding-left: 0;
-    padding-right: 0;
-}
-
-div.main > table.equal, div.alternate > table.equal
-{
-    padding-left:7em;
-}
-
-
-div.alternate
-{
-    background: #F0FFF0;
-}
-
-div.main, div.alternate
-{
-    border-top: dotted green 1px;
-}
-
-span.ifinst
-{
-    font-size:0.8em;
-    font-style:italic;
-    color: gray;
-}
-
-span.duref, span.symbol
-{
-    background-color: #A0A0FF;
-}
-
-div.desccond div.intro
-{
-    font-weight:bold;
-}
-
-div.desccond div.condbody
-{
-    margin-left: 2em;
-}
-
-div.footnotes
-{
-    border: 1px solid gray;
-    margin-top:-1px;
-    padding-left:1em;
-    padding-top:0.5em;
-}
-
-
-div.footnotetext
-{
-    margin-left:4em;
-    margin-top: -2em;
-}
-
-div.pageindex p
-{
-    margin-top:0em;
-    margin-bottom:0em;
-}
-
-h1.sectionheading
-{
-    text-decoration:underline;
-    margin-bottom:2em;
-}
-
-ul, ol
-{
-   margin-left: 2em;
-   padding-left:0em
-}
+/************************************************************/
+/*Folding functionality*/
+/************************************************************/
 
 div.folded *
 {
@@ -209,17 +214,9 @@ div.folded *
 
 a.showme, a.hideme
 {
-    padding: 1em;
-    display: block;
+    margin-top:0.25em;
     text-align:right;
 }
-
-a.hideme
-{
-    padding-bottom: 0;
-    margin-bottom:-1em;
-}
-
 
 a.showme
 {
@@ -231,16 +228,97 @@ div.folded a.showme
     display:block;
 }
 
+a.hideme
+{
+    display: block;
+}
+
 div.folded a.hideme
 {
     display:none;
 }
 
-p.applies, p.duident
+/************************************************************/
+/*First level indenting*/
+/************************************************************/
+
+div.main > *, div.alternate > *, div.index > *, div.duindex > *,
+div.main > table.equal, div.alternate > table.equal
 {
-    color: gray;
+    margin-left: 10em;
+    margin-right: 6em;
+}
+
+div.main > h1, div.alternate > h1
+{
+    margin-left: 1em;
+}
+
+div.main > table, div.alternate > table,
+div.main > div.image, div.alternate > div.image,
+div.main > div.footnotes, div.alternate > div.footnotes
+{
+    margin-left: 0;
+    margin-right: 0;
+}
+
+div.main > table.equal, div.alternate > table.equal
+{
+    max-width: 54em;
+}
+
+/************************************************************/
+/*exch DTD "equal" element*/
+/************************************************************/
+
+table.equal
+{
+    margin-top: 0.25em;
+    margin-bottom: 0.25em;
+}
+
+table.equal td.equ-l
+{
+    /* width:35%; */
+}
+
+/************************************************************/
+/*exch DTD "desc-cond" element*/
+/************************************************************/
+
+div.desccond div.intro
+{
+    font-weight:bold;
+}
+
+div.desccond div.condbody
+{
     padding-left:2em;
-    font-size: 0.9em;
+}
+
+/************************************************************/
+/*Miscellaneous*/
+/************************************************************/
+
+span.ifinst
+{
+    font-size:0.8em;
+    font-style:italic;
+    color: gray;
+}
+
+div.tdu
+{
+    background: yellow;
+}
+
+/************************************************************/
+/*Debugging elements*/
+/************************************************************/
+
+div.not-impl
+{
+    background-color:red;
 }
 
 p.duident
@@ -248,20 +326,15 @@ p.duident
     display:none;
 }
 
-div.duindex p
+div.image
 {
-    padding-top:0;
-    padding-bottom:0;
-    margin-top:0;
-    margin-bottom:0;
+    border: green 1px solid;
+    margin-top: 1em;
+    margin-bottom: 1em;
 }
 
-div.duindex
+span.duref, span.symbol
 {
-    padding-bottom:1em;
+    background-color: #A0A0FF;
 }
 
-div.tdu
-{
-    background: yellow;
-}
