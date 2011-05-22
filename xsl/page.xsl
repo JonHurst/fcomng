@@ -25,13 +25,13 @@
 	  <table><tr><th>easyJet</th><th>FCOM</th><th>A319/A320</th>
 	  <th><xsl:value-of select="@acft"/></th>
 	  <td align="center">
-	  <a>
+	  <a accesskey="p">
 	    <xsl:attribute name="href"><xsl:value-of select="@prev"/></xsl:attribute>
 	  Prev</a>
 	  <xsl:text> | </xsl:text>
-	  <a href="index.html">Index</a>
+	  <a href="index.html" accesskey="c">Contents</a>
 	  <xsl:text> | </xsl:text>
-	  <a>
+	  <a accesskey="n">
 	    <xsl:attribute name="href"><xsl:value-of select="@next"/></xsl:attribute>
 	  Next</a></td>
 	</tr></table>
@@ -60,7 +60,7 @@
 	      <xsl:attribute name="href"><xsl:value-of select="@prev"/></xsl:attribute>
 	    Prev</a>
 	    <xsl:text> | </xsl:text>
-	    <a href="index.html">Index</a>
+	    <a href="index.html">Contents</a>
 	    <xsl:text> | </xsl:text>
 	    <a>
 	      <xsl:attribute name="href"><xsl:value-of select="@next"/></xsl:attribute>
