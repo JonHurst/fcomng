@@ -131,6 +131,14 @@
 </xsl:template>
 
 
+<xsl:template match="warning">
+  <div class="caution">
+    <h2>Warning</h2>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
 <xsl:template match="comment">
   <xsl:choose>
     <xsl:when test="note">
