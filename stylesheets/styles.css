@@ -250,7 +250,7 @@ div.folded a.hideme
 /************************************************************/
 
 div.main > *, div.alternate > *, div.index > *, div.duindex > *,
-div.main > table.equal, div.alternate > table.equal
+div.main > div.equal, div.alternate > div.equal
 {
     margin-left: 10em;
     margin-right: 6em;
@@ -269,11 +269,6 @@ div.main > div.footnotes, div.alternate > div.footnotes
     margin-right: 0;
 }
 
-div.main > table.equal, div.alternate > table.equal
-{
-    max-width: 54em;
-}
-
 /************************************************************/
 /*exch DTD "equal" element*/
 /************************************************************/
@@ -282,6 +277,7 @@ table.equal
 {
     margin-top: 0.25em;
     margin-bottom: 0.25em;
+    width:100%;
 }
 
 table.equal td.equ-l

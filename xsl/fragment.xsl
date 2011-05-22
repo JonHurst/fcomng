@@ -196,6 +196,7 @@
 
 <xsl:template match="equal">
   <xsl:if test="not(preceding-sibling::equal)">
+    <div class="equal">
     <table class="equal">
       <tr>
 	<th class="equ-l">
@@ -216,6 +217,7 @@
 	</tr>
       </xsl:for-each>
     </table>
+    </div>
   </xsl:if>
 </xsl:template>
 
