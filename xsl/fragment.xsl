@@ -88,30 +88,61 @@
   <xsl:variable name="ref" select="interactive-graphic/illustration/sheet/fileref/@href"/>
   <xsl:variable name="companion" select="interactive-graphic/illustration/sheet/gcompanionref/@href"/>
   <div class="image">
-    <p>
+    <p class="img-detail">
       Image:
       <a>
-	<xsl:attribute name="href">
-	  ../fcom/DATA/DU/<xsl:value-of select="$ref"/>
-	</xsl:attribute>
-	<xsl:value-of select="$ref"/>
+    	<xsl:attribute name="href">
+    	  ../fcom/DATA/DU/<xsl:value-of select="$ref"/>
+    	</xsl:attribute>
+    	<xsl:value-of select="$ref"/>
       </a>
     </p>
-    <p>
+    <p class="img-detail">
       Companion:
       <a>
-	<xsl:attribute name="href">
-	  ../fcom/DATA/DU/<xsl:value-of select="$companion"/>
-	</xsl:attribute>
-	<xsl:value-of select="$companion"/>
+    	<xsl:attribute name="href">
+    	  ../fcom/DATA/DU/<xsl:value-of select="$companion"/>
+    	</xsl:attribute>
+    	<xsl:value-of select="$companion"/>
       </a>
     </p>
-  <!-- <xsl:element name="img" use-attribute-sets="imgsrc"> -->
-  <!--   <xsl:attribute name="src"> -->
-  <!--     <xsl:value-of select="concat($ref, '.png')"/> -->
-  <!--   </xsl:attribute> -->
-  <!-- </xsl:element> -->
+    <img>
+      <xsl:attribute name="src">
+	../images/<xsl:value-of select="substring-before(substring-after($ref,
+	'../ILLUS/'), '.cgm')"/>.png
+      </xsl:attribute>
+      <xsl:attribute name="alt">
+	Illustration: <xsl:value-of select="$ref"/>
+      </xsl:attribute>
+    </img>
+    <xsl:apply-templates select="interactive-graphic/illustration/sheet/gdesc"/>
   </div>
+</xsl:template>
+
+
+<xsl:template match="gdesc">
+  <div class="callout-list"><xsl:apply-templates/></div>
+</xsl:template>
+
+
+<xsl:template match="gdesc/listitem">
+  <table class="callouts">
+    <xsl:for-each select="grdescitem">
+      <tr class="callout" valign="top">
+	<th class="callout"><xsl:value-of select="gritem"/></th>
+	<td class="callout">
+	  <xsl:if test="title">
+	    <h1><xsl:value-of select="title"/></h1>
+	  </xsl:if>
+	<xsl:apply-templates select="itembody"/></td>
+      </tr>
+  </xsl:for-each>
+  </table>
+</xsl:template>
+
+<xsl:template match="gritem"/>
+<xsl:template match="itembody">
+  <xsl:apply-templates/>
 </xsl:template>
 
 

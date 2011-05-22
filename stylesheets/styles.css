@@ -114,12 +114,12 @@ div.table
     overflow-x:auto;
 }
 
-
 table
 {
     border-collapse: collapse;
     width:100%;
 }
+
 
 tr, td, th
 {
@@ -209,6 +209,39 @@ div.caution
     border: red 2px solid;
 }
 
+/************************************************************/
+/*Images*/
+/************************************************************/
+
+img
+{
+    padding-top:1em;
+    padding-bottom:1em;
+}
+
+table.callouts
+{
+    width:auto;
+    margin:auto;
+    text-align:left;
+    border: none;
+}
+
+tr.callout, td.callout
+{
+    border:none;
+}
+
+td.callout h1
+{
+    font-size: 1.1em;
+}
+
+div.callout-list
+{
+    margin:1em auto;
+    max-width:80%;
+}
 
 /************************************************************/
 /*Folding functionality*/
@@ -324,16 +357,16 @@ div.not-impl
     background-color:red;
 }
 
-p.duident
+p.duident, p.img-detail
 {
     display:none;
 }
 
 div.image
 {
-    border: green 1px solid;
     margin-top: 1em;
     margin-bottom: 1em;
+    text-align:center;
 }
 
 span.duref, span.symbol

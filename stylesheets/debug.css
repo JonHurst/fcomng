@@ -1,6 +1,6 @@
 @import url(styles.xss);
 
-p.duident
+p.duident, p.img-detail
 {
     display:block;
 }
