@@ -115,10 +115,18 @@
 	Illustration: <xsl:value-of select="$ref"/>
       </xsl:attribute>
     </img>
-    <xsl:apply-templates select="interactive-graphic/illustration/sheet/gdesc"/>
+    <xsl:apply-templates select="interactive-graphic/illustration/sheet/*"/>
   </div>
 </xsl:template>
 
+<xsl:template match="sheet/fileref"/>
+<xsl:template match="sheet/gcompanionref"/>
+
+<xsl:template match="desctext">
+  <xsl:for-each select="paradesc">
+    <p><xsl:apply-templates/></p>
+  </xsl:for-each>
+</xsl:template>
 
 <xsl:template match="gdesc">
   <div class="callout-list"><xsl:apply-templates/></div>
