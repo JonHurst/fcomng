@@ -18,6 +18,7 @@
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
       <script type="text/javascript" src="../scripts/script.js"></script>
       <link rel="stylesheet" type="text/css" href="../stylesheets/styles.css"/>
+      <link rel="alternate stylesheet" title="Debug" type="text/css" href="../stylesheets/debug.css"/>
     </head>
     <body>
       <div class="page">
