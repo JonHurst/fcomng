@@ -362,9 +362,22 @@
 </xsl:template>
 
 
+
 <xsl:template match="duref">
-  <span class="duref">DUREF to <xsl:value-of select="@product"/> here</span>
+  <xsl:choose>
+    <xsl:when test="@product = 'FCOM'">
+      <a class="duref">
+	<xsl:attribute name="href">
+	  <xsl:value-of select="@ref"/>
+	</xsl:attribute>
+      </a>
+    </xsl:when>
+    <xsl:otherwise>
+      <span class="duref">See <xsl:value-of select="@product"/></span>
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
+
 
 
 <xsl:template match="symbol">

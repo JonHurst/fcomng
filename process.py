@@ -5,6 +5,7 @@ import html_templates
 import xml.etree.ElementTree
 et = xml.etree.ElementTree
 import subprocess
+import re
 
 control_file = "fcom/DATA/XML_N_FCOM_EZY_TF_N_EU_CA_20110407.xml"
 msn = "2412"
@@ -259,10 +260,12 @@ class FCOMFactory:
 
     def __init__(self, fcm):
         self.fcm = fcm #instance of FCOMMeta
+        self.pagelist = self.fcm.get_leaves(3)
+        self.duref_lookup = {}
+        self.__build_duref_lookup__()
 
 
     def build_fcom(self, msn):
-        self.pagelist = self.fcm.get_leaves(3)
         self.make_index(self.pagelist)
         for c, sid in enumerate(self.pagelist):
             prevsid, nextsid = None, None
@@ -271,6 +274,23 @@ class FCOMFactory:
             if c < len(self.pagelist) - 1:
                 nextsid = self.pagelist[c + 1]
             self.make_page(c, sid ,prevsid, nextsid, msn)
+
+
+    def __build_duref_lookup__(self):
+        for sid in self.pagelist:
+            sid_list = self.__build_sid_list__(sid)
+            for s in sid_list:
+                for du_list in self.fcm.get_dus(s):
+                    duref = self.__du_to_duref__(du_list[0])
+                    self.duref_lookup[duref] = (
+                        self.__make_filename__(sid) + "#duid" + duref,
+                        ".".join(s) + ": " + self.fcm.get_du_title(du_list[0]))
+
+
+    def __du_to_duref__(self, du):
+        #this is dependent on the intrinsic link between du filenames and durefs
+        # - it may be brittle
+        return du[5:].split(".")[0]
 
 
     def __build_sid_list__(self, sid):
@@ -297,13 +317,15 @@ class FCOMFactory:
                     if main_du == len(dul): break
                 if main_du == len(dul):
                     du_attrib = {"href": "",
-                                 "title": self.fcm.get_du_title(dul[0])}
+                                 "title": self.fcm.get_du_title(dul[0]),
+                                 "id": self.__du_to_duref__(dul[0])}
                     if self.fcm.is_tdu(dul[0]):
                         du_attrib["tdu"] = "tdu"
                     tb.start("du", du_attrib)
                 else:
                     du_attrib = {"href": data_dir + dul[main_du],
-                                 "title": self.fcm.get_du_title(dul[main_du])}
+                                 "title": self.fcm.get_du_title(dul[main_du]),
+                                 "id": self.__du_to_duref__(dul[main_du])}
                     if self.fcm.is_tdu(dul[main_du]):
                         du_attrib["tdu"] = "tdu"
                     tb.start("du", du_attrib)
@@ -321,11 +343,19 @@ class FCOMFactory:
                 tb.end("du")
             tb.end("section")
         tb.end("page")
-        page = et.tostring(tb.close(), "utf-8")
-        of = open(output_dir + filename, "w")
-        of.write(subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "page.xsl", "-"],
+        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "page.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
-                                  ).communicate(page)[0])
+                                  ).communicate(et.tostring(tb.close(), "utf-8"))[0]
+        page_parts = re.split('<a class="duref" href="(\d+)">', page_string)
+        duref_index = 1
+        while duref_index < len(page_parts):
+            page_parts[duref_index] = ('<a class="duref" href="' +
+                                       self.duref_lookup[page_parts[duref_index]][0] +
+                                       '">' +
+                                       self.duref_lookup[page_parts[duref_index]][1])
+            duref_index += 2
+        of = open(output_dir + filename, "w")
+        of.write("".join(page_parts))
 
 
     def make_index(self, pagelist):
