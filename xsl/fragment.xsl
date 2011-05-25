@@ -446,7 +446,7 @@
       </h2>
     </xsl:if>
     <xsl:for-each select="action">
-      <xsl:apply-templates select="action"/>
+      <xsl:apply-templates/>
     </xsl:for-each>
   </div>
 </xsl:template>
