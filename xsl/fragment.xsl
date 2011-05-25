@@ -37,7 +37,7 @@
   </div>
 </xsl:template>
 
-<xsl:template match="normalproc">
+<xsl:template match="normalproc|abnormalproc|emergencyproc">
   <xsl:apply-templates/>
 </xsl:template>
 
@@ -74,6 +74,22 @@
 
 <xsl:template match="action">
   <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="land">
+  <p>
+    <xsl:attribute name="class">
+      <xsl:value-of select="@type"/>
+    </xsl:attribute>
+    <xsl:choose>
+      <xsl:when test="@type = 'landasap'">
+	LAND ASAP
+      </xsl:when>
+      <xsl:otherwise>
+	LAND type not implemented yet!
+      </xsl:otherwise>
+    </xsl:choose>
+  </p>
 </xsl:template>
 
 <xsl:template match="command">
@@ -432,6 +448,55 @@
     <!--   <xsl:value-of select="equation-image/@height"/> -->
     <!-- </xsl:attribute> -->
   </img>
+</xsl:template>
+
+
+<xsl:template match="associated-procs">
+  <div class="associated-procs">
+    <h1>Associated Procedures</h1>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="associated-proc">
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="associated-proc/xtitle">
+  <xsl:if test="ecamsystem">
+    <span class="ecamsys"><xsl:value-of select="ecamsystem"/></span> 
+  </xsl:if>
+  <span class="ecamtitle"><xsl:value-of select="title"/></span> 
+  <xsl:apply-templates select="title/*"/>
+  <xsl:if test="subtitle">
+    <span class="ecamsubtitle"><xsl:value-of select="subtitle"/></span>
+  </xsl:if>
+</xsl:template>
+
+<xsl:template match="secondary-failures">
+  <div class="secondary-failures">
+    <h1>Secondary Failures</h1>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="ecampage">
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="ecamsyspage">
+  <p><xsl:value-of select="."/></p>
+</xsl:template>
+
+<xsl:template match="ecam-info">
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="reason">
+  <div class="note">
+    <h2>Reason</h2>
+    <xsl:apply-templates/>
+  </div>
 </xsl:template>
 
 </xsl:stylesheet>
