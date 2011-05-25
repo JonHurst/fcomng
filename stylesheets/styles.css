@@ -285,8 +285,8 @@ div.folded a.hideme
 div.main > *, div.alternate > *, div.index > *, div.duindex > *,
 div.main > div.equal, div.alternate > div.equal
 {
-    margin-left: 10em;
-    margin-right: 6em;
+    margin-left: 10%;
+    max-width:55em;
 }
 
 div.main > h1, div.alternate > h1
@@ -300,6 +300,7 @@ div.main > div.footnotes, div.alternate > div.footnotes
 {
     margin-left: 0;
     margin-right: 0;
+    max-width:100%;
 }
 
 /************************************************************/
