@@ -266,7 +266,7 @@
 
 <xsl:template match="comment">
   <xsl:choose>
-    <xsl:when test="note|caution">
+    <xsl:when test="note|caution|warning">
       <xsl:apply-templates/>
     </xsl:when>
     <xsl:otherwise>
