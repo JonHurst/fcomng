@@ -99,15 +99,17 @@
 </xsl:template>
 
 <xsl:template match="cr-action">
-  <table class="cr"><tr>
-    <td width="1%">
-      <xsl:apply-templates select="challenge"/>
-    </td>
-    <td width="100%"><div class="dots"> </div></td>
-    <td width="1%">
-      <xsl:apply-templates select="response"/>
-    </td>
-  </tr></table>
+  <div class="cr">
+    <table class="cr"><tr>
+      <td class="cr-left">
+	<xsl:apply-templates select="challenge"/>
+      </td>
+      <td class="cr-dots"><div class="dots"> </div></td>
+      <td class="cr-right">
+	<xsl:apply-templates select="response"/>
+      </td>
+    </tr></table>
+  </div>
 </xsl:template>
 
 <xsl:template match="cr-action/challenge|cr-action/response">

@@ -389,6 +389,11 @@ div.condition > p.intro
     margin-left:0;
 }
 
+div.cr
+{
+    overflow:auto;
+}
+
 table.cr
 {
     border:none;
@@ -406,6 +411,11 @@ table.cr td
     white-space:nowrap;
     margin:0 0.5em;
     font-weight:bold;
+}
+
+td.cr-dots
+{
+    width:100%;
 }
 
 div.dots
