@@ -379,9 +379,14 @@ span.duref, span.symbol
 
 
 
-div.condition div.procbody
+div.condition > *
 {
     margin-left:3em;
+}
+
+div.condition > p.intro
+{
+    margin-left:0;
 }
 
 table.cr
@@ -414,3 +419,7 @@ span.ecamsys
     text-decoration:underline;
 }
 
+div.command
+{
+    font-weight: bold;
+}
