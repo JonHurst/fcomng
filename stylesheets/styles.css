@@ -375,3 +375,42 @@ span.duref, span.symbol
     background-color: #A0A0FF;
 }
 
+
+
+
+
+div.condition div.procbody
+{
+    margin-left:3em;
+}
+
+table.cr
+{
+    border:none;
+}
+
+table.cr tr
+{
+    border:none;
+}
+
+table.cr td
+{
+    vertical-align:bottom;
+    border:none;
+    white-space:nowrap;
+    margin:0 0.5em;
+    font-weight:bold;
+}
+
+div.dots
+{
+    border-bottom:2px dotted;
+    margin-bottom:2px;
+}
+
+span.ecamsys
+{
+    text-decoration:underline;
+}
+

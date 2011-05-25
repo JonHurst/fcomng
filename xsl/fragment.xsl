@@ -37,6 +37,15 @@
   </div>
 </xsl:template>
 
+<xsl:template match="normalproc">
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="xtitle"/>
+
+<xsl:template match="inform">
+  <xsl:apply-templates/>
+</xsl:template>
 
 <xsl:template match="desc-cond/condbody">
   <div class="condbody">
@@ -44,6 +53,67 @@
   </div>
 </xsl:template>
 
+
+<xsl:template match="procbody">
+  <div class="procbody">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="procitem">
+  <div class="procitem">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="procdesc">
+  <div class="procdesc">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="action">
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="command">
+  <div class="command">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="cr-action">
+  <table class="cr"><tr>
+    <td width="1%">
+      <xsl:apply-templates select="challenge"/>
+    </td>
+    <td width="100%"><div class="dots"> </div></td>
+    <td width="1%">
+      <xsl:apply-templates select="response"/>
+    </td>
+  </tr></table>
+</xsl:template>
+
+<xsl:template match="cr-action/challenge|cr-action/response">
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="condition">
+  <div class="condition">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="ex-conditions">
+    <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="intro">
+  <p class="intro">
+    <xsl:text>&#x2022; </xsl:text>
+    <xsl:apply-templates/>
+  </p>
+</xsl:template>
 
 <xsl:template match="title">
   <xsl:if test=".. != /">
@@ -154,7 +224,7 @@
 </xsl:template>
 
 
-<xsl:template match="note">
+<xsl:template match="note|noteproc">
   <div class="note">
     <h2>Note</h2>
     <xsl:apply-templates/>
@@ -162,7 +232,7 @@
 </xsl:template>
 
 
-<xsl:template match="caution">
+<xsl:template match="caution|cautionproc">
   <div class="caution">
     <h2>Caution</h2>
     <xsl:apply-templates/>
@@ -170,7 +240,7 @@
 </xsl:template>
 
 
-<xsl:template match="warning">
+<xsl:template match="warning|warningproc">
   <div class="caution">
     <h2>Warning</h2>
     <xsl:apply-templates/>
@@ -180,12 +250,11 @@
 
 <xsl:template match="comment">
   <xsl:choose>
-    <xsl:when test="note">
+    <xsl:when test="note|caution">
       <xsl:apply-templates/>
     </xsl:when>
     <xsl:otherwise>
       <div class="note">
-	<h2>Comment</h2>
 	<xsl:apply-templates/>
       </div>
     </xsl:otherwise>
@@ -326,5 +395,43 @@
   </div>
 </xsl:template>
 
+<xsl:template match="ecam-data">
+    <xsl:if test="ecamsys">
+      <span class="ecamsys"><xsl:value-of select="ecamsys"/></span> 
+    </xsl:if>
+    <xsl:if test="ecamtitle">
+      <span class="ecamtitle"><xsl:value-of select="ecamtitle"/></span> 
+    </xsl:if>
+    <xsl:if test="ecamsubtitle">
+      <span class="ecamsubtitle"><xsl:value-of select="ecamsubtitle"/></span>
+    </xsl:if>
+</xsl:template>
+
+<xsl:template match="action-block">
+  <div class="actionblock">
+    <xsl:if test="title">
+      <h2>
+	<xsl:apply-templates select="title"></xsl:apply-templates>
+      </h2>
+    </xsl:if>
+    <xsl:for-each select="action">
+      <xsl:apply-templates select="action"/>
+    </xsl:for-each>
+  </div>
+</xsl:template>
+
+<xsl:template match="equation|inline-equation">
+  <img class="equation" alt="equation">
+    <xsl:attribute name="src">
+      ../images/<xsl:value-of select="substring-after(equation-image/fileref/@href, '../EXTOBJ/')"/>
+    </xsl:attribute>
+    <!-- <xsl:attribute name="width"> -->
+    <!--   <xsl:value-of select="equation-image/@width"/> -->
+    <!-- </xsl:attribute> -->
+    <!-- <xsl:attribute name="height"> -->
+    <!--   <xsl:value-of select="equation-image/@height"/> -->
+    <!-- </xsl:attribute> -->
+  </img>
+</xsl:template>
 
 </xsl:stylesheet>
