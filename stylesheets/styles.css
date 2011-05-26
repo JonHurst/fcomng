@@ -409,8 +409,18 @@ table.cr td
     vertical-align:bottom;
     border:none;
     white-space:nowrap;
-    margin:0 0.5em;
     font-weight:bold;
+    padding:0.5em 0;
+}
+
+td.cr-left:
+{
+    margin-right:1em;
+}
+
+td.cr-right:
+{
+    margin-left:1em;
 }
 
 td.cr-dots
