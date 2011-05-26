@@ -674,11 +674,6 @@
 <!-- not implemented: lit-limit -->
 <!-- not implemented: perf-value -->
 
-<xsl:template match="intro">
-  <!-- standard inline -->
-  <xsl:apply-templates/>
-</xsl:template>
-
 <xsl:template match="introblock">
   <!-- (intro, intro+) -->
   <xsl:apply-templates/>
