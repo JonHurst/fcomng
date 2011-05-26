@@ -703,4 +703,94 @@
   <xsl:apply-templates/>
 </xsl:template>
 
+
+<!-- approbation -->
+<xsl:template match="approbation">
+  <!-- (reason?,title,
+  (tr-data|env-data|heading-data|bulletin-data),approbation-frame?
+  ,approbation-area?)-->
+  <xsl:apply-templates/>
+</xsl:template>
+
+<!-- approbation/* -->
+<!-- not implemented: tr-data -->
+<!-- not implemented: env-data -->
+<!-- not implemented: heading-data -->
+<!-- not implemented: bulletin-data -->
+<!-- not implemented: approbation-frame -->
+
+<xsl:template match="bulletin-data">
+  <!-- (reason-for-issue,applicable-to?,bul-cancelled-by?) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="approbation-area">
+  <!--(approbation-authority?,approval-date,approval-reference,
+  approved-by?)-->
+  <div class="approbation">
+    <h1>Approbation:</h1>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<!-- approbation/*/* -->
+
+<xsl:template match="reason-for-issue">
+  <!-- subset of standard block elements -->
+  <div class="reason">
+    <h1>Reason for issue:</h1>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="applicable-to">
+  <!-- subset of standard block elements -->
+  <div class="applicable">
+    <h1>Applicability:</h1>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="bul-cancelled-by">
+  <!-- subset of standard block elements -->
+  <div class="cancelled-by">
+    <h1>Cancelled by:</h1>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="approbation-authority">
+  <!-- (#PCDATA) -->
+  <p>Authority: <xsl:value-of select="."/></p>
+</xsl:template>
+
+<xsl:template match="approval-date">
+  <!-- (#PCDATA) -->
+  <p>Date: <xsl:value-of select="."/></p>
+</xsl:template>
+
+<xsl:template match="approval-reference">
+  <!-- (#PCDATA) -->
+  <p>Reference: <xsl:value-of select="."/></p>
+</xsl:template>
+
+<xsl:template match="approved-by">
+  <!--(name?,job-title?,approval-comment?)-->
+  <p>Approved by:
+  <xsl:choose>
+    <xsl:when test="name and job-title">
+      <xsl:value-of select="name"/>, <xsl:value-of select="job-title"/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="name"/>
+      <xsl:value-of select="job-title"/>
+    </xsl:otherwise>
+  </xsl:choose>
+  </p>
+  <xsl:if test="approval-comment">
+    <p> <xsl:value-of select="approval-comment"/></p>
+  </xsl:if>
+</xsl:template>
+
 </xsl:stylesheet>
