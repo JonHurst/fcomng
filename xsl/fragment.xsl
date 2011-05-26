@@ -814,4 +814,28 @@
   <xsl:apply-templates/>
 </xsl:template>
 
+<!-- procsynthesis -->
+
+<xsl:template match="procsynthesis">
+  <!--(reason?,xtitle,procsynthbody)-->
+  <div class="procsynthesis">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="procsynthbody">
+  <!--(table+)-->
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="condintro">
+  <!-- standard in-line -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="role">
+  <!-- EMPTY -->
+  <xsl:value-of select="@name"/>
+</xsl:template>
+
 </xsl:stylesheet>

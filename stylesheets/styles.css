@@ -458,3 +458,8 @@ div.status > h1
 {
     margin-left: 0;
 }
+
+div.procsynthesis td, div.procsynthesis th
+{
+    width:50%;
+}
