@@ -793,4 +793,25 @@
   </xsl:if>
 </xsl:template>
 
+<!-- work-example -->
+
+<xsl:template match="work-example">
+  <!--(title?,
+  (((para|unlist|numlist|warning|caution|note)+|table|graphref|
+  launcher|equal)+|desc-cond|ex-desc-cond|workex-item)+)-->
+  <div class="example">
+    <xsl:if test="not(title)">
+      <h1>Example</h1>
+    </xsl:if>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<!-- synthesisitem -->
+
+<xsl:template match="synthesisitem">
+  <!-- (reason?,title,table) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
 </xsl:stylesheet>
