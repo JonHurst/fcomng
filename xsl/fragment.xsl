@@ -11,284 +11,133 @@
 <xsl:template name="anchor"/>
 <xsl:param name="table.borders.with.css" select="0"/>
 
-<!--Test mode - if true, produces a valid page from a fragment-->
-<xsl:variable name="test-mode" select="0"/>
-
 <xsl:key name="ftnote-ids" match="ftnote" use="@lid"/>
 
+<!--* Default template - produces IMPLWARNING *-->
 
-<xsl:template match="descitem">
-  <div class="descitem">
-    <xsl:apply-templates/>
-  </div>
-</xsl:template>
-
-
-<xsl:template match="desc-cond">
-  <div class="desccond">
-    <xsl:apply-templates/>
-  </div>
-</xsl:template>
-
-
-<xsl:template match="desc-cond/intro">
-  <div class="intro">
-    <xsl:apply-templates/>
-  </div>
-</xsl:template>
-
-<xsl:template match="normalproc|abnormalproc|emergencyproc">
-  <xsl:apply-templates/>
-</xsl:template>
-
-<xsl:template match="xtitle"/>
-
-<xsl:template match="inform">
-  <xsl:apply-templates/>
-</xsl:template>
-
-<xsl:template match="desc-cond/condbody">
-  <div class="condbody">
-    <xsl:apply-templates/>
-  </div>
-</xsl:template>
-
-
-<xsl:template match="procbody">
-  <div class="procbody">
-    <xsl:apply-templates/>
-  </div>
-</xsl:template>
-
-<xsl:template match="procitem">
-  <div class="procitem">
-    <xsl:apply-templates/>
-  </div>
-</xsl:template>
-
-<xsl:template match="procdesc">
-  <div class="procdesc">
-    <xsl:apply-templates/>
-  </div>
-</xsl:template>
-
-<xsl:template match="action">
-  <xsl:apply-templates/>
-</xsl:template>
-
-<xsl:template match="land">
-  <p>
-    <xsl:attribute name="class">
-      <xsl:value-of select="@type"/>
-    </xsl:attribute>
-    <xsl:choose>
-      <xsl:when test="@type = 'landasap'">
-	LAND ASAP
-      </xsl:when>
-      <xsl:otherwise>
-	LAND type not implemented yet!
-      </xsl:otherwise>
-    </xsl:choose>
-  </p>
-</xsl:template>
-
-<xsl:template match="command">
-  <div class="command">
-    <xsl:apply-templates/>
-  </div>
-</xsl:template>
-
-<xsl:template match="cr-action">
-  <div class="cr">
-    <table class="cr"><tr>
-      <td class="cr-left">
-	<xsl:apply-templates select="challenge"/>
-      </td>
-      <td class="cr-dots"><div class="dots"> </div></td>
-      <td class="cr-right">
-	<xsl:apply-templates select="response"/>
-      </td>
-    </tr></table>
-  </div>
-</xsl:template>
-
-<xsl:template match="cr-action/challenge|cr-action/response">
-  <xsl:apply-templates/>
-</xsl:template>
-
-<xsl:template match="condition">
-  <div class="condition">
-    <xsl:apply-templates/>
-  </div>
-</xsl:template>
-
-<xsl:template match="ex-conditions">
-    <xsl:apply-templates/>
-</xsl:template>
-
-<xsl:template match="intro">
-  <p class="intro">
-    <xsl:text>&#x2022; </xsl:text>
-    <xsl:apply-templates/>
-  </p>
-</xsl:template>
-
-<xsl:template match="title">
-  <xsl:if test=".. != /">
-    <h1><xsl:apply-templates/></h1>
-  </xsl:if>
-</xsl:template>
-
-
-<xsl:template match="para">
-  <p><xsl:apply-templates/></p>
-</xsl:template>
-
-
-<xsl:template match="unlist">
-  <xsl:apply-templates select="title|para"/>
-  <xsl:element name="ul">
-    <xsl:attribute name="class">
-      <xsl:value-of select="@bulltype"/>
-    </xsl:attribute>
-    <xsl:apply-templates select="item"/>
-  </xsl:element>
-</xsl:template>
-
-
-<xsl:template match="numlist">
-  <xsl:apply-templates select="title|para"/>
-  <xsl:element name="ol">
-    <xsl:attribute name="class">
-      <xsl:value-of select="@format"/>
-    </xsl:attribute>
-    <xsl:apply-templates select="item"/>
-  </xsl:element>
-</xsl:template>
-
-
-<xsl:template match="item">
-  <li><xsl:apply-templates/></li>
-</xsl:template>
-
-
-<xsl:template match="graphref">
-  <xsl:variable name="ref" select="interactive-graphic/illustration/sheet/fileref/@href"/>
-  <xsl:variable name="companion" select="interactive-graphic/illustration/sheet/gcompanionref/@href"/>
-  <div class="image">
-    <p class="img-detail">
-      Image:
-      <a>
-    	<xsl:attribute name="href">
-    	  ../fcom/DATA/DU/<xsl:value-of select="$ref"/>
-    	</xsl:attribute>
-    	<xsl:value-of select="$ref"/>
-      </a>
+<xsl:template match="*">
+  <div class="not-impl">
+    <p>
+      <xsl:text>IMPLWARNING: </xsl:text>
+      <xsl:value-of select="name()"/>
+      <xsl:text> is not implemented yet!</xsl:text>
     </p>
-    <p class="img-detail">
-      Companion:
-      <a>
-    	<xsl:attribute name="href">
-    	  ../fcom/DATA/DU/<xsl:value-of select="$companion"/>
-    	</xsl:attribute>
-    	<xsl:value-of select="$companion"/>
-      </a>
-    </p>
-    <img>
-      <xsl:attribute name="src">
-	../images/<xsl:value-of select="substring-before(substring-after($ref,
-	'../ILLUS/'), '.cgm')"/>.png
-      </xsl:attribute>
-      <xsl:attribute name="alt">
-	Illustration: <xsl:value-of select="$ref"/>
-      </xsl:attribute>
-    </img>
-    <xsl:apply-templates select="interactive-graphic/illustration/sheet/*"/>
+    <xsl:if test="node()">
+      <p><xsl:text>Content:</xsl:text></p>
+      <xsl:value-of select="node()"/>
+    </xsl:if>
   </div>
 </xsl:template>
 
-<xsl:template match="sheet/fileref"/>
-<xsl:template match="sheet/gcompanionref"/>
 
-<xsl:template match="desctext">
-  <xsl:for-each select="paradesc">
-    <p><xsl:apply-templates/></p>
-  </xsl:for-each>
+
+<!--* Standard inline elements -->
+<!-- (ecam-data|if-installed|tech-label|emph|ein|abb|symbol|
+      f-phase|measure|inline-equation|duref|refint|liminaryref|
+      context-link)* *-->
+<!-- not implemented: ein -->
+<!-- not implemented: f-phase -->
+<!-- not implemented: liminary-ref -->
+<!-- not implemented: context-link -->
+
+<xsl:template match="ecam-data">
+  <!-- (ecamsys?,ecamtitle?,ecamsubtitle?) <- all just #PCDATA -->
+    <xsl:if test="ecamsys">
+      <span class="ecamsys"><xsl:value-of select="ecamsys"/></span> 
+    </xsl:if>
+    <xsl:if test="ecamtitle">
+      <span class="ecamtitle"><xsl:value-of select="ecamtitle"/></span> 
+    </xsl:if>
+    <xsl:if test="ecamsubtitle">
+      <span class="ecamsubtitle"><xsl:value-of select="ecamsubtitle"/></span>
+    </xsl:if>
 </xsl:template>
 
-<xsl:template match="gdesc">
-  <div class="callout-list"><xsl:apply-templates/></div>
+
+<xsl:template match="if-installed">
+  <!-- (#PCDATA|emph|abb|f-phase|tech-label)* -->
+  <xsl:apply-templates/><span class="ifinst"> (if inst)</span>
 </xsl:template>
 
 
-<xsl:template match="gdesc/listitem">
-  <table class="callouts">
-    <xsl:for-each select="grdescitem">
-      <tr class="callout" valign="top">
-	<th class="callout"><xsl:value-of select="gritem"/></th>
-	<td class="callout">
-	  <xsl:if test="title">
-	    <h1><xsl:value-of select="title"/></h1>
-	  </xsl:if>
-	<xsl:apply-templates select="itembody"/></td>
-      </tr>
-  </xsl:for-each>
-  </table>
-</xsl:template>
-
-<xsl:template match="gritem"/>
-<xsl:template match="itembody">
+<xsl:template match="tech-label">
+  <!-- (#PCDATA|emph|if-installed)* -->
   <xsl:apply-templates/>
 </xsl:template>
 
 
-<xsl:template match="note|noteproc">
-  <div class="note">
-    <h2>Note</h2>
-    <xsl:apply-templates/>
-  </div>
+<xsl:template match="emph">
+  <!-- (#PCDATA) -->
+  <strong><xsl:apply-templates/></strong>
 </xsl:template>
 
 
-<xsl:template match="caution|cautionproc">
-  <div class="caution">
-    <h2>Caution</h2>
-    <xsl:apply-templates/>
-  </div>
+<xsl:template match="abb">
+  <!-- (#PCDATA|emph|if-installed)* -->
+  <xsl:apply-templates/>
 </xsl:template>
 
 
-<xsl:template match="warning|warningproc">
-  <div class="caution">
-    <h2>Warning</h2>
-    <xsl:apply-templates/>
-  </div>
+<xsl:template match="symbol">
+  <!-- EMPTY, but lots of data in attributes
+  Need to replace this once images are transformed -->
+  <span class="symbol">SYMBOL</span>
 </xsl:template>
 
 
-<xsl:template match="comment">
+<xsl:template match="measure">
+  <!-- (#PCDATA) -->
+  <xsl:value-of select="."/>
+  <xsl:value-of select="@unit"/>
+</xsl:template>
+
+
+<xsl:template match="inline-equation">
+  <!-- ((m:math,equation-image?)) -->
+  <!-- equation-image: (fileref) -->
+  <!-- fileref: EMPTY -->
   <xsl:choose>
-    <xsl:when test="note|caution|warning">
-      <xsl:apply-templates/>
+    <xsl:when test="equation-image">
+      <img class="equation" alt="equation">
+	<xsl:attribute name="src">
+	  ../images/<xsl:value-of select="substring-after(equation-image/fileref/@href, '../EXTOBJ/')"/>
+	</xsl:attribute>
+      </img>
     </xsl:when>
     <xsl:otherwise>
-      <div class="note">
-	<xsl:apply-templates/>
+      <div class="not-impl">
+	<p>IMPLWARNING: Equation without image. m:math is not yet implemented!</p>
       </div>
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
 
 
-<xsl:template match="example">
-  <div class="example">
-    <h2>Example</h2>
-    <xsl:apply-templates/>
-  </div>
+<xsl:template match="duref">
+  <!-- (linktext?) -->
+  <!-- linktext is subset of standard inline -->
+  <xsl:choose>
+    <xsl:when test="@product = 'FCOM'">
+      <a class="duref">
+	<xsl:attribute name="href">
+	  <xsl:value-of select="@ref"/>
+	</xsl:attribute>
+	<xsl:value-of select="linktext"/>
+      </a>
+    </xsl:when>
+    <xsl:otherwise>
+      <span class="duref">See <xsl:value-of select="@product"/>
+      <xsl:if test="linktext">
+	<xsl:text>: </xsl:text>
+	<xsl:value-of select="linktext"/></xsl:if>
+      </span>
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
 
 
 <xsl:template match="refint">
+  <!-- (#PCDATA|symbol)* -->
   <xsl:variable name="marker" select="normalize-space(text())"/>
   <xsl:choose>
     <xsl:when test="$marker">
@@ -303,24 +152,85 @@
   </xsl:choose>
 </xsl:template>
 
+<!--** Standard inline elements/* *-->
+<!-- not implemented: m:math -->
 
-<xsl:template match="footnotes">
-  <div class="footnotes">
+
+<!--* Standard block level elements -->
+<!-- (para|unlist|numlist|warning|caution|note|table|graphref|
+     launcher|equal|whatif|equation|example|assumption|comment|reason)*)-->
+<!-- graphref implemented in graphref section *-->
+<!-- launcher not implemented -->
+<!-- whatif not implemented -->
+<!-- assumption not implemented -->
+
+<xsl:template match="para">
+  <!-- (Standard inline elements)+ -->
+  <p><xsl:apply-templates/></p>
+</xsl:template>
+
+
+<xsl:template match="unlist">
+  <!-- ((title?,para?,item+)) -->
+  <xsl:apply-templates select="title|para"/>
+  <xsl:element name="ul">
+    <xsl:attribute name="class">
+      <xsl:value-of select="@bulltype"/>
+    </xsl:attribute>
+    <xsl:apply-templates select="item"/>
+  </xsl:element>
+</xsl:template>
+
+
+<xsl:template match="numlist">
+  <!-- ((title?,para?,item+)) -->
+  <xsl:apply-templates select="title|para"/>
+  <xsl:element name="ol">
+    <xsl:attribute name="class">
+      <xsl:value-of select="@format"/>
+    </xsl:attribute>
+    <xsl:apply-templates select="item"/>
+  </xsl:element>
+</xsl:template>
+
+
+<xsl:template match="warning">
+  <!-- (((para|unlist|numlist|equal)+|desc-cond)+)-->
+  <div class="caution">
+    <h2>Warning</h2>
     <xsl:apply-templates/>
   </div>
 </xsl:template>
 
 
-<xsl:template match="ftnote">
-  <span class="footnotenum">
-  <xsl:attribute name="id">fnid<xsl:value-of select="generate-id()"/></xsl:attribute>
-  (<xsl:number/>)
-  </span>
-  <div class="footnotetext"><xsl:apply-templates/></div>
+<xsl:template match="caution">
+  <!-- (((para|unlist|numlist|equal)+|desc-cond)+) -->
+  <div class="caution">
+    <h2>Caution</h2>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="note">
+  <!-- ((((para|unlist|numlist|equal)+|desc-cond)+|graphref)+) -->
+  <div class="note">
+    <h2>Note</h2>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="table">
+  <!-- ((title?, (tgroup+|graphref),footnotes?))-->
+  <div class="table">
+    <xsl:apply-templates/>
+  </div>
 </xsl:template>
 
 
 <xsl:template match="equal">
+  <!-- (equ-l,equ-r) -->
   <xsl:if test="not(preceding-sibling::equal)">
     <div class="equal">
     <table class="equal">
@@ -348,97 +258,317 @@
 </xsl:template>
 
 
-<xsl:template match="measure">
-  <xsl:value-of select="."/>
-  <xsl:value-of select="@unit"/>
-</xsl:template>
-
-
-<xsl:template match="if-installed">
-  <xsl:apply-templates/><span class="ifinst"> (if inst)</span>
-</xsl:template>
-
-
-<xsl:template match="emph">
-  <strong><xsl:apply-templates/></strong>
-</xsl:template>
-
-
-
-<xsl:template match="duref">
+<xsl:template match="equation">
+  <!-- ((m:math,equation-image?)) -->
+  <!-- equation-image: (fileref) -->
+  <!-- fileref: EMPTY -->
   <xsl:choose>
-    <xsl:when test="@product = 'FCOM'">
-      <a class="duref">
-	<xsl:attribute name="href">
-	  <xsl:value-of select="@ref"/>
+    <xsl:when test="equation-image">
+      <img class="equation" alt="equation">
+	<xsl:attribute name="src">
+	  ../images/<xsl:value-of select="substring-after(equation-image/fileref/@href, '../EXTOBJ/')"/>
 	</xsl:attribute>
-      </a>
+      </img>
     </xsl:when>
     <xsl:otherwise>
-      <span class="duref">See <xsl:value-of select="@product"/></span>
+      <div class="not-impl">
+	<p>IMPLWARNING: Equation without image. m:math is not yet implemented!</p>
+      </div>
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
 
 
-
-<xsl:template match="symbol">
-  <span class="symbol">SYMBOL</span>
-</xsl:template>
-
-
-<xsl:template match="lit-limit">
-  <p><strong><xsl:apply-templates/></strong></p>
-</xsl:template>
-
-
-<xsl:template match="perf-value">
-    <p><strong><xsl:apply-templates select="perf"/>:</strong>  <xsl:apply-templates  select="value"/></p>
-</xsl:template>
-
-
-<xsl:template match="table">
-  <div class="table">
+<xsl:template match="example">
+  <!-- (((para|unlist|numlist|equal)+|equation)+) -->
+  <div class="example">
+    <h2>Example</h2>
     <xsl:apply-templates/>
   </div>
 </xsl:template>
 
 
-<xsl:template match="description|equ-l|equ-r|abb|
-		     descbody|row-header|tech-label|
-		     ex-desc-cond|limitation|limitbody|
-		     perf|value|limititem|limit|
-		     performance|perfbody|perfitem">
+<xsl:template match="comment">
+  <!-- (Standard block elements) -->
+  <xsl:choose>
+    <xsl:when test="note|caution|warning">
+      <xsl:apply-templates/>
+    </xsl:when>
+    <xsl:otherwise>
+      <div class="note">
+	<xsl:apply-templates/>
+      </div>
+    </xsl:otherwise>
+  </xsl:choose>
+</xsl:template>
+
+
+<xsl:template match="reason">
+  <!-- (para|unlist|numlist)+ -->
+  <div class="note">
+    <h2>Reason</h2>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<!--** Standard block level elements/* -->
+<!-- (title|item|footnotes|equ-l|equ-r) -->
+<!-- desc-cond implemented in description subsection *-->
+<!-- tgroup implemented in table.xsl -->
+
+<xsl:template match="title">
+  <!-- (Standard inline elements)* -->
+  <xsl:if test=".. != /">
+    <h1><xsl:apply-templates/></h1>
+  </xsl:if>
+</xsl:template>
+
+
+<xsl:template match="item">
+  <!-- (Standard block elements)+ -->
+  <li><xsl:apply-templates/></li>
+</xsl:template>
+
+
+<xsl:template match="footnotes">
+  <!-- (ftnote+) -->
+  <div class="footnotes">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="equ-l|equ-r">
+  <!-- equ-l: (Standard inline elements)* -->
+  <!-- equ-r: ((para|unlist|numlist|warning|caution|note)+) -->
   <xsl:apply-templates/>
 </xsl:template>
 
 
-<xsl:template match="*">
-  <div class="not-impl">
-    <p>
-      <xsl:value-of select="name()"/>
-      <xsl:text> is not implemented yet!</xsl:text>
+
+<!--*** Standard block level elements/*/* -->
+<!-- (ftnote) *-->
+
+<xsl:template match="ftnote">
+  <!-- ((para|unlist|numlist|equal)+) -->
+  <span class="footnotenum">
+  <xsl:attribute name="id">fnid<xsl:value-of select="generate-id()"/></xsl:attribute>
+  (<xsl:number/>)
+  </span>
+  <div class="footnotetext"><xsl:apply-templates/></div>
+</xsl:template>
+
+
+
+<!--* graphref *-->
+<!-- graphref/linktext not implemented -->
+<!-- graphref/unanchored-graphics not implemented -->
+<!-- graphref/interactive-graphic/hotspot-links not implemented -->
+
+<xsl:template match="graphref">
+  <!-- ((linktext?,interactive-graphic,unanchored-graphics?)) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+<xsl:template match="interactive-graphic">
+  <!-- (illustration,hotspot-links?) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+<xsl:template match="illustration">
+  <!-- illustration: (title?, (sheet+)) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+<xsl:template match="sheet">
+  <!-- ((fileref,gcompanionref?,gdesc?)) -->
+  <div class="image">
+    <p class="img-detail">
+      Image:
+      <a>
+    	<xsl:attribute name="href">
+    	  ../fcom/DATA/DU/<xsl:value-of select="fileref/@href"/>
+    	</xsl:attribute>
+    	<xsl:value-of select="fileref/@href"/>
+      </a>
     </p>
-    <xsl:if test="node()">
-      <p><xsl:text>Content:</xsl:text></p>
-      <xsl:value-of select="node()"/>
-    </xsl:if>
+    <p class="img-detail">
+      Companion:
+      <a>
+    	<xsl:attribute name="href">
+    	  ../fcom/DATA/DU/<xsl:value-of select="gcompanionref/@href"/>
+    	</xsl:attribute>
+    	<xsl:value-of select="gcompanionref/@ref"/>
+      </a>
+    </p>
+    <img>
+      <xsl:attribute name="src">
+	../images/<xsl:value-of select="substring-before(substring-after(fileref/@href,
+	'../ILLUS/'), '.cgm')"/>.png
+      </xsl:attribute>
+      <xsl:attribute name="alt">
+	Illustration: <xsl:value-of select="fileref/@href"/>
+      </xsl:attribute>
+    </img>
+    <xsl:apply-templates select="gdesc"/>
   </div>
 </xsl:template>
 
-<xsl:template match="ecam-data">
-    <xsl:if test="ecamsys">
-      <span class="ecamsys"><xsl:value-of select="ecamsys"/></span> 
-    </xsl:if>
-    <xsl:if test="ecamtitle">
-      <span class="ecamtitle"><xsl:value-of select="ecamtitle"/></span> 
-    </xsl:if>
-    <xsl:if test="ecamsubtitle">
-      <span class="ecamsubtitle"><xsl:value-of select="ecamsubtitle"/></span>
-    </xsl:if>
+
+<xsl:template match="gdesc">
+  <!-- (desctext?,listitem?) -->
+  <div class="callout-list"><xsl:apply-templates/></div>
 </xsl:template>
 
+
+<xsl:template match="desctext">
+  <!-- (paradesc+) -->
+  <!-- paradesc: (standard-inline|gritem) -->
+  <xsl:for-each select="paradesc">
+    <p><xsl:apply-templates/></p>
+  </xsl:for-each>
+</xsl:template>
+
+
+<xsl:template match="gdesc/listitem">
+  <!-- (grdescitem+) -->
+  <!-- grdescitem: (gritem,title?,itembody?) -->
+  <table class="callouts">
+    <xsl:for-each select="grdescitem">
+      <tr class="callout" valign="top">
+	<th class="callout"><xsl:apply-templates select="gritem"/></th>
+	<td class="callout">
+	  <xsl:if test="title">
+	    <h1><xsl:value-of select="title"/></h1>
+	  </xsl:if>
+	<xsl:apply-templates select="itembody"/></td>
+      </tr>
+  </xsl:for-each>
+  </table>
+</xsl:template>
+
+
+<xsl:template match="gritem">
+  <!-- gritem (#PCDATA|emph|if-installed)* -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+<xsl:template match="itembody">
+  <!-- (standard block items)* -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+<!--* description -->
+<!-- (description | descbody | ex_desc_cond | descitem | desc-cond |
+     desc-cond/intro | desc-cond/condbody) *-->
+<!-- hatref not implemented -->
+<!-- perfoapplication not implemented -->
+
+<xsl:template match="description|descbody|ex-desc-cond">
+  <!-- description: (reason?,title, (descbody|descitem),descitem*) -->
+  <!-- descbody: (standard_block|desc-cond|ex-desc-cond) -->
+  <!-- ex-desc-cond: (desc-cond,desc-cond+) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+<xsl:template match="descitem">
+  <!-- (title, (descbody|descitem),descitem*) -->
+  <div class="descitem">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="desc-cond">
+  <!-- (intro,condbody) -->
+  <div class="desccond">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="desc-cond/intro">
+  <!-- (standard_inline) -->
+  <div class="intro">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="desc-cond/condbody">
+  <!-- (standard_block | desc_cond | ex_desc_cond)* -->
+  <div class="condbody">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<!--* normalproc
+    normalproc | xtitle | procitem | procdesc | ecam-info
+    procbody implemented in own section *-->
+<!-- hatref not implemented -->
+<!-- perfoapplication not implemented -->
+<!-- starting-point not implemented -->
+
+<xsl:template match="normalproc">
+  <!--(reason?,xtitle,procdesc?,
+  (procbody|procitem),procitem*)-->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+<xsl:template match="xtitle"/>
+<!-- du heading is used instead -->
+
+
+<xsl:template match="procitem">
+  <!-- (title,procdesc?, (procbody|procitem),procitem*) -->
+  <div class="procitem">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="procdesc">
+  <!-- standard_block_items -->
+  <div class="procdesc">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="ecam-info">
+  <!-- (para+,comment?) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+<!--* procbody
+    procbody | action | action-block | limit | inform | condition | ex-conditions *-->
+<!-- line is not implemented -->
+
+<xsl:template match="procbody">
+  <!-- ((((action|action-block|limit|inform|condition|ex-conditions|line)+))+) -->
+  <div class="procbody">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="action">
+  <!-- (((cr-action|command),comment?)) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
 <xsl:template match="action-block">
+  <!-- (title?, (action,action+)) -->
   <div class="actionblock">
     <xsl:if test="title">
       <h2>
@@ -451,18 +581,163 @@
   </div>
 </xsl:template>
 
-<xsl:template match="equation|inline-equation">
-  <img class="equation" alt="equation">
-    <xsl:attribute name="src">
-      ../images/<xsl:value-of select="substring-after(equation-image/fileref/@href, '../EXTOBJ/')"/>
+
+<xsl:template match="limit">
+  <!-- ((lit-limit|perf-value),comment?) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+<xsl:template match="inform">
+  <!-- (standard_block | cautionproc | noteproc | warningproc ) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+<xsl:template match="condition">
+  <!-- ((intro|introblock),procdesc?,procbody,endofproc?) -->
+  <div class="condition">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="ex-conditions">
+  <!-- (condition,condition+) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+<!--** procbody/*//*
+    cr-action | challenge | response | commmand | lit-limit | perf-value |
+    cautionproc | noteproc | warningproc | intro | introblock *-->
+<!-- extobject not implemented -->
+<!-- extapplication not implemented -->
+<!-- field not implemented -->
+<!-- endofproc not implemented -->
+
+
+<xsl:template match="cr-action">
+  <!-- (challenge,response) -->
+  <div class="cr">
+    <table class="cr"><tr>
+      <td class="cr-left">
+	<xsl:apply-templates select="challenge"/>
+      </td>
+      <td class="cr-dots"><div class="dots"> </div></td>
+      <td class="cr-right">
+	<xsl:apply-templates select="response"/>
+      </td>
+    </tr></table>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="cr-action/challenge|cr-action/response">
+  <!-- challenge: standard_inline -->
+  <!-- response: (#PCDATA|extobject|extapplication|field)* -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+<xsl:template match="command">
+  <!-- standard_block_elements -->
+  <div class="command">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="lit-limit">
+  <!-- standard_inline_elements -->
+  <p><strong><xsl:apply-templates/></strong></p>
+</xsl:template>
+
+
+<xsl:template match="perf-value">
+  <!-- (perf,value) <- Both standard inline -->
+  <p><strong><xsl:apply-templates select="perf"/>:</strong>  <xsl:apply-templates  select="value"/></p>
+</xsl:template>
+
+
+<xsl:template match="cautionproc">
+  <!-- standard_block | (action|action-block|limit|inform|condition|ex-conditions|line) -->
+  <div class="caution">
+    <h2>Caution</h2>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="noteproc">
+  <!-- standard_block | (action|action-block|limit|inform|condition|ex-conditions|line) -->
+  <div class="note">
+    <h2>Note</h2>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="warningproc">
+  <!-- standard_block | (action|action-block|limit|inform|condition|ex-conditions|line) -->
+  )+))-->
+  <div class="caution">
+    <h2>Warning</h2>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="intro">
+  <!-- standard_inline -->
+  <p class="intro">
+    <xsl:text>&#x2022; </xsl:text>
+    <xsl:apply-templates/>
+  </p>
+</xsl:template>
+
+
+<xsl:template match="introblock">
+  <!-- (intro, intro+) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+
+
+
+
+
+<!--* Yet to be sorted *-->
+
+
+
+
+<xsl:template match="abnormalproc|emergencyproc">
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="land">
+  <p>
+    <xsl:attribute name="class">
+      <xsl:value-of select="@type"/>
     </xsl:attribute>
-    <!-- <xsl:attribute name="width"> -->
-    <!--   <xsl:value-of select="equation-image/@width"/> -->
-    <!-- </xsl:attribute> -->
-    <!-- <xsl:attribute name="height"> -->
-    <!--   <xsl:value-of select="equation-image/@height"/> -->
-    <!-- </xsl:attribute> -->
-  </img>
+    <xsl:choose>
+      <xsl:when test="@type = 'landasap'">
+	LAND ASAP
+      </xsl:when>
+      <xsl:otherwise>
+	LAND type not implemented yet!
+      </xsl:otherwise>
+    </xsl:choose>
+  </p>
+</xsl:template>
+
+
+<xsl:template match="equ-l|equ-r|row-header|
+		     limitation|limitbody|
+		     perf|value|limititem|
+		     performance|perfbody|perfitem">
+  <xsl:apply-templates/>
 </xsl:template>
 
 
@@ -501,17 +776,6 @@
 
 <xsl:template match="ecamsyspage">
   <p><xsl:value-of select="."/></p>
-</xsl:template>
-
-<xsl:template match="ecam-info">
-  <xsl:apply-templates/>
-</xsl:template>
-
-<xsl:template match="reason">
-  <div class="note">
-    <h2>Reason</h2>
-    <xsl:apply-templates/>
-  </div>
 </xsl:template>
 
 <!-- fwspage -->
@@ -674,11 +938,6 @@
 <!-- not implemented: lit-limit -->
 <!-- not implemented: perf-value -->
 
-<xsl:template match="introblock">
-  <!-- (intro, intro+) -->
-  <xsl:apply-templates/>
-</xsl:template>
-
 <xsl:template match="condlimitbody">
   <!-- (limit|lit-limit)+ -->
   <div class="condbody">
@@ -832,5 +1091,7 @@
   <!-- EMPTY -->
   <xsl:value-of select="@name"/>
 </xsl:template>
+
+
 
 </xsl:stylesheet>
