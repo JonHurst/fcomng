@@ -514,4 +514,193 @@
   </div>
 </xsl:template>
 
+<!-- fwspage -->
+
+<xsl:template match="fwspage">
+  <!-- (limitations?,deferredproc?,status?,moreinfopage?,memopage?) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+<!-- fwspage/* -->
+<!-- not implemented: moreinfopage -->
+<!-- not implemented: memopage -->
+
+<xsl:template match="limitations">
+  <div class="limitations">
+    <h1>Limitations:</h1>
+    <!-- (ecamlimit?,pfdlimit?,comment?) -->
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="deferredproc">
+  <div class="deferred-proc">
+    <h1>Deferred procedures:</h1>
+    <!-- ((allphase-proc|flightphase-proc)+,comment?) -->
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="status">
+  <div class="status">
+    <h1>Status:</h1>
+    <!-- (ecaminopsys?,otherinopsys?,info?,comment?) -->
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<!-- fwspage/*/* -->
+
+<xsl:template match="ecamlimit">
+  <div class="ecamlimit">
+    <!-- (((allphase-limit|flightphase-limit)+,comment?)) -->
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="pfdlimit">
+  <div class="pfdlimit">
+    <!-- (((allphase-limit|flightphase-limit)+,comment?)) -->
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="allphase-proc">
+  <div class="all-phase">
+    <!-- ((procbody+,comment?)) -->
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="flightphase-proc">
+  <div class="flight-phase">
+    <!-- ((procbody+,comment?)) -->
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="ecaminopsys">
+  <div class="ecaminop">
+    <h1>Inop systems:</h1>
+    <!-- (((duref| (allphase-sys|flightphase-sys)+),comment?)) -->
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="otherinopsys">
+  <div class="otherinop">
+    <h1>Inop systems not displayed by ECAM:</h1>
+    <!-- (((duref|(allphase-sys|flightphase-sys)+),comment?)) -->
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="info">
+  <div class="info">
+    <h1>Info:</h1>
+    <!-- (((infobody|info-cond),comment?)+) -->
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<!-- fwspage/*/*/* -->
+<!-- not implemented: flightphase-limit -->
+<!-- not implemented: flightphase-sys -->
+
+<xsl:template match="allphase-limit">
+  <!-- (((limit|condlimit),comment?)+) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="allphase-sys">
+  <div class="all-phase">
+    <!-- comment | condsys | sys -->
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="infobody">
+  <!-- subset of standard block -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="info-cond">
+  <!-- ((intro|introblock),info-condbody) -->
+    &#x2022; <xsl:apply-templates select="intro|introblock"/>:
+    <xsl:apply-templates select="info-condbody"/>
+</xsl:template>
+
+
+<!-- fwspage/*/*/*/* -->
+<!-- not implemented: allphase-limit -->
+<!-- not implemented: flightphase-limit-->
+<!-- not implemented: condlimit -->
+<!-- not implemented: info-condbody -->
+
+<xsl:template match="limit">
+  <!-- ((lit-limit|perf-value),comment?) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="condlimit">
+  <!-- ((intro|introblock),condlimitbody) -->
+  &#x2022; <xsl:apply-templates select="intro|introblock"/>:
+  <xsl:apply-templates select="condlimitbody"/>
+</xsl:template>
+
+<xsl:template match="condsys">
+  <div class="condsys">
+    <!-- (intro | introblock), condsysbody -->
+    &#x2022; <xsl:apply-templates select="intro|introblock"/>:
+    <xsl:apply-templates select="condsysbody"/>
+  </div>
+</xsl:template>
+
+<xsl:template match="sys">
+  <div class="sys">
+    <!-- standard inline -->
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="info-condbody">
+  <!-- ((infobody+,comment?)) -->
+  <div class="condbody">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<!-- fwspage/*/*/*/*/* -->
+<!-- not implemented: lit-limit -->
+<!-- not implemented: perf-value -->
+
+<xsl:template match="intro">
+  <!-- standard inline -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="introblock">
+  <!-- (intro, intro+) -->
+  <xsl:apply-templates/>
+</xsl:template>
+
+<xsl:template match="condlimitbody">
+  <!-- (limit|lit-limit)+ -->
+  <div class="condbody">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="condsysbody">
+  <!-- (sys+) -->
+  <div class="condbody">
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+<xsl:template match="infobody">
+  <!-- standard block -->
+  <xsl:apply-templates/>
+</xsl:template>
+
 </xsl:stylesheet>

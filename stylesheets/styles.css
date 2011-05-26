@@ -443,3 +443,18 @@ div.command
 {
     font-weight: bold;
 }
+
+div.condbody
+{
+    margin-left: 2em;
+}
+
+div.status > *
+{
+    margin-left: 2em;
+}
+
+div.status > h1
+{
+    margin-left: 0;
+}
