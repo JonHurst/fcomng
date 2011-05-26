@@ -349,10 +349,14 @@ class FCOMFactory:
         page_parts = re.split('<a class="duref" href="(\d+)">', page_string)
         duref_index = 1
         while duref_index < len(page_parts):
+            duinfo = self.duref_lookup[page_parts[duref_index]]
             page_parts[duref_index] = ('<a class="duref" href="' +
-                                       self.duref_lookup[page_parts[duref_index]][0] +
-                                       '">' +
-                                       self.duref_lookup[page_parts[duref_index]][1])
+                                       duinfo[0] +
+                                       '">')
+            if page_parts[duref_index + 1][:2] == "</":
+                page_parts[duref_index] += duinfo[1]
+            else:
+                page_parts[duref_index] += duinfo[1].split()[0]
             duref_index += 2
         of = open(output_dir + filename, "w")
         of.write("".join(page_parts))
