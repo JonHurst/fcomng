@@ -898,8 +898,6 @@
 <!-- fwspage/*/*/*/* -->
 <!-- not implemented: allphase-limit -->
 <!-- not implemented: flightphase-limit-->
-<!-- not implemented: condlimit -->
-<!-- not implemented: info-condbody -->
 
 <xsl:template match="limit">
   <!-- ((lit-limit|perf-value),comment?) -->
@@ -908,15 +906,14 @@
 
 <xsl:template match="condlimit">
   <!-- ((intro|introblock),condlimitbody) -->
-  &#x2022; <xsl:apply-templates select="intro|introblock"/>:
+  <xsl:apply-templates select="intro|introblock"/>
   <xsl:apply-templates select="condlimitbody"/>
 </xsl:template>
 
 <xsl:template match="condsys">
   <div class="condsys">
     <!-- (intro | introblock), condsysbody -->
-    &#x2022; <xsl:apply-templates select="intro|introblock"/>:
-    <xsl:apply-templates select="condsysbody"/>
+    <xsl:apply-templates/>
   </div>
 </xsl:template>
 
