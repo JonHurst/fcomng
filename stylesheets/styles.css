@@ -26,6 +26,7 @@ div.section, div.pageindex, div.titleblock, div.footerblock, div.index
 {
     border:green solid 1px;
     padding:1em;
+    padding-left: 2em;
     margin-top:1em;
 }
 
@@ -285,13 +286,14 @@ div.folded a.hideme
 div.main > *, div.alternate > *, div.index > *, div.duindex > *,
 div.main > div.equal, div.alternate > div.equal
 {
-    margin-left: 10%;
-    max-width:55em;
+    margin-left: auto;
+    margin-right: auto;
+    max-width:50em;
 }
 
 div.main > h1, div.alternate > h1
 {
-    margin-left: 1em;
+    margin-left: 0;
 }
 
 div.main > div.table, div.alternate > div.table,
@@ -379,16 +381,6 @@ span.duref, span.symbol
 
 
 
-div.condition > *
-{
-    margin-left:3em;
-}
-
-div.condition > p.intro
-{
-    margin-left:0;
-}
-
 div.cr
 {
     overflow:auto;
@@ -470,4 +462,23 @@ div.condsys p.intro
     margin-bottom:0;
     padding-top:0;
     padding-bottom:0
+}
+
+div.condition > div.procbody,
+div.condition > div.procdesc
+{
+    border-left: 1px dotted green;
+    padding-left:3em;
+}
+
+div.condition > p.intro
+{
+   color: #005000;
+   font-weight: bold;
+}
+
+p.landasap
+{
+    font-size: 2em;
+    font-weight: bold;
 }
