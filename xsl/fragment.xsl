@@ -401,7 +401,7 @@
     	<xsl:attribute name="href">
     	  ../fcom/DATA/DU/<xsl:value-of select="gcompanionref/@href"/>
     	</xsl:attribute>
-    	<xsl:value-of select="gcompanionref/@ref"/>
+    	<xsl:value-of select="gcompanionref/@href"/>
       </a>
     </p>
     <img>
@@ -680,7 +680,6 @@
 
 <xsl:template match="warningproc">
   <!-- standard_block | (action|action-block|limit|inform|condition|ex-conditions|line) -->
-  )+))-->
   <div class="caution">
     <h2>Warning</h2>
     <xsl:apply-templates/>
@@ -890,7 +889,7 @@
 
 <xsl:template match="info-cond">
   <!-- ((intro|introblock),info-condbody) -->
-    &#x2022; <xsl:apply-templates select="intro|introblock"/>:
+    <xsl:apply-templates select="intro|introblock"/>
     <xsl:apply-templates select="info-condbody"/>
 </xsl:template>
 
