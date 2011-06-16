@@ -404,6 +404,15 @@
     	<xsl:value-of select="gcompanionref/@href"/>
       </a>
     </p>
+    <!-- <div class="cgm"> -->
+    <!--   <embed type="image/cgm" height="600" width="600"> -->
+    <!-- 	<xsl:attribute name="src"> -->
+    <!-- 	  <xsl:value-of select="fileref/@href"/> -->
+    <!-- 	</xsl:attribute> -->
+    <!--   </embed> -->
+    <!--   <p><xsl:value-of select="substring-after(fileref/@href, '../ILLUS/')"/></p> -->
+    <!-- </div> -->
+
     <img>
       <xsl:attribute name="src">
 	../images/<xsl:value-of select="substring-before(substring-after(fileref/@href,
