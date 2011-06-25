@@ -224,12 +224,12 @@ table.callouts
 {
     width:auto;
     margin:auto;
-    border: none;
+    border: 1px solid grey;
 }
 
 tr.callout, td.callout
 {
-    border:none;
+    border:1px solid grey;
 }
 
 td.callout h1
@@ -483,3 +483,20 @@ p.landasap
     font-size: 2em;
     font-weight: bold;
 }
+
+td > p:first-child, th > p:first-child
+{
+    margin-top:0;
+}
+
+td > p:last-child, th > p:last-child
+{
+    margin-bottom:0;
+}
+
+td > h1:first-child
+{
+    margin-top:0em;
+    margin-bottom:0em
+}
+
