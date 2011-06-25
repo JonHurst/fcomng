@@ -16,9 +16,12 @@ image_output = base_dir + "images/"
 
 
 def cgmtopng(matchobj):
-    global modflag
     tag =  matchobj.group(0)
     cgm_filename = os.path.basename(re.search('src="([^"]*)"', tag).group(1))
+    class_attrib_mo = re.search('class="[^"]*"',tag)
+    class_attrib = ""
+    if class_attrib_mo:
+        class_attrib = class_attrib_mo.group()
     if cgm_filename[-3:] != "cgm":
         return tag
     if not cgm_index.has_key(cgm_filename):
@@ -39,7 +42,7 @@ def cgmtopng(matchobj):
     if png != None:
         png_filename = png.get("href")
         shutil.copyfile(image_library + png_filename, image_output + png_filename)
-        tag = '<img src="../images/' + png_filename + '" alt="png"/>'
+        tag = '<img ' + class_attrib + ' src="../images/' + png_filename + '" alt="png"/>'
         if pngzoom != None:
             pngzoom_filename = pngzoom.get("href")
             shutil.copyfile(image_library + pngzoom_filename, image_output + pngzoom_filename)

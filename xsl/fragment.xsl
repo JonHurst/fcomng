@@ -81,7 +81,7 @@
 <xsl:template match="symbol">
   <!-- EMPTY, but lots of data in attributes
   Need to replace this once images are transformed -->
-  <img alt="">
+  <img class="symbol" alt="">
     <xsl:attribute name="src">
       <xsl:value-of select="@href"/>
     </xsl:attribute>

@@ -497,6 +497,11 @@ td > p:last-child, th > p:last-child
 td > h1:first-child
 {
     margin-top:0em;
-    margin-bottom:0em
+    margin-bottom:0.5em
 }
 
+img.symbol
+{
+    margin:0;
+    padding:0;
+}
