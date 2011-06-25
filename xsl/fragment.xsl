@@ -81,7 +81,11 @@
 <xsl:template match="symbol">
   <!-- EMPTY, but lots of data in attributes
   Need to replace this once images are transformed -->
-  <span class="symbol">SYMBOL</span>
+  <img alt="">
+    <xsl:attribute name="src">
+      <xsl:value-of select="@href"/>
+    </xsl:attribute>
+  </img>
 </xsl:template>
 
 
@@ -386,40 +390,9 @@
 <xsl:template match="sheet">
   <!-- ((fileref,gcompanionref?,gdesc?)) -->
   <div class="image">
-    <p class="img-detail">
-      Image:
-      <a>
-    	<xsl:attribute name="href">
-    	  ../fcom/DATA/DU/<xsl:value-of select="fileref/@href"/>
-    	</xsl:attribute>
-    	<xsl:value-of select="fileref/@href"/>
-      </a>
-    </p>
-    <p class="img-detail">
-      Companion:
-      <a>
-    	<xsl:attribute name="href">
-    	  ../fcom/DATA/DU/<xsl:value-of select="gcompanionref/@href"/>
-    	</xsl:attribute>
-    	<xsl:value-of select="gcompanionref/@href"/>
-      </a>
-    </p>
-    <!-- <div class="cgm"> -->
-    <!--   <embed type="image/cgm" height="600" width="600"> -->
-    <!-- 	<xsl:attribute name="src"> -->
-    <!-- 	  <xsl:value-of select="fileref/@href"/> -->
-    <!-- 	</xsl:attribute> -->
-    <!--   </embed> -->
-    <!--   <p><xsl:value-of select="substring-after(fileref/@href, '../ILLUS/')"/></p> -->
-    <!-- </div> -->
-
-    <img>
+    <img alt="cgm">
       <xsl:attribute name="src">
-	../images/<xsl:value-of select="substring-before(substring-after(fileref/@href,
-	'../ILLUS/'), '.cgm')"/>.png
-      </xsl:attribute>
-      <xsl:attribute name="alt">
-	Illustration: <xsl:value-of select="fileref/@href"/>
+	<xsl:value-of select="fileref/@href"/>
       </xsl:attribute>
     </img>
     <xsl:apply-templates select="gdesc"/>
