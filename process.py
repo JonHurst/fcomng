@@ -1,7 +1,6 @@
 #!/usr/bin/python
 # coding=utf-8
 
-import html_templates
 import xml.etree.ElementTree
 et = xml.etree.ElementTree
 import subprocess
