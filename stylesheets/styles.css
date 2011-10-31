@@ -248,33 +248,7 @@ div.callout-list
 /*Folding functionality*/
 /************************************************************/
 
-div.folded *
-{
-    display:none;
-}
-
-a.showme, a.hideme
-{
-    margin-top:0.25em;
-    text-align:right;
-}
-
-a.showme
-{
-    display:none;
-}
-
-div.folded a.showme
-{
-    display:block;
-}
-
-a.hideme
-{
-    display: block;
-}
-
-div.folded a.hideme
+div.folded
 {
     display:none;
 }

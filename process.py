@@ -50,11 +50,11 @@ class FCOMMeta:
                 self.fleets[m].add(a.attrib["msn"])
 
 
-        def applies(self, msnlist):
+        def applies_string(self, msnlist):
             msnset = set(msnlist)
             fleets = []
             for f in self.fleets.keys():
-                if self.fleets[f] <= msnset:
+               if self.fleets[f] <= msnset:
                     fleets.append(f + " fleet")
                     msnset = msnset.difference(self.fleets[f])
             pseudofleets = []
@@ -70,6 +70,10 @@ class FCOMMeta:
 
         def msn_to_reg(self, msn):
             return self.aircraft[msn]
+
+
+        def all(self):
+            return self.aircraft
 
 
         def dump(self):
@@ -215,11 +219,16 @@ class FCOMMeta:
 
 
     def applies(self, du_filename):
-        ac_list = self.du_metaquery.get_ac_list(du_filename)
-        if not ac_list:
-            return "Whole fleet"
-        else:
-            return self.aircraft.applies(ac_list)
+        return self.du_metaquery.get_ac_list(du_filename)
+
+
+    def notcovered(self, msnlist):
+        return list(set(self.aircraft.all()) - set(msnlist))
+
+
+    def applies_string(self, msnlist):
+        return self.aircraft.applies_string(msnlist)
+
 
 
     def is_tdu(self, du_filename):
@@ -306,45 +315,65 @@ class FCOMFactory:
         if prevsid: page_attributes["prev"] = ".".join(prevsid) + ".html"
         if nextsid: page_attributes["next"] = ".".join(nextsid) + ".html"
         tb.start("page", page_attributes)
+        javascript_list = []
         for s in self.__build_sid_list__(sid):
             tb.start("section", {"sid": ".".join(s),
                                  "title": self.fcm.get_title(s)})
             for dul in self.fcm.get_dus(s):
-                main_du = 0
-                while not self.fcm.affected(msn, dul[main_du]):
-                    main_du += 1
-                    if main_du == len(dul): break
-                if main_du == len(dul):
-                    du_attrib = {"href": "",
-                                 "title": self.fcm.get_du_title(dul[0]),
-                                 "id": self.__du_to_duref__(dul[0])}
-                    if self.fcm.is_tdu(dul[0]):
+                msnlist = []
+                tb.start("du_container", {"id": self.__du_to_duref__(dul[0]),
+                                          "title": self.fcm.get_du_title(dul[0])})
+                for c, du in enumerate(dul):
+                    du_attrib = {"href": data_dir + du,
+                                 "title": self.fcm.get_du_title(du),
+                                 "id": self.__du_to_duref__(du) + "-" + str(c)}
+                    if self.fcm.is_tdu(du):
                         du_attrib["tdu"] = "tdu"
                     tb.start("du", du_attrib)
-                else:
-                    du_attrib = {"href": data_dir + dul[main_du],
-                                 "title": self.fcm.get_du_title(dul[main_du]),
-                                 "id": self.__du_to_duref__(dul[main_du])}
-                    if self.fcm.is_tdu(dul[main_du]):
-                        du_attrib["tdu"] = "tdu"
-                    tb.start("du", du_attrib)
-                    if self.fcm.applies(dul[main_du]) != "Whole fleet":
+                    applies = self.fcm.applies(du)
+                    if applies:
                         tb.start("applies", {})
-                        tb.data(self.fcm.applies(dul[main_du]))
+                        applies_string = self.fcm.applies_string(applies)
+                        msnlist.append((du_attrib["id"], applies, applies_string[:100]))
+                        tb.data(applies_string)
                         tb.end("applies")
-                for adu in (dul[:main_du] + dul[main_du+1:]):
-                    tb.start("adu", {"href": data_dir + adu,
-                                     "title": self.fcm.get_du_title(adu)})
-                    tb.start("applies", {})
-                    tb.data(self.fcm.applies(adu))
-                    tb.end("applies")
-                    tb.end("adu")
-                tb.end("du")
+                    tb.end("du")
+                if msnlist:
+                    javascript_list.append(msnlist)
+                    # if dul does not cover the entire fleet, we need to add a fake extra du
+                    msns = []
+                    for msnentry in msnlist:
+                        msns.extend(msnentry[1])
+                    nc = self.fcm.notcovered(msns)
+                    if nc:
+                        du_attrib = {"href": "",
+                                     "title": self.fcm.get_du_title(dul[0]),
+                                     "id": self.__du_to_duref__(dul[0]) + "-na"}
+                        if self.fcm.is_tdu(du):
+                            du_attrib["tdu"] = "tdu"
+                        tb.start("du", du_attrib)
+                        tb.start("applies", {})
+                        applies_string = self.fcm.applies_string(nc)
+                        msnlist.append((du_attrib["id"], nc, applies_string[:100]))
+                        tb.data(applies_string)
+                        tb.end("applies")
+                        tb.end("du")
+                tb.end("du_container")
             tb.end("section")
         tb.end("page")
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "page.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
+        #create javascript variable for controlling folding
+        javascript_string = "var folding = [\n"
+        for folding_section in javascript_list:
+            javascript_string += "  [\n"
+            for dusection in folding_section:
+                javascript_string += "    ['%s', %s, '%s'],\n" % dusection
+            javascript_string = javascript_string[:-2] + "],\n"
+        javascript_string = javascript_string[:-2] + "];\n"
+        page_string = page_string.replace("<!--jsvariable-->", javascript_string)
+        #replace xml links with xhtml links
         page_parts = re.split('<a class="duref" href="(\d+)">', page_string)
         duref_index = 1
         while duref_index < len(page_parts):

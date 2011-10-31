@@ -16,11 +16,15 @@
     <head>
       <title><xsl:value-of select="@title"/>: <xsl:value-of select="@subtitle"/></title>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-      <script type="text/javascript" src="../scripts/script.js"></script>
       <link rel="stylesheet" type="text/css" href="../stylesheets/styles.css"/>
-      <link rel="alternate stylesheet" title="Debug" type="text/css" href="../stylesheets/debug.css"/>
+      <link rel="alternate stylesheet" title="Debug" type="text/css"
+            href="../stylesheets/debug.css"/>
+      <script type="text/javascript">
+        <xsl:comment>jsvariable</xsl:comment>
+      </script>
+      <script type="text/javascript" src="../scripts/script.js"></script>
     </head>
-    <body>
+    <body onload="initial_fold();">
       <div class="page">
 	  <table><tr><th>easyJet</th><th>FCOM</th><th>A319/A320</th>
 	  <th><xsl:value-of select="@acft"/></th>
@@ -77,24 +81,26 @@
   <div class="section">
     <xsl:attribute name="id">sid<xsl:value-of select="@sid"/></xsl:attribute>
     <h1 class="sectionheading"><xsl:value-of select="@sid"/>: <xsl:value-of select="@title"/></h1>
-    <xsl:if test="count(du) &gt; 1">
+    <xsl:if test="count(du_container) &gt; 1">
       <div class="duindex">
-	<xsl:for-each select="du">
+	<xsl:for-each select="du_container">
 	  <p><a>
-	    <xsl:choose>
-	      <xsl:when test="@href != ''">
-		<xsl:attribute name="href">#duid<xsl:value-of select="@id"/></xsl:attribute>
-		<xsl:value-of select="@title"/>
-	      </xsl:when>
-	      <xsl:otherwise>
-		<xsl:attribute name="href">#duid<xsl:value-of select="@id"/></xsl:attribute>
-		<xsl:value-of select="adu/@title"/>
-	      </xsl:otherwise>
-	    </xsl:choose>
+       <xsl:attribute name="href">#duid<xsl:value-of select="@id"/></xsl:attribute>
+       <xsl:value-of select="@title"/>
 	  </a></p>
 	</xsl:for-each>
       </div>
     </xsl:if>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="du_container">
+  <div class="du_container">
+    <xsl:attribute name="id">
+      <xsl:text>duid</xsl:text><xsl:value-of select="@id"/>
+    </xsl:attribute>
     <xsl:apply-templates/>
   </div>
 </xsl:template>
@@ -110,43 +116,26 @@
 	<xsl:attribute name="class">main</xsl:attribute>
       </xsl:otherwise>
     </xsl:choose>
-    <xsl:choose>
-      <xsl:when test="@href != ''">
 	<xsl:attribute name="id">duid<xsl:value-of select="@id"/></xsl:attribute>
-	<h1><xsl:value-of select="@title"/></h1>
-	<xsl:if test="applies">
-	  <p class="applies">Applies to: <xsl:value-of select="applies"/></p>
-	</xsl:if>
-	<xsl:apply-templates select="document(@href)"/>
-      </xsl:when>
-      <xsl:otherwise>
-	<xsl:attribute name="id">duid<xsl:value-of select="@id"/></xsl:attribute>
-	<h1><xsl:value-of select="adu/@title"/></h1>
-	<p>DU does not apply to <xsl:value-of select="/page/@acft"/>.</p>
-      </xsl:otherwise>
-    </xsl:choose>
     <p class="duident">
       <a>
 	<xsl:attribute name="href">../<xsl:value-of select="@href"/></xsl:attribute>
 	<xsl:value-of select="@href"/>
       </a>
+	<h1><xsl:value-of select="@title"/></h1>
+	<xsl:if test="applies">
+	  <p class="applies">Applies to: <xsl:value-of select="applies"/></p>
+	</xsl:if>
+    <xsl:choose>
+      <xsl:when test="@href != ''">
+        <xsl:apply-templates select="document(@href)"/>
+      </xsl:when>
+      <xsl:otherwise>
+        <p>DU does not apply to selected aircraft.</p>
+      </xsl:otherwise>
+    </xsl:choose>
     </p>
   </div>
-  <xsl:for-each select="adu">
-    <div class="alternate folded">
-      <a class="showme" href="#" onclick="showdu(this); return false">Show alternative DU</a>
-      <a class="hideme" href="#" onclick="hidedu(this); return false">Hide alternative DU</a>
-      <h1><xsl:value-of select="@title"/></h1>
-      <p class="applies">Applies to: <xsl:value-of select="applies"/></p>
-      <xsl:apply-templates select="document(@href)"/>
-      <p class="duident">
-	<a>
-	  <xsl:attribute name="href">../<xsl:value-of select="@href"/></xsl:attribute>
-	  <xsl:value-of select="@href"/>
-	</a>
-      </p>
-    </div>
-  </xsl:for-each>
 </xsl:template>
 
 </xsl:stylesheet>
