@@ -79,3 +79,16 @@ function initial_fold() {
     insert_tabs(tabs);
   }
 }
+
+function toggle_applies(ob) {
+  if(!ob.parentNode.style.whiteSpace || ob.parentNode.style.whiteSpace == "nowrap") {
+    ob.parentNode.style.whiteSpace = "normal";
+    ob.childNodes[0].src = "../images/minus.gif";
+  }
+  else {
+    ob.parentNode.style.whiteSpace = "nowrap";
+    ob.childNodes[0].src = "../images/plus.gif";
+  }
+
+  return false;
+}

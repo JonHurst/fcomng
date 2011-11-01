@@ -185,8 +185,8 @@ div.index p
 p.applies
 {
     color: gray;
-    font-size: 0.9em;
-    margin-left: 5em;
+    font-size: 0.85em;
+    border: 1px dotted gray;
 }
 
 /************************************************************/
@@ -272,7 +272,8 @@ div.main > h1, div.alternate > h1
 
 div.main > div.table, div.alternate > div.table,
 div.main > div.image, div.alternate > div.image,
-div.main > div.footnotes, div.alternate > div.footnotes
+div.main > div.footnotes, div.alternate > div.footnotes,
+p.applies
 {
     margin-left: 0;
     margin-right: 0;
@@ -507,12 +508,14 @@ div.tags a
     position:relative;
     white-space:nowrap;
     padding: 4px 1em 0;
+    margin-left: 2px;
     border-style: solid solid none;
     border-width: 1px;
     border-color: gray;
     text-decoration: none;
     background-color: white;
     font-size: 0.85em;
+    bottom: -1px;
 }
 
 div.tags a.alternate
@@ -524,6 +527,22 @@ div.tags a.alternate
 div.tags a.active
 {
     color: black;
-    bottom: -2px;
+    bottom: -3px;
     padding-top: 6px;
+}
+
+p.applies
+{
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    padding-left: 2em;
+}
+
+p.applies img
+{
+    position: absolute;
+    padding:0;
+    left: 0;
+    top: 0.2em;
 }
