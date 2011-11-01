@@ -117,10 +117,13 @@ class FCOMMeta:
             else:
                 self.msns = []
                 for msn in m.text.split(" "):
-                    while len(msn) != 4:
-                        self.msns.append(msn[:4])
-                        msn = msn[4:]
-                    self.msns.append(msn)
+                    #supposition: a pair of numbers together indicates all aircraft with MSNs between
+                    #[:4] and [4:]
+                    if len(msn) == 8:
+                        for rangemsn in range(int(msn[:4]), int(msn[4:]) + 1):
+                            self.msns.append(str(rangemsn))
+                    else:
+                        self.msns.append(msn)
 
 
     def __init__(self, control_file):
