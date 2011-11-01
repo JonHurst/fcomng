@@ -53,7 +53,6 @@ function insert_tabs(tabs) {
     class_string = "alternate";
   }
   //find du container
-  console.log(tagdiv.innerHTML);
   var du_container = document.getElementById("duid" + tabs[0].linkend).parentNode;
   du_container.insertBefore(tagdiv, du_container.firstChild);
 }
