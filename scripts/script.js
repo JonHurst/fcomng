@@ -18,8 +18,7 @@ function change_tab(event) {
   //set this node as active
   this.className += " active";
   //get id of du to unfold
-  var duid = "duid" + this.href.split("#")[1];
-  console.log(duid);
+  var duid = this.href.split("#")[1];
   //fold as required
   var du = this.parentNode.nextSibling;
   while(du) {
@@ -42,7 +41,7 @@ function insert_tabs(tabs) {
   var label_length = 80/tabs.length;
   for(var i=0; i<tabs.length; i++) {
     var anchor = document.createElement("a");
-    anchor.setAttribute("href", "#" + tabs[i].linkend);
+    anchor.setAttribute("href", "#duid" + tabs[i].linkend);
     anchor.className = class_string;
     anchor.onclick = change_tab;
     var label = tabs[i].label.slice(0, label_length);
