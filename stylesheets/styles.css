@@ -479,3 +479,51 @@ img.symbol
     margin:0;
     padding:0;
 }
+
+
+div.du_container
+{
+    position: relative;
+}
+
+div.tags
+{
+    position: relative;
+    text-align: right;
+    border-bottom: 1px gray solid;
+    background-color: white;
+    z-index: 101;
+    bottom: -1px;
+}
+
+div.main, div.alternate
+{
+    position:relative;
+    z-index: 100;
+}
+
+div.tags a
+{
+    position:relative;
+    white-space:nowrap;
+    padding: 4px 1em 0;
+    border-style: solid solid none;
+    border-width: 1px;
+    border-color: gray;
+    text-decoration: none;
+    background-color: white;
+    font-size: 0.85em;
+}
+
+div.tags a.alternate
+{
+    background-color: #F0FFF0;
+}
+
+
+div.tags a.active
+{
+    color: black;
+    bottom: -2px;
+    padding-top: 6px;
+}
