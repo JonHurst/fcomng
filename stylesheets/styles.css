@@ -10,20 +10,30 @@
 
 body
 {
-    font-size:0.8em;
-    font-family: verdana, sans;
+	font-family: Arial, verdana, tahoma, georgia, sans-serif;
+	margin:0;
+	font-size:100%;
+	line-height:1.3;
 }
 
 div.page
 {
-    font-size:1em;
+    position:relative;
+    font-size:0.9em;
     margin:auto;
-    max-width:70em;
+    max-width:55em;
+    min-width: 40em;
     line-height:1.3em;
 }
 
-div.section, div.pageindex, div.titleblock, div.footerblock, div.index
+div.content
 {
+    font-size: 1em;
+}
+
+div.section, div.pageindex, div.titleblock, div.index
+{
+    border-radius: 10px;
     border:green solid 1px;
     padding:1em;
     padding-left: 2em;
@@ -51,16 +61,25 @@ div.descitem
     margin-left: 1.5em;
 }
 
-div.index
-{
-    padding-bottom:2em;
-}
-
 div.duindex
 {
     margin-bottom: 1.5em;
 }
 
+div.titleblock h2, div.linkbar
+{
+    border: 1px solid green;
+    margin-top: 1em;
+    padding: 0 0.5em;
+    border-radius: 10px;
+}
+
+div.linkbar p
+{
+    margin:0;
+    padding: 0.2em;
+    overflow:hidden;
+}
 /************************************************************/
 /*Headings*/
 /************************************************************/
@@ -72,7 +91,7 @@ h1, h2, h3
 
 h1
 {
-    font-size:1.3em;
+    font-size:1.1em;
     margin-top:1em;
     margin-bottom:1em;
 }
@@ -80,29 +99,34 @@ h1
 h1.sectionheading
 {
     text-decoration:underline;
-    margin-bottom:1.5em;
-}
-
-div.index h1.title
-{
-    text-align:center;
-    margin-bottom:2em;
-
-}
-
-div.index h1
-{
-    margin-left:4em;
+    margin-bottom:1.1em;
+    font-size: 1.2em;
 }
 
 h2
 {
-    font-size:1.2em;
+    font-size:1.05em;
 }
 
 h3
 {
     font-size:1em;
+}
+
+div.titleblock h1
+{
+	 margin: 0.25em 0;
+	 text-align: center;
+	 font-size:1.75em;
+}
+
+div.titleblock h2
+{
+	 text-align:center;
+	 font-weight: bold;
+	 font-size:1.2em;
+    margin-top: 2em;
+    padding: 0.25em;
 }
 
 /************************************************************/
@@ -179,7 +203,7 @@ div.pageindex p, div.duindex p
 
 div.index p
 {
-    margin: 0 0 0 8em;
+    margin: 0.25em 0 0 0;
 }
 
 p.applies

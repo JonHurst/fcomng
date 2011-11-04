@@ -50,6 +50,7 @@
             </tr>
           </table>
           </div>
+          <div class="content">
 	<div class="titleblock">
 	  <h1>easyJet A319/A320 FCOM (<xsl:value-of select="@version"/>)</h1>
      <h2><xsl:value-of select="@title"/></h2>
@@ -68,6 +69,7 @@
 	  </div>
 	</xsl:if>
 	  <xsl:apply-templates/>
+          </div>
      <div id="bottombar">
        <table class="navbar">
          <tr>

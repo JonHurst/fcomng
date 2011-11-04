@@ -460,7 +460,7 @@ class FCOMFactory:
 
     def __build_linkbar__(self, sid):
         if not sid: return ""
-        title_crop = 25
+        title_crop = 30
         tb = et.TreeBuilder()
         tb.start("div", {"class": "linkbar"})
         tb.start("p", {})
