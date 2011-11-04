@@ -546,3 +546,41 @@ p.applies img
     left: 0;
     top: 0.2em;
 }
+
+
+div.index
+{
+    padding: 2em 8em;
+}
+
+div.index p
+{
+    position:relative;
+    padding-left: 20px;
+}
+
+div.index > p.sectionheading
+{
+    font-weight: bold;
+}
+
+div.index > p.sectionheading
+{
+    margin-top: 1.5em;
+}
+
+div.index p a img
+{
+    position: absolute;
+    margin:0;
+    padding:0;
+    top: 0.2em;
+    left: 0;
+}
+
+div.index div.section
+{
+    margin: 0;
+    padding: 0 0 0 3em;;
+    border: none;
+}

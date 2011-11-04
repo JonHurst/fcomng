@@ -10,55 +10,72 @@
 	    version="1.0"/>
 
 <xsl:template match="index">
+  <xsl:variable name="title">
+    <xsl:if test="@ident">
+      <xsl:value-of select="@ident"/><xsl:text>: </xsl:text>
+    </xsl:if>
+    <xsl:value-of select="@title"/>
+  </xsl:variable>
   <html>
     <head>
-      <title>Index</title>
+      <title><xsl:value-of select="$title"/></title>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
       <link rel="stylesheet" type="text/css" href="../stylesheets/styles.css"/>
+      <script type="text/javascript" src="../scripts/script.js"></script>
     </head>
     <body>
       <div class="page">
-	<div class="titleblock">
-	  <h1>easyJet FCOM NG - XHTML version - G-EJAR build</h1>
-	  <h2>Version 0.9 (Prototype)</h2>
-	</div>
-	<div class="index">
-	  <xsl:for-each select="book">
-	    <p>
-	      <a>
-		<xsl:attribute name="href">
-		  #<xsl:value-of  select="@id"/>
-		</xsl:attribute>
-		<xsl:value-of select="@id"/>
-		<xsl:text>: </xsl:text>
-		<xsl:value-of select="@title"/>
-	      </a>
-	    </p>
-	  </xsl:for-each>
-	</div>
-	<xsl:apply-templates/>
+        <div class="titleblock">
+          <h1>easyJet FCOM NG - <xsl:value-of select="$title"/></h1>
+          <h2>Version 0.9 (Prototype)</h2>
+        </div>
+        <div class="index">
+          <xsl:apply-templates/>
+        </div>
       </div>
     </body>
   </html>
 </xsl:template>
 
 
-<xsl:template match="book">
-  <div class="index">
+<xsl:template match="section">
+  <xsl:variable name="foldsection" select="ancestor::section
+                                           or @ident = 'OEB' or @ident = 'FCB'"/><!--special case folding-->
+  <p class="sectionheading">
+    <a href="#" onclick="return toggle_folded(this);">
+      <img alt="">
+        <xsl:attribute name="src">
+          <xsl:choose>
+            <xsl:when test="$foldsection">../images/plus.gif</xsl:when>
+            <xsl:otherwise>../images/minus.gif</xsl:otherwise>
+          </xsl:choose>
+        </xsl:attribute>
+      </img>
+    </a>
+    <a>
+      <xsl:copy-of select="@href"/>
+      <xsl:value-of select="@ident"/>
+      <xsl:text>: </xsl:text>
+      <xsl:value-of select="@title"/>
+    </a>
+  </p>
+  <div>
+    <xsl:attribute name="class">
+      <xsl:choose>
+        <xsl:when test="$foldsection">section folded</xsl:when>
+        <xsl:otherwise>section</xsl:otherwise>
+      </xsl:choose>
+    </xsl:attribute>
     <xsl:copy-of select="@id"/>
-    <h1 class="title"><xsl:value-of select="@title"/></h1>
     <xsl:apply-templates/>
   </div>
 </xsl:template>
 
 
-<xsl:template match="a">
+<xsl:template match="page">
   <p><a><xsl:copy-of select="@href"/><xsl:value-of select="."/></a></p>
 </xsl:template>
 
 
-<xsl:template match="h1">
-  <h1><xsl:value-of select="."/></h1>
-</xsl:template>
 
 </xsl:stylesheet>

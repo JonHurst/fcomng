@@ -272,12 +272,13 @@ class FCOMFactory:
     def __init__(self, fcm):
         self.fcm = fcm #instance of FCOMMeta
         self.pagelist = self.fcm.get_leaves(3)
+        self.pageset = set(self.pagelist)
         self.duref_lookup = {}
         self.__build_duref_lookup__()
 
 
     def build_fcom(self, msn):
-        self.make_index(self.pagelist)
+        self.make_index()
         for c, sid in enumerate(self.pagelist):
             prevsid, nextsid = None, None
             if c > 0:
@@ -393,39 +394,50 @@ class FCOMFactory:
         of.write("".join(page_parts))
 
 
-    def make_index(self, pagelist):
+
+
+    def __recursive_add_section__(self, ident, tb):
+        if ident not in self.pageset:
+            children = self.fcm.get_children(ident)
+            self.__make_node_page__(ident, children)
+            tb.start("section", {"title": self.fcm.get_title(ident),
+                                 "ident": ".".join(ident),
+                                 "href": self.__make_filename__(ident)})
+            for s in children:
+                self.__recursive_add_section__(s, tb)
+            tb.end("section")
+        else:
+            tb.start("page", {"href": self.__make_filename__(ident)})
+            tb.data(".".join(ident) + ": " + self.fcm.get_title(ident))
+            tb.end("page")
+
+
+    def __make_node_page__(self, ident, children):
         tb = et.TreeBuilder()
-        tb.start("index", {})
-        tb.start("book", {"title": self.fcm.get_title(pagelist[0][:1]),
-                          "id": pagelist[0][0]})
-        prev_section = pagelist[0][:1]
-        title_level = 3
-        for p in pagelist:
-            if p[:1] != prev_section[:1]:
-                tb.end("book")
-                tb.start("book", {"title": self.fcm.get_title(p[:1]),
-                                  "id": p[0]})
-                title_level = 3
-            if len(p) > 2 and p[:2] != prev_section[:2]:
-                tb.start("h1", {})
-                tb.data(self.fcm.get_title(p[:2]))
-                tb.end("h1")
-            if len(p) == 2 and (title_level == 2 or len(prev_section) == 3):
-                tb.start("h1", {})
-                tb.data(self.fcm.get_title(p))
-                tb.end("h1")
-                title_level = 2
-            tb.start("a", {"href": self.__make_filename__(p)})
-            tb.data(".".join(p) + ": " + self.fcm.get_title(p))
-            tb.end("a")
-            prev_section = p
-        tb.end("book")
+        tb.start("index", {"title": self.fcm.get_title(ident),
+                          "ident": ".".join(ident)})
+        for i in children:
+            self.__recursive_add_section__(i, tb)
         tb.end("index")
-        page = et.tostring(tb.close(), "utf-8")
-        of = open(output_dir + "index.html", "w")
-        of.write(subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "index.xsl", "-"],
+        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "index.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
-                                  ).communicate(page)[0])
+                                  ).communicate(et.tostring(tb.close(), "utf-8"))[0]
+        print "Creating node page", ident
+        of = open(output_dir + self.__make_filename__(ident), "w")
+        of.write(page_string)
+
+
+    def make_index(self):
+        tb = et.TreeBuilder()
+        tb.start("index", {"title": "Contents"})
+        for s in self.fcm.get_leaves(1):
+            self.__recursive_add_section__(s, tb)
+        tb.end("index")
+        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "index.xsl", "-"],
+                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE
+                                  ).communicate(et.tostring(tb.close(), "utf-8"))[0]
+        of = open(output_dir + "index.html", "w")
+        of.write(page_string)
 
 
     def __make_filename__(self, sid):

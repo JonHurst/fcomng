@@ -69,6 +69,7 @@ function initial_fold() {
   }
 }
 
+
 function toggle_applies(ob) {
   if(!ob.parentNode.style.whiteSpace || ob.parentNode.style.whiteSpace == "nowrap") {
     ob.parentNode.style.whiteSpace = "normal";
@@ -79,5 +80,23 @@ function toggle_applies(ob) {
     ob.childNodes[0].src = "../images/plus.gif";
   }
 
+  return false;
+}
+
+
+function toggle_folded(ob)
+{
+  //this is the folding for index pages
+  //the click is received in the anchors context, so change img src below and next section
+  var img_ob = ob.childNodes[0];
+  var section = ob.parentNode.nextSibling;
+  if(section.className.indexOf("folded") != -1) {
+    img_ob.src = "../images/minus.gif";
+    section.className = section.className.replace(new RegExp(" folded\\b"), "");
+  }
+  else {
+    img_ob.src = "../images/plus.gif";
+    section.className += " folded";
+  }
   return false;
 }
