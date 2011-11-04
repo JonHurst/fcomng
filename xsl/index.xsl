@@ -29,6 +29,7 @@
           <h1>easyJet FCOM NG - <xsl:value-of select="$title"/></h1>
           <h2>Version 0.9 (Prototype)</h2>
         </div>
+        <xsl:comment>linkbar</xsl:comment>
         <div class="index">
           <xsl:apply-templates/>
         </div>

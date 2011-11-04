@@ -45,6 +45,7 @@
 	    <h2><xsl:value-of select="@subtitle"/></h2>
 	  </xsl:if>
 	</div>
+   <xsl:comment>linkbar</xsl:comment>
 	<xsl:if test="count(section) > 1">
 	  <div class="pageindex">
 	    <xsl:for-each select="section">

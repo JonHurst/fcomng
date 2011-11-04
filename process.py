@@ -390,8 +390,11 @@ class FCOMFactory:
             else:
                 page_parts[duref_index] += duinfo[1].split()[0]
             duref_index += 2
+        page_string = "".join(page_parts)
+        #insert link bar
+        page_string = page_string.replace("<!--linkbar-->", self.__build_linkbar__(sid))
         of = open(output_dir + filename, "w")
-        of.write("".join(page_parts))
+        of.write(page_string)
 
 
 
@@ -422,6 +425,7 @@ class FCOMFactory:
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "index.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
+        page_string = page_string.replace("<!--linkbar-->", self.__build_linkbar__(ident))
         print "Creating node page", ident
         of = open(output_dir + self.__make_filename__(ident), "w")
         of.write(page_string)
@@ -445,6 +449,31 @@ class FCOMFactory:
         if sid:
             retval = ".".join(sid) + ".html"
         return retval
+
+
+    def __build_linkbar__(self, sid):
+        if not sid: return ""
+        title_crop = 25
+        tb = et.TreeBuilder()
+        tb.start("div", {"class": "linkbar"})
+        tb.start("p", {})
+        tb.start("a", {"title": "Contents",
+                       "href": "index.html"})
+        tb.data("Contents")
+        tb.end("a")
+        for c in range(1, len(sid)):
+            tb.data(" >> ")
+            ident = sid[:c]
+            title = ".".join(ident) + ": " + self.fcm.get_title(ident)
+            tb.start("a", {"title": title,
+                           "href": self.__make_filename__(ident)})
+            tb.data(title[:title_crop])
+            if len(title) > title_crop:
+                tb.data("...")
+            tb.end("a")
+        tb.end("p")
+        tb.end("div")
+        return et.tostring(tb.close(), "utf-8")
 
 
 def main():
