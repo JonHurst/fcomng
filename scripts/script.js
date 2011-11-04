@@ -1,13 +1,3 @@
-function hidedu(ob) {
-  ob.className += " folded";
-}
-
-
-function showdu(ob) {
-  ob.className = ob.parentNode.className.replace(new RegExp(" folded\\b"), "");
-}
-
-
 function change_tab(event) {
   event = event || window.event;
   //remove active from all siblings
@@ -68,8 +58,7 @@ function initial_fold() {
       var msn_found = du[1].indexOf(msn);
       if(msn_found == -1) {
         var ob = document.getElementById("duid" + du[0]);
-        ob.className = ob.className.replace(new RegExp("main"), "alternate");
-        hidedu(ob);
+        ob.className = ob.className.replace(new RegExp("main"), "alternate folded");
         tabs.push({linkend:du[0], label:du[2]});
       }
       else {
