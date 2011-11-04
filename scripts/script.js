@@ -68,7 +68,7 @@ function initial_fold() {
       var msn_found = du[1].indexOf(msn);
       if(msn_found == -1) {
         var ob = document.getElementById("duid" + du[0]);
-        ob.className.replace(new RegExp("main\\b"), "alternate");
+        ob.className = ob.className.replace(new RegExp("main"), "alternate");
         hidedu(ob);
         tabs.push({linkend:du[0], label:du[2]});
       }
