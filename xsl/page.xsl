@@ -59,13 +59,13 @@
 	<xsl:if test="count(section) > 1">
 	  <div class="pageindex">
 	    <xsl:for-each select="section">
-	      <p><a>
-		<xsl:attribute name="href">
-		  #sid<xsl:value-of select="@sid"/>
-		</xsl:attribute>
-		<xsl:value-of select="@sid"/>: <xsl:value-of select="@title"/>
-	      </a></p>
-	    </xsl:for-each>
+         <p><a>
+           <xsl:attribute name="href">
+             #sid<xsl:value-of select="@sid"/>
+           </xsl:attribute>
+           <xsl:value-of select="@sid"/>: <xsl:value-of select="@title"/>
+         </a></p>
+       </xsl:for-each>
 	  </div>
 	</xsl:if>
 	  <xsl:apply-templates/>
@@ -110,10 +110,16 @@
     <xsl:if test="count(du_container) &gt; 1">
       <div class="duindex">
 	<xsl:for-each select="du_container">
-	  <p><a>
-       <xsl:attribute name="href">#duid<xsl:value-of select="@id"/></xsl:attribute>
-       <xsl:value-of select="@title"/>
-	  </a></p>
+     <!--special processing: if we are dealing with PRO section, don't add
+         an entry for a FWSPAGE that immediately follows a section with the same
+         title root -->
+     <xsl:if test="not(preceding-sibling::du_container and
+                   @title = concat(preceding-sibling::du_container[1]/@title, ' - FWSPAGE'))">
+       <p><a>
+         <xsl:attribute name="href">#duid<xsl:value-of select="@id"/></xsl:attribute>
+         <xsl:value-of select="@title"/>
+       </a></p>
+     </xsl:if>
 	</xsl:for-each>
       </div>
     </xsl:if>
