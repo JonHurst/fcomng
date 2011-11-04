@@ -374,7 +374,7 @@ class FCOMFactory:
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
         #create javascript variable for controlling folding
-        javascript_string = "var folding = [\n"
+        javascript_string = "var folding = [ \n"
         for folding_section in javascript_list:
             javascript_string += "  [\n"
             for dusection in folding_section:
