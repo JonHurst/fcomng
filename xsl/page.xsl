@@ -26,24 +26,33 @@
     </head>
     <body onload="initial_fold();">
       <div class="page">
-	  <table><tr><th>easyJet</th><th>FCOM</th><th>A319/A320</th>
-	  <th><xsl:value-of select="@acft"/></th>
-	  <td align="center">
-	  <a accesskey="p">
-	    <xsl:attribute name="href"><xsl:value-of select="@prev"/></xsl:attribute>
-	  Prev</a>
-	  <xsl:text> | </xsl:text>
-	  <a href="index.html" accesskey="c">Contents</a>
-	  <xsl:text> | </xsl:text>
-	  <a accesskey="n">
-	    <xsl:attribute name="href"><xsl:value-of select="@next"/></xsl:attribute>
-	  Next</a></td>
-	</tr></table>
+        <div id="topbar">
+          <table class="navbar">
+            <tr>
+              <td class="left">
+                <xsl:if test="@prev">
+                  <xsl:text>Prev: </xsl:text>
+                  <a accesskey="p">
+                    <xsl:attribute name="href"><xsl:value-of select="@prev"/></xsl:attribute>
+                    <xsl:value-of select="@prevtitle"/>
+                  </a>
+                </xsl:if>
+              </td>
+              <td class="right">
+                <xsl:if test="@next">
+                  <xsl:text>Next: </xsl:text>
+                  <a accesskey="n">
+                    <xsl:attribute name="href"><xsl:value-of select="@next"/></xsl:attribute>
+                    <xsl:value-of select="@nexttitle"/>
+                  </a>
+                </xsl:if>
+              </td>
+            </tr>
+          </table>
+          </div>
 	<div class="titleblock">
-	  <h1><xsl:value-of select="@title"/></h1>
-	  <xsl:if test="@subtitle">
-	    <h2><xsl:value-of select="@subtitle"/></h2>
-	  </xsl:if>
+	  <h1>easyJet A319/A320 FCOM (<xsl:value-of select="@version"/>)</h1>
+     <h2><xsl:value-of select="@title"/></h2>
 	</div>
    <xsl:comment>linkbar</xsl:comment>
 	<xsl:if test="count(section) > 1">
@@ -59,19 +68,33 @@
 	  </div>
 	</xsl:if>
 	  <xsl:apply-templates/>
-	<div class="footerblock">
-	  <p>
-	    <a>
-	      <xsl:attribute name="href"><xsl:value-of select="@prev"/></xsl:attribute>
-	    Prev</a>
-	    <xsl:text> | </xsl:text>
-	    <a href="index.html">Contents</a>
-	    <xsl:text> | </xsl:text>
-	    <a>
-	      <xsl:attribute name="href"><xsl:value-of select="@next"/></xsl:attribute>
-	    Next</a>
-	  </p>
-	</div>
+     <div id="bottombar">
+       <table class="navbar">
+         <tr>
+           <td class="left">
+             <xsl:if test="@prev">
+               <xsl:text>Prev: </xsl:text>
+               <a>
+                 <xsl:attribute name="href"><xsl:value-of select="@prev"/></xsl:attribute>
+                 <xsl:value-of select="@prevtitle"/>
+               </a>
+             </xsl:if>
+           </td>
+           <td>
+             <a href="#topbar">Top</a>
+           </td>
+           <td class="right">
+             <xsl:if test="@next">
+               <xsl:text>Next: </xsl:text>
+               <a>
+                 <xsl:attribute name="href"><xsl:value-of select="@next"/></xsl:attribute>
+                 <xsl:value-of select="@nexttitle"/>
+               </a>
+             </xsl:if>
+           </td>
+         </tr>
+       </table>
+     </div>
       </div>
     </body>
   </html>

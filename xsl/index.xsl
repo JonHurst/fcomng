@@ -26,8 +26,8 @@
     <body>
       <div class="page">
         <div class="titleblock">
-          <h1>easyJet FCOM NG - <xsl:value-of select="$title"/></h1>
-          <h2>Version 0.9 (Prototype)</h2>
+          <h1>easyJet A319/A320 FCOM (<xsl:value-of select="@version"/>)</h1>
+          <h2><xsl:value-of select="@title"/></h2>
         </div>
         <xsl:comment>linkbar</xsl:comment>
         <div class="index">

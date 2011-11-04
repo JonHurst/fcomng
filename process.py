@@ -269,8 +269,9 @@ class FCOMMeta:
 
 class FCOMFactory:
 
-    def __init__(self, fcm):
+    def __init__(self, fcm, version):
         self.fcm = fcm #instance of FCOMMeta
+        self.versionstring = version
         self.pagelist = self.fcm.get_leaves(3)
         self.pageset = set(self.pagelist)
         self.duref_lookup = {}
@@ -313,11 +314,15 @@ class FCOMFactory:
         filename = self.__make_filename__(sid)
         print "Creating:", filename
         tb = et.TreeBuilder()
-        page_attributes = {"title": "[" + ".".join(sid) + "] " +self.fcm.get_title(sid[:1]) + ": " + self.fcm.get_title(sid[:2]),
-                           "acft": self.fcm.aircraft.msn_to_reg(msn)}
-        if len(sid) > 2: page_attributes["subtitle"] = self.fcm.get_title(sid[:3])
-        if prevsid: page_attributes["prev"] = ".".join(prevsid) + ".html"
-        if nextsid: page_attributes["next"] = ".".join(nextsid) + ".html"
+        page_attributes = {"title": "[" + ".".join(sid) + "] " +self.fcm.get_title(sid),
+                           "acft": self.fcm.aircraft.msn_to_reg(msn),
+                           "version": self.versionstring}
+        if prevsid:
+            page_attributes["prev"] = self.__make_filename__(prevsid)
+            page_attributes["prevtitle"] = ".".join(prevsid) + ": " + self.fcm.get_title(prevsid)
+        if nextsid:
+            page_attributes["next"] = self.__make_filename__(nextsid)
+            page_attributes["nexttitle"] = ".".join(nextsid) + ": " + self.fcm.get_title(nextsid)
         tb.start("page", page_attributes)
         javascript_list = []
         for s in self.__build_sid_list__(sid):
@@ -418,7 +423,8 @@ class FCOMFactory:
     def __make_node_page__(self, ident, children):
         tb = et.TreeBuilder()
         tb.start("index", {"title": self.fcm.get_title(ident),
-                          "ident": ".".join(ident)})
+                          "ident": ".".join(ident),
+                           "version": self.versionstring})
         for i in children:
             self.__recursive_add_section__(i, tb)
         tb.end("index")
@@ -433,7 +439,8 @@ class FCOMFactory:
 
     def make_index(self):
         tb = et.TreeBuilder()
-        tb.start("index", {"title": "Contents"})
+        tb.start("index", {"title": "Contents",
+                           "version": self.versionstring})
         for s in self.fcm.get_leaves(1):
             self.__recursive_add_section__(s, tb)
         tb.end("index")
@@ -478,7 +485,7 @@ class FCOMFactory:
 
 def main():
     fcm = FCOMMeta(control_file)
-    ff = FCOMFactory(fcm)
+    ff = FCOMFactory(fcm, "April 2011")
     ff.build_fcom(msn)
 
 

@@ -584,3 +584,20 @@ div.index div.section
     padding: 0 0 0 3em;;
     border: none;
 }
+
+table.navbar, table.navbar tr, table.navbar td
+{
+    border: none;
+}
+
+table.navbar td.left
+{
+    text-align: left;
+    width:50%;
+}
+
+table.navbar td.right
+{
+    text-align: right;
+    width:50%;
+}
