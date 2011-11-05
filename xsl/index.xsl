@@ -21,9 +21,10 @@
       <title><xsl:value-of select="$title"/></title>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
       <link rel="stylesheet" type="text/css" href="../stylesheets/styles.css"/>
+      <script type="text/javascript" src="../scripts/fleet.js"></script>
       <script type="text/javascript" src="../scripts/script.js"></script>
     </head>
-    <body>
+    <body onload="set_folding_reg();">
       <div class="page">
         <div class="titleblock">
           <h1>easyJet A319/A320 FCOM (<xsl:value-of select="@version"/>)</h1>
@@ -31,6 +32,9 @@
         </div>
         <xsl:comment>linkbar</xsl:comment>
         <div class="index">
+          <div class="foldmessage">
+            <p>This manual is pre-folded for <span id="folding_reg">G-XXXX</span>.</p>
+          </div>
           <xsl:apply-templates/>
         </div>
       </div>

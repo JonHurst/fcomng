@@ -7,9 +7,9 @@ import subprocess
 import re
 
 control_file = "fcom/DATA/XML_N_FCOM_EZY_TF_N_EU_CA_20110407.xml"
-msn = "2412"
 output_dir = "html/"
 data_dir= "fcom/DATA/"
+fleet_script_file = "scripts/fleet.js"
 xsl_dir = "xsl/"
 
 class FCOMMeta:
@@ -214,6 +214,10 @@ class FCOMMeta:
         return retval
 
 
+    def get_fleet(self):
+        return [(X, self.aircraft.aircraft[X]) for X in self.aircraft.aircraft]
+
+
     def affected(self, msn, du_filename):
         ac_list = self.du_metaquery.get_ac_list(du_filename)
         if not ac_list or msn in ac_list:
@@ -278,7 +282,8 @@ class FCOMFactory:
         self.__build_duref_lookup__()
 
 
-    def build_fcom(self, msn):
+    def build_fcom(self):
+        self.write_fleet_js()
         self.make_index()
         for c, sid in enumerate(self.pagelist):
             prevsid, nextsid = None, None
@@ -286,7 +291,7 @@ class FCOMFactory:
                 prevsid = self.pagelist[c - 1]
             if c < len(self.pagelist) - 1:
                 nextsid = self.pagelist[c + 1]
-            self.make_page(c, sid ,prevsid, nextsid, msn)
+            self.make_page(c, sid ,prevsid, nextsid)
 
 
     def __build_duref_lookup__(self):
@@ -310,12 +315,11 @@ class FCOMFactory:
         return [sid, ] + self.fcm.get_descendants(sid)
 
 
-    def make_page(self, c, sid, prevsid, nextsid, msn):
+    def make_page(self, c, sid, prevsid, nextsid):
         filename = self.__make_filename__(sid)
         print "Creating:", filename
         tb = et.TreeBuilder()
         page_attributes = {"title": "[" + ".".join(sid) + "] " +self.fcm.get_title(sid),
-                           "acft": self.fcm.aircraft.msn_to_reg(msn),
                            "version": self.versionstring}
         if prevsid:
             page_attributes["prev"] = self.__make_filename__(prevsid)
@@ -373,14 +377,15 @@ class FCOMFactory:
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "page.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
-        #create javascript variable for controlling folding
-        javascript_string = "var folding = [ \n"
+        #create javascript variables for controlling folding
+        javascript_string = ""
         for folding_section in javascript_list:
-            javascript_string += "  [\n"
+            javascript_string += "["
             for dusection in folding_section:
-                javascript_string += "    ['%s', %s, '%s'],\n" % dusection
-            javascript_string = javascript_string[:-2] + "],\n"
-        javascript_string = javascript_string[:-2] + "];\n"
+                javascript_string += "['%s',%s,'%s']," % dusection
+            javascript_string = javascript_string[:-1] + "],"
+        javascript_string = javascript_string[:-1] + "];\n"
+        javascript_string = "var folding = [" + javascript_string
         page_string = page_string.replace("<!--jsvariable-->", javascript_string)
         #replace xml links with xhtml links
         page_parts = re.split('<a class="duref" href="(\d+)">', page_string)
@@ -483,10 +488,18 @@ class FCOMFactory:
         return et.tostring(tb.close(), "utf-8")
 
 
+    def write_fleet_js(self):
+        open(fleet_script_file, "w").write(
+            ("var fleet = { \n" +
+             ",".join(["'%s':'%s'" % X for X in self.fcm.get_fleet()]) +
+             "};\n"))
+
+
+
 def main():
     fcm = FCOMMeta(control_file)
     ff = FCOMFactory(fcm, "April 2011")
-    ff.build_fcom(msn)
+    ff.build_fcom()
 
 
 main()

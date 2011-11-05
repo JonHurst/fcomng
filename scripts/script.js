@@ -1,7 +1,12 @@
+"use strict";
+
+//default msn for folding
+var default_msn = '2412';
+
+
 //add indexOf function to IE
 if (!Array.prototype.indexOf) {
     Array.prototype.indexOf = function (searchElement /*, fromIndex */ ) {
-      "use strict";
         if (this === void 0 || this === null) {
             throw new TypeError();
         }
@@ -31,6 +36,7 @@ if (!Array.prototype.indexOf) {
         return -1;
     };
 }
+
 
 function change_tab(event) {
   event = event || window.event;
@@ -86,7 +92,7 @@ function insert_tabs(tabs) {
 
 
 function initial_fold() {
-  var msn = '2412';
+  var msn = get_active_msn();
   for(var i=0; i<folding.length; i++) {
     var du_container = folding[i];
     var tabs = [];
@@ -134,6 +140,69 @@ function toggle_folded(ob)
   else {
     img_ob.src = "../images/plus.gif";
     section.className += " folded";
+  }
+  return false;
+}
+
+
+function get_active_msn() {
+  var msn = default_msn;
+  try {
+    if(window.localStorage["active_msn"])
+      msn = window.localStorage["active_msn"];
+  }
+  catch(e) {
+    console.log("Failed to find active_msn in localStorage; using default of " + msn);
+  }
+  return msn;
+}
+
+
+function set_folding_reg() {
+  var reg_ob = document.getElementById("folding_reg");
+  var label = fleet[get_active_msn()];
+  if(reg_ob.textContent != undefined)
+      reg_ob.textContent = label;
+    else //fix for IE
+      reg_ob.innerText = label;
+
+}
+
+
+function set_active_msn(msn) {
+  try {
+    window.localStorage["active_msn"] = msn;
+    return true;
+  }
+  catch(e) {
+    var message = "Unfortunately it appears that local storage is not available.\n\n";
+    if(window.location.protocol.slice(0,4) == "file") {
+      message += "Many browsers do not support local storage with the file:// " +
+      "protocol for security reasons.";
+    }
+    else {
+      message += "Please try a more modern browser.";
+    }
+    alert(message);
+    return false;
+  }
+}
+
+
+function change_reg(ob) {
+  var new_reg = document.getElementById("new_reg").value.toUpperCase();
+  var msn = "";
+  for(var p in fleet) {
+    if(fleet[p] == new_reg) {
+      msn = p;
+      break;
+    }
+  }
+  if (!msn) {
+    alert("Could not find " + new_reg);
+  }
+  else {
+    set_active_msn(msn);
   }
   return false;
 }

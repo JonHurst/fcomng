@@ -630,3 +630,13 @@ table.navbar td.right
     text-align: right;
     width:50%;
 }
+
+div.foldmessage {
+    margin-bottom: 1.5em;
+    text-align:center;
+}
+
+#folding_reg
+{
+    font-weight: bold;
+}
