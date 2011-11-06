@@ -319,7 +319,7 @@ class FCOMFactory:
         filename = self.__make_filename__(sid)
         print "Creating:", filename
         tb = et.TreeBuilder()
-        page_attributes = {"title": "[" + ".".join(sid) + "] " +self.fcm.get_title(sid),
+        page_attributes = {"title": self.__make_page_title__(sid),
                            "version": self.versionstring}
         if prevsid:
             page_attributes["prev"] = self.__make_filename__(prevsid)
@@ -407,6 +407,11 @@ class FCOMFactory:
         of.write(page_string)
 
 
+    def __make_page_title__(self, sid):
+        titleparts = []
+        for c in range(1, len(sid) + 1):
+            titleparts.append(self.fcm.get_title(sid[:c]))
+        return "[%s] %s" % (".".join(sid), " : ".join(titleparts))
 
 
     def __recursive_add_section__(self, ident, tb):
@@ -427,7 +432,7 @@ class FCOMFactory:
 
     def __make_node_page__(self, ident, children):
         tb = et.TreeBuilder()
-        tb.start("index", {"title": self.fcm.get_title(ident),
+        tb.start("index", {"title": self.__make_page_title__(ident),
                           "ident": ".".join(ident),
                            "version": self.versionstring})
         for i in children:
