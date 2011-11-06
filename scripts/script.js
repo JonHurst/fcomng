@@ -173,6 +173,7 @@ function set_folding_reg() {
 function set_active_msn(msn) {
   try {
     window.localStorage["active_msn"] = msn;
+    alert("Pre-folding MSN now set to " + msn);
     return true;
   }
   catch(e) {
