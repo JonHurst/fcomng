@@ -45,8 +45,9 @@
 
 
 <xsl:template match="section">
-  <xsl:variable name="foldsection" select="ancestor::section
-                                           or @ident = 'OEB' or @ident = 'FCB'"/><!--special case folding-->
+  <xsl:variable name="foldsection" select="true()"/>
+  <!--ancestor::section
+                                           or @ident = 'OEB' or @ident = 'FCB'"/>-->
   <p class="sectionheading">
     <a href="#" onclick="return toggle_folded(this);">
       <img alt="">
