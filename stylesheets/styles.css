@@ -79,6 +79,20 @@ div.titleblock h2, div.linkbar
     border-radius: 10px;
 }
 
+div.linkbar
+{
+    overflow:hidden;
+    position: relative;
+}
+
+
+div.otherlinks
+{
+    position:absolute;
+    right:1em;
+    top: 0em;
+}
+
 div.linkbar p
 {
     margin:0;
