@@ -154,8 +154,9 @@
 	<xsl:attribute name="href">../<xsl:value-of select="@href"/></xsl:attribute>
 	<xsl:value-of select="@href"/>
       </a>
+    </p>
 	<xsl:if test="applies">
-	  <p class="applies"><a onclick="toggle_applies(this); return false;" href="#" alt="">
+	  <p class="applies"><a onclick="toggle_applies(this); return false;" href="#">
      <img src="../images/plus.gif" alt="" /></a>Applies to: <xsl:value-of select="applies"/></p>
 	</xsl:if>
 	<h1><xsl:value-of select="@title"/></h1>
@@ -167,7 +168,6 @@
         <p>DU does not apply to selected aircraft.</p>
       </xsl:otherwise>
     </xsl:choose>
-    </p>
   </div>
 </xsl:template>
 
