@@ -42,7 +42,12 @@ def cgmtopng(matchobj):
     if png != None:
         png_filename = png.get("href")
         shutil.copyfile(image_library + png_filename, image_output + png_filename)
-        tag = '<img ' + class_attrib + ' src="../images/' + png_filename + '" alt="png"/>'
+        width, height = png.get("size").split("x")
+        tag = "<img %s src='../images/%s' width='%s' height='%s' alt='png'/>" % (
+            class_attrib,
+            png_filename,
+            width,
+            height)
         if pngzoom != None:
             pngzoom_filename = pngzoom.get("href")
             shutil.copyfile(image_library + pngzoom_filename, image_output + pngzoom_filename)
