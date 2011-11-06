@@ -152,7 +152,8 @@ function get_active_msn() {
       msn = window.localStorage["active_msn"];
   }
   catch(e) {
-    console.log("Failed to find active_msn in localStorage; using default of " + msn);
+    if(window.console)
+      console.log("Failed to find active_msn in localStorage; using default of " + msn);
   }
   return msn;
 }
