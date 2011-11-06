@@ -595,7 +595,7 @@ div.index > p.sectionheading
 
 div.index > p.sectionheading
 {
-    margin-top: 1.5em;
+    margin: 1em 0;
 }
 
 div.index p a img
@@ -610,7 +610,7 @@ div.index p a img
 div.index div.section
 {
     margin: 0;
-    padding: 0 0 0 3em;;
+    padding: 0 0 1em 3em;;
     border: none;
 }
 
@@ -618,6 +618,8 @@ table.navbar, table.navbar tr, table.navbar td
 {
     border: none;
 }
+
+
 
 table.navbar td.left
 {
@@ -639,4 +641,3 @@ div.foldmessage {
 #folding_reg
 {
     font-weight: bold;
-}
