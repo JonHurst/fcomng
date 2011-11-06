@@ -33,7 +33,8 @@
         <xsl:comment>linkbar</xsl:comment>
         <div class="index">
           <div class="foldmessage">
-            <p>This manual is pre-folded for <span id="folding_reg">G-XXXX</span>.</p>
+            <p>This manual is pre-folded for <span id="folding_reg">G-XXXX</span>.
+            (<a href="change-reg.html">change</a>)</p>
           </div>
           <xsl:apply-templates/>
         </div>
