@@ -226,11 +226,6 @@ div.index p
     margin: 0.25em 0 0 0;
 }
 
-p.applies
-{
-    color: gray;
-    font-size: 0.85em;
-}
 
 /************************************************************/
 /*Cautions, notes, examples etc.
@@ -315,8 +310,7 @@ div.main > h1, div.alternate > h1
 
 div.main > div.table, div.alternate > div.table,
 div.main > div.image, div.alternate > div.image,
-div.main > div.footnotes, div.alternate > div.footnotes,
-p.applies
+div.main > div.footnotes, div.alternate > div.footnotes
 {
     margin-left: 0;
     margin-right: 0;
@@ -574,13 +568,6 @@ div.tags a.active
     padding-top: 5px;
 }
 
-p.applies
-{
-    position: relative;
-    padding-left: 2em;
-}
-
-
 div.index
 {
     padding: 2em 8em;
@@ -650,10 +637,11 @@ div.foldmessage {
 div.infocontainer
 {
     position:absolute;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
+    padding: 1px;
     top: 5px;
-    right: 5px;
+    right: 0px;
 }
 
 div.infocontainer img
@@ -677,8 +665,12 @@ div.info
     position: absolute;
     width: 100%;
     top: 2px;
+    right:0;
     border: 1px gray solid;
     background-color: white;
+    padding:1em;
+    color: gray;
+    font-size:0.85em;
 }
 
 div.infocontainer:hover div.info
