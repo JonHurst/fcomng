@@ -156,8 +156,12 @@
       </a>
     </p>
 	<xsl:if test="applies">
-	  <p class="applies"><a onclick="toggle_applies(this); return false;" href="#">
-     <img src="../images/plus.gif" alt="" /></a>Applies to: <xsl:value-of select="applies"/></p>
+    <div class="infocontainer">
+      <img src="../images/isymbol.gif" alt=""/>
+      <div class="info">
+        <p class="applies"><strong>Applies to</strong>: <xsl:value-of select="applies"/></p>
+      </div>
+    </div>
 	</xsl:if>
 	<h1><xsl:value-of select="@title"/></h1>
     <xsl:choose>
