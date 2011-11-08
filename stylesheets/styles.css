@@ -636,17 +636,16 @@ div.foldmessage {
 
 div.infocontainer
 {
-    position:absolute;
+    position:relative;
     width: 18px;
     height: 18px;
-    padding: 1px;
-    top: 5px;
-    right: 0px;
+    padding: 1px 2px;
+    margin: 2px 0 -22px auto;
 }
 
 div.infocontainer img
 {
-    padding:0;
+    padding:1px;
 }
 
 div.infocontainer:hover
@@ -654,28 +653,23 @@ div.infocontainer:hover
     width: 100%;
 }
 
-div.infocontainer:hover img
+div.info
 {
     display: none;
 }
 
-div.info
+div.infocontainer:hover div.info
 {
-    display: none;
+    display: block;
     position: absolute;
     width: 100%;
-    top: 2px;
+    top: 0;
     right:0;
     border: 1px gray solid;
     background-color: white;
     padding:1em;
     color: gray;
     font-size:0.85em;
-}
-
-div.infocontainer:hover div.info
-{
-    display: block;
 }
 
 div.du_container div.infocontainer
