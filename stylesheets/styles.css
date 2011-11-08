@@ -653,7 +653,7 @@ div.infocontainer:hover
     width: 100%;
 }
 
-div.info
+div.infocontainer div.info
 {
     display: none;
 }
