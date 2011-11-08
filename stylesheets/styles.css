@@ -681,3 +681,8 @@ div.du_container:hover div.infocontainer
 {
     display: block;
 }
+
+a img
+{
+    border:none;
+}
