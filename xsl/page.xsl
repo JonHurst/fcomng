@@ -165,7 +165,8 @@
 	</xsl:if>
 	<h1>
      <xsl:attribute name="title">
-       <xsl:value-of select="../../@sid"/>: <xsl:value-of select="../@id"/>
+       <xsl:text>[</xsl:text><xsl:value-of select="../../@sid"/>]: <xsl:value-of
+       select="../../@title"/> / DU:<xsl:value-of select="../@id"/>
      </xsl:attribute>
    <xsl:value-of select="@title"/>
    </h1>
