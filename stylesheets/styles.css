@@ -674,7 +674,7 @@ div.infocontainer:hover div.info
 
 div.du_container div.infocontainer
 {
-    display: none;
+    display: block;
 }
 
 div.du_container:hover div.infocontainer

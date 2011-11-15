@@ -110,6 +110,7 @@ function initial_fold() {
     }
     insert_tabs(tabs);
   }
+  add_eventlisteners_for_ipad();
 }
 
 
@@ -207,4 +208,16 @@ function change_reg(ob) {
     set_active_msn(msn);
   }
   return false;
+}
+
+
+function add_eventlisteners_for_ipad() {
+  //adds an empty click function handler to all ducontainer and infocontainer divs - apparently
+  //this triggers correct hover behaviour on iDevices
+  var divs = document.getElementsByTagName("div");
+  for(var c=0; c<divs.length; c++) {
+    if(divs[c].className == "infocontainer" || divs[c].className == "du_container") {
+      divs[c].onclick = function() {};
+    }
+  }
 }
