@@ -163,7 +163,12 @@
       </div>
     </div>
 	</xsl:if>
-	<h1><xsl:value-of select="@title"/></h1>
+	<h1>
+     <xsl:attribute name="title">
+       <xsl:value-of select="../../@sid"/>: <xsl:value-of select="../@id"/>
+     </xsl:attribute>
+   <xsl:value-of select="@title"/>
+   </h1>
     <xsl:choose>
       <xsl:when test="@href != ''">
         <xsl:apply-templates select="document(@href)"/>
