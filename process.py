@@ -6,7 +6,7 @@ et = xml.etree.ElementTree
 import subprocess
 import re
 
-control_file = "fcom/DATA/XML_N_FCOM_EZY_TF_N_EU_CA_20110407.xml"
+control_file = "fcom/DATA/XML_N_FCOM_EZY_TF_N_EU_CA_20111007.xml"
 output_dir = "html/"
 data_dir= "fcom/DATA/"
 fleet_script_file = "scripts/fleet.js"
@@ -283,6 +283,7 @@ class FCOMFactory:
 
 
     def build_fcom(self):
+        self.errorlog = open("build-error.log", "w")
         self.write_fleet_js()
         self.make_index()
         for c, sid in enumerate(self.pagelist):
@@ -391,7 +392,10 @@ class FCOMFactory:
         page_parts = re.split('<a class="duref" href="(\d+)">', page_string)
         duref_index = 1
         while duref_index < len(page_parts):
-            duinfo = self.duref_lookup[page_parts[duref_index]]
+            duinfo = self.duref_lookup.get(page_parts[duref_index])
+            if not duinfo: #protect against bad links in source
+                print >> self.errorlog, "Reference to unknown DU", page_parts[duref_index], "whilst processing", ".".join(sid)
+                duinfo = ("", "!!!DU REFERENCE ERROR!!!")
             page_parts[duref_index] = ('<a class="duref" href="' +
                                        duinfo[0] +
                                        '">')
@@ -514,7 +518,7 @@ class FCOMFactory:
 
 def main():
     fcm = FCOMMeta(control_file)
-    ff = FCOMFactory(fcm, "April 2011")
+    ff = FCOMFactory(fcm, "October 2011")
     ff.build_fcom()
 
 
