@@ -522,6 +522,7 @@ def main():
     ff.build_fcom()
 
 
-main()
+if __name__ == "__main__":
+    main()
 
 
