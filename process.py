@@ -86,55 +86,46 @@ class FCOMMeta:
                         print a
 
 
-    class DUMetaQuery:
+    class DU:
 
-        def __init__(self, fnd):
-            self.du_filename = ""
-            self.msns = []
-            self.filename_dict = fnd
-            self.tdu = False
-
-
-        def get_ac_list(self, filename):
-            if filename != self.du_filename:
-                self.scan_dumeta(filename)
-            return self.msns
-
-        def is_tdu(self, filename):
-            if filename != self.du_filename:
-                self.scan_dumeta(filename)
-            return self.tdu
-
-
-        def scan_dumeta(self, filename):
-            e = et.ElementTree(None, data_dir + self.filename_dict[filename])
+        def __init__(self,  mu_filename, parent_sid, title):
+            self.parent_sid = parent_sid
+            self.title = title
+            #parse metadata file
+            e = et.ElementTree(None, data_dir + mu_filename)
+            self.msns = self.__get_msns__(e)
             self.tdu = False
             if e.getroot().attrib["tdu"] == "true":
                 self.tdu = True
+            self.linked_du = e.getroot().attrib["linked-du-ident"]
+            self.affected_by = None
+
+
+        def __get_msns__(self, e):
             m = e.find("effect").find("aircraft-ranges").find("effact").find("aircraft-range")
             if not et.iselement(m):
-                self.msns = None
+                msns = None
             else:
-                self.msns = []
+                msns = []
                 for msn in m.text.split(" "):
                     #supposition: a pair of numbers together indicates all aircraft with MSNs between
                     #[:4] and [4:]
                     if len(msn) == 8:
                         for rangemsn in range(int(msn[:4]), int(msn[4:]) + 1):
-                            self.msns.append(str(rangemsn))
+                            msns.append(str(rangemsn))
                     else:
-                        self.msns.append(msn)
+                        msns.append(msn)
+            return msns
 
 
     def __init__(self, control_file):
         self.sections = {}
-        self.du_titles = {}
-        self.du_meta_filenames = {}
+        self.dus = {}
         self.top_level_sids = []
+        print "Scanning metadata"
         self.control = et.ElementTree(None, control_file)
         self.global_meta = et. ElementTree(None, control_file.replace(".xml", "_mdata.xml"))
         self.aircraft = self.Aircraft(self.global_meta.find("aat"))
-        self.du_metaquery = self.DUMetaQuery(self.du_meta_filenames)
         for psl in self.control.getroot().findall("psl"):
             self.top_level_sids.append((psl.attrib["pslcode"],))
             self.__process_psl__(psl, ())
@@ -157,13 +148,13 @@ class FCOMMeta:
 
 
     def __process_duinv__(self, elem, section):
-        retval = []
         data_files = []
         for s in elem.findall("du-sol"):
             data_file = s.find("sol-content-ref").attrib["href"]
-            self.du_meta_filenames[data_file] = s.find("sol-mdata-ref").attrib["href"]
+            meta_file = s.find("sol-mdata-ref").attrib["href"]
+            title = elem.find("title").text
+            self.dus[data_file] = self.DU(meta_file, section, title)
             data_files.append(data_file)
-            self.du_titles[data_file] = elem.find("title").text
         section.add_du(tuple(data_files))
 
 
@@ -178,7 +169,7 @@ class FCOMMeta:
 
 
     def get_du_title(self, du_filename):
-        return self.du_titles[du_filename]
+        return self.dus[du_filename].title
 
 
     def get_dus(self, sid):
@@ -219,14 +210,14 @@ class FCOMMeta:
 
 
     def affected(self, msn, du_filename):
-        ac_list = self.du_metaquery.get_ac_list(du_filename)
+        ac_list = self.dus[du_filename].msns
         if not ac_list or msn in ac_list:
             return True
         return False
 
 
     def applies(self, du_filename):
-        return self.du_metaquery.get_ac_list(du_filename)
+        return self.dus[du_filename].msns
 
 
     def notcovered(self, msnlist):
@@ -239,7 +230,7 @@ class FCOMMeta:
 
 
     def is_tdu(self, du_filename):
-        return self.du_metaquery.is_tdu(du_filename)
+        return self.dus[du_filename].tdu
 
 
     def dump(self):
@@ -250,25 +241,18 @@ class FCOMMeta:
             print indent, ".".join(s), ": ", section.title
             for du in self.get_dus(s):
                 print indent, " ", du
+        print "DUs:\n============\n"
+        for du in sorted(self.dus):
+            print du, self.dus[du].parent_sid, self.dus[du].msns, self.dus[du].tdu
         print "\n\nLeaves:\n=======\n"
         for l in self.get_leaves():
             print ".".join(l), ": ", self.get_title(l)
-        print "\n\nMeta:\n=====\n"
-        du_keys = self.du_meta_filenames.keys()
-        du_keys.sort()
-        for k in du_keys:
-            print k, self.du_meta_filenames[k]
         print "\n\nAircraft:\n=========\n"
         self.aircraft.dump()
         print "\n\nAircraft list test\n"
-        print self.affected("4556", "./DU/00000284.0001001.xml")
-        print self.applies("./DU/00000284.0001001.xml")
-        print self.applies("./DU/00000879.0002001.xml")
-        print "\n\nDU titles:\n==========\n"
-        du_titles_keys = self.du_titles.keys()
-        du_titles_keys.sort()
-        for k in du_titles_keys:
-            print k, self.du_titles[k]
+        print self.affected("4556", "./DU/00000284.0003001.xml")
+        print self.applies("./DU/00000284.0003001.xml")
+        print self.applies("./DU/00000879.0004001.xml")
 
 
 class FCOMFactory:
