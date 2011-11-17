@@ -140,28 +140,28 @@ class FCOMMeta:
             self.sections[i[:-1]].add_child(i)
         for e in elem:
             if e.tag == "du-inv":
-                self.__process_duinv__(e, section)
+                self.__process_duinv__(e, i)
             elif e.tag == "group":
-                self.__process_group__(e, section)
+                self.__process_group__(e, i)
             elif e.tag == "psl":
                 self.__process_psl__(e, i)
 
 
-    def __process_duinv__(self, elem, section):
+    def __process_duinv__(self, elem, sec_id):
         data_files = []
         for s in elem.findall("du-sol"):
             data_file = s.find("sol-content-ref").attrib["href"]
             meta_file = s.find("sol-mdata-ref").attrib["href"]
             title = elem.find("title").text
-            self.dus[data_file] = self.DU(meta_file, section, title)
+            self.dus[data_file] = self.DU(meta_file, sec_id, title)
             data_files.append(data_file)
-        section.add_du(tuple(data_files))
+        self.sections[sec_id].add_du(tuple(data_files))
 
 
-    def __process_group__(self, elem, section):
+    def __process_group__(self, elem, sec_id):
         #note: groups don't nest, and they only contain du-inv sections
         for s in elem.findall("du-inv"):
-            self.__process_duinv__(s, section)
+            self.__process_duinv__(s, sec_id)
 
 
     def get_title(self, sid):
@@ -170,6 +170,10 @@ class FCOMMeta:
 
     def get_du_title(self, du_filename):
         return self.dus[du_filename].title
+
+
+    def get_du_parent(self, du_filename):
+        return self.dus[du_filename].parent_sid
 
 
     def get_dus(self, sid):
