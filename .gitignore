@@ -5,3 +5,4 @@ images/
 ILLUS
 image-library
 scripts/fleet.js
+*.pyc
