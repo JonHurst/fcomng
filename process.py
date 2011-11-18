@@ -88,9 +88,10 @@ class FCOMMeta:
 
     class DU:
 
-        def __init__(self,  mu_filename, parent_sid, title):
+        def __init__(self,  mu_filename, parent_sid, title, groupid):
             self.parent_sid = parent_sid
             self.title = title
+            self.groupid = groupid
             #parse metadata file
             e = et.ElementTree(None, data_dir + mu_filename)
             self.msns = self.__get_msns__(e)
@@ -121,6 +122,7 @@ class FCOMMeta:
     def __init__(self, control_file):
         self.sections = {}
         self.dus = {}
+        self.group_titles = {}
         self.top_level_sids = []
         print "Scanning metadata"
         self.control = et.ElementTree(None, control_file)
@@ -147,21 +149,23 @@ class FCOMMeta:
                 self.__process_psl__(e, i)
 
 
-    def __process_duinv__(self, elem, sec_id):
+    def __process_duinv__(self, elem, sec_id, groupid=None):
         data_files = []
         for s in elem.findall("du-sol"):
             data_file = s.find("sol-content-ref").attrib["href"]
             meta_file = s.find("sol-mdata-ref").attrib["href"]
             title = elem.find("title").text
-            self.dus[data_file] = self.DU(meta_file, sec_id, title)
+            self.dus[data_file] = self.DU(meta_file, sec_id, title, groupid)
             data_files.append(data_file)
         self.sections[sec_id].add_du(tuple(data_files))
 
 
     def __process_group__(self, elem, sec_id):
         #note: groups don't nest, and they only contain du-inv sections
+        groupid = elem.attrib["id"]
+        self.group_titles[groupid] = elem.find("title").text
         for s in elem.findall("du-inv"):
-            self.__process_duinv__(s, sec_id)
+            self.__process_duinv__(s, sec_id, groupid)
 
 
     def get_title(self, sid):
@@ -174,6 +178,14 @@ class FCOMMeta:
 
     def get_du_parent(self, du_filename):
         return self.dus[du_filename].parent_sid
+
+
+    def get_du_group(self, du_filename):
+        return self.dus[du_filename].groupid
+
+
+    def get_group_title(self, groupid):
+        return self.group_titles.get(groupid)
 
 
     def get_dus(self, sid):
