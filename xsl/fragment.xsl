@@ -91,8 +91,16 @@
 
 <xsl:template match="measure">
   <!-- (#PCDATA) -->
-  <xsl:value-of select="."/>
-  <xsl:value-of select="@unit"/>
+  <xsl:choose>
+    <xsl:when test="@unit = 'FL' or @unit = 'M'">
+      <xsl:value-of select="@unit"/>
+      <xsl:value-of select="."/>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:value-of select="."/>
+      <xsl:value-of select="@unit"/>
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
 
 
