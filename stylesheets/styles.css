@@ -682,12 +682,12 @@ div.infocontainer:hover div.info
     font-size:0.85em;
 }
 
-div.du_container div.infocontainer
+div.du_container div.infocontainer img
 {
-    display: block;
+    display: none;
 }
 
-div.du_container:hover div.infocontainer
+div.du_container:hover div.infocontainer img
 {
     display: block;
 }
