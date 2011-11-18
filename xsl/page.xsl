@@ -169,20 +169,18 @@
 	<xsl:value-of select="@href"/>
       </a>
     </p>
-	<xsl:if test="applies">
     <div class="infocontainer">
       <img src="../images/isymbol.gif" alt=""/>
       <div class="info">
-        <p class="applies"><strong>Applies to</strong>: <xsl:value-of select="applies"/></p>
+         <p><xsl:text>[</xsl:text><xsl:value-of select="ancestor::section/@sid"/>]: <xsl:value-of
+         select="ancestor::section/@title"/> / DU:<xsl:value-of select="../@id"/></p>
+        <xsl:if test="applies">
+          <p class="applies"><strong>Applies to</strong>: <xsl:value-of select="applies"/></p>
+        </xsl:if>
       </div>
     </div>
-	</xsl:if>
    <xsl:if test="not(ancestor::group)">
      <h1>
-       <xsl:attribute name="title">
-         <xsl:text>[</xsl:text><xsl:value-of select="../../@sid"/>]: <xsl:value-of
-         select="../../@title"/> / DU:<xsl:value-of select="../@id"/>
-       </xsl:attribute>
        <xsl:value-of select="@title"/>
      </h1>
    </xsl:if>
