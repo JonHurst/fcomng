@@ -331,10 +331,23 @@ class FCOMFactory:
         tb.start("page", page_attributes)
         javascript_list = []
         for s in self.__build_sid_list__(sid):
+            #process each section required for the page
             tb.start("section", {"sid": ".".join(s),
                                  "title": self.fcm.get_title(s)})
+            last_groupid = None
             for dul in self.fcm.get_dus(s):
+                #get_dus returns a list of the form [(du_filename, ...), (du_filename, ...), ...]
+                #so dul is each (du_filename, ...) tuple, each tuple entry representing alternative
+                #versions of the DU. Alternative versions are neccessarily of the same group if applicable.
                 msnlist = []
+                groupid = self.fcm.get_du_group(dul[0])
+                if groupid != last_groupid:
+                    if last_groupid:
+                        tb.end("group")
+                    if groupid:
+                        tb.start("group", {"id": groupid,
+                                           "title": self.fcm.get_group_title(groupid)})
+                    last_groupid = groupid
                 tb.start("du_container", {"id": self.__du_to_duref__(dul[0]),
                                           "title": self.fcm.get_du_title(dul[0])})
                 for c, du in enumerate(dul):
@@ -373,6 +386,8 @@ class FCOMFactory:
                         tb.end("applies")
                         tb.end("du")
                 tb.end("du_container")
+            if last_groupid: #if last_groupid hasn't been set to None, we were in a group at the end of the section
+                tb.end("group")
             tb.end("section")
         tb.end("page")
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "page.xsl", "-"],

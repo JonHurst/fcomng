@@ -57,6 +57,16 @@ div.main, div.alternate
     position: relative;
 }
 
+div.group div.main, div.group div.alternate
+{
+    border-top: none;
+}
+
+div.group
+{
+    border-top: dotted green 1px;
+}
+
 div.alternate
 {
     background: #F0FFF0;

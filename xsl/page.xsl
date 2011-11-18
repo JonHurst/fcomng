@@ -107,22 +107,36 @@
   <div class="section">
     <xsl:attribute name="id">sid<xsl:value-of select="@sid"/></xsl:attribute>
     <h1 class="sectionheading"><xsl:value-of select="@sid"/>: <xsl:value-of select="@title"/></h1>
-    <xsl:if test="count(du_container) &gt; 1">
+    <xsl:if test="count(du_container) + count(group) &gt; 1">
       <div class="duindex">
-	<xsl:for-each select="du_container">
-     <!--special processing: if we are dealing with PRO section, don't add
-         an entry for a FWSPAGE that immediately follows a section with the same
-         title root -->
-     <xsl:if test="not(preceding-sibling::du_container and
-                   @title = concat(preceding-sibling::du_container[1]/@title, ' - FWSPAGE'))">
-       <p><a>
-         <xsl:attribute name="href">#duid<xsl:value-of select="@id"/></xsl:attribute>
-         <xsl:value-of select="@title"/>
-       </a></p>
-     </xsl:if>
-	</xsl:for-each>
+        <xsl:for-each select="du_container|group">
+          <p><a>
+            <xsl:choose>
+              <xsl:when test="self::du_container">
+                <xsl:attribute name="href">#duid<xsl:value-of select="@id"/></xsl:attribute>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:attribute name="href">#gid<xsl:value-of select="@id"/></xsl:attribute>
+              </xsl:otherwise>
+            </xsl:choose>
+            <xsl:value-of select="@title"/>
+          </a></p>
+        </xsl:for-each>
       </div>
     </xsl:if>
+    <xsl:apply-templates/>
+  </div>
+</xsl:template>
+
+
+<xsl:template match="group">
+  <div class="group">
+    <xsl:attribute name="id">
+      <xsl:text>gid</xsl:text><xsl:value-of select="@id"/>
+    </xsl:attribute>
+    <h1>
+      <xsl:value-of select="@title"/>
+   </h1>
     <xsl:apply-templates/>
   </div>
 </xsl:template>
@@ -163,21 +177,23 @@
       </div>
     </div>
 	</xsl:if>
-	<h1>
-     <xsl:attribute name="title">
-       <xsl:text>[</xsl:text><xsl:value-of select="../../@sid"/>]: <xsl:value-of
-       select="../../@title"/> / DU:<xsl:value-of select="../@id"/>
-     </xsl:attribute>
-   <xsl:value-of select="@title"/>
-   </h1>
-    <xsl:choose>
-      <xsl:when test="@href != ''">
-        <xsl:apply-templates select="document(@href)"/>
-      </xsl:when>
-      <xsl:otherwise>
-        <p>DU does not apply to selected aircraft.</p>
-      </xsl:otherwise>
-    </xsl:choose>
+   <xsl:if test="not(ancestor::group)">
+     <h1>
+       <xsl:attribute name="title">
+         <xsl:text>[</xsl:text><xsl:value-of select="../../@sid"/>]: <xsl:value-of
+         select="../../@title"/> / DU:<xsl:value-of select="../@id"/>
+       </xsl:attribute>
+       <xsl:value-of select="@title"/>
+     </h1>
+   </xsl:if>
+   <xsl:choose>
+     <xsl:when test="@href != ''">
+       <xsl:apply-templates select="document(@href)"/>
+     </xsl:when>
+     <xsl:otherwise>
+       <p>DU does not apply to selected aircraft.</p>
+     </xsl:otherwise>
+   </xsl:choose>
   </div>
 </xsl:template>
 
