@@ -300,7 +300,7 @@ class FCOMFactory:
             sid_list = self.__build_sid_list__(sid)
             for s in sid_list:
                 for du_list in self.fcm.get_dus(s):
-                    duref = self.__du_to_duref__(du_list[0])
+                    duref = self.__du_to_duref__(du_list[0])[0]
                     self.duref_lookup[duref] = (
                         self.__make_filename__(sid) + "#duid" + duref,
                         ".".join(s) + ": " + self.fcm.get_du_title(du_list[0]))
@@ -309,7 +309,7 @@ class FCOMFactory:
     def __du_to_duref__(self, du):
         #this is dependent on the intrinsic link between du filenames and durefs
         # - it may be brittle
-        return du[5:].split(".")[0]
+        return du[5:].split(".")[:-1]
 
 
     def __build_sid_list__(self, sid):
@@ -348,12 +348,12 @@ class FCOMFactory:
                         tb.start("group", {"id": groupid,
                                            "title": self.fcm.get_group_title(groupid)})
                     last_groupid = groupid
-                tb.start("du_container", {"id": self.__du_to_duref__(dul[0]),
+                tb.start("du_container", {"id": self.__du_to_duref__(dul[0])[0],
                                           "title": self.fcm.get_du_title(dul[0])})
                 for c, du in enumerate(dul):
                     du_attrib = {"href": data_dir + du,
                                  "title": self.fcm.get_du_title(du),
-                                 "id": self.__du_to_duref__(du) + "-" + str(c)}
+                                 "id": ".".join(self.__du_to_duref__(du))}
                     if self.fcm.is_tdu(du):
                         du_attrib["tdu"] = "tdu"
                     tb.start("du", du_attrib)
@@ -375,7 +375,7 @@ class FCOMFactory:
                     if nc:
                         du_attrib = {"href": "",
                                      "title": self.fcm.get_du_title(dul[0]),
-                                     "id": self.__du_to_duref__(dul[0]) + "-na"}
+                                     "id": self.__du_to_duref__(dul[0])[0] + ".na"}
                         if self.fcm.is_tdu(du):
                             du_attrib["tdu"] = "tdu"
                         tb.start("du", du_attrib)
