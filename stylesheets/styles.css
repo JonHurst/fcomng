@@ -20,7 +20,6 @@ body
 
 div.page
 {
-    position:relative;
     font-size:0.9em;
     margin:auto;
     max-width:55em;
@@ -54,7 +53,6 @@ div.main, div.alternate
 {
     border-top: dotted green 1px;
     padding-bottom: 2em;
-    position: relative;
 }
 
 div.group div.main, div.group div.alternate
@@ -529,40 +527,26 @@ img.symbol
 }
 
 
-div.du_container
-{
-    position: relative;
-}
-
 div.tags
 {
     position: relative;
     text-align: right;
-    border-bottom: 1px gray solid;
-    background-color: white;
-    z-index: 101;
-    bottom: -1px;
+    margin-bottom: -2px;
 }
 
-div.main, div.alternate
-{
-    position:relative;
-    z-index: 100;
-}
 
 div.tags a
 {
-    position:relative;
     white-space:nowrap;
     padding: 4px 1em 0;
-    margin-left: 2px;
+    margin-left: 1px;
     border-style: solid solid none;
     border-width: 1px;
     border-color: gray;
     text-decoration: none;
     background-color: white;
     font-size: 0.85em;
-    bottom: -1px;
+    border-bottom: 1px dotted green;
 }
 
 div.tags a.alternate
@@ -574,8 +558,9 @@ div.tags a.alternate
 div.tags a.active
 {
     color: black;
-    bottom: -3px;
     padding-top: 5px;
+    border-bottom: 1px solid white;
+
 }
 
 div.index
@@ -665,21 +650,22 @@ div.infocontainer:hover
 
 div.infocontainer div.info
 {
+    position: absolute;
     display: none;
 }
 
 div.infocontainer:hover div.info
 {
     display: block;
-    position: absolute;
     width: 100%;
     top: 0;
     right:0;
     border: 1px gray solid;
-    background-color: white;
     padding:1em;
     color: gray;
     font-size:0.85em;
+    background-color: white;
+    box-shadow: 2px 2px 2px 2px;
 }
 
 div.du_container div.infocontainer img
