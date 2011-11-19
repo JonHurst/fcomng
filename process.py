@@ -112,7 +112,8 @@ class FCOMMeta:
             self.groupid = groupid
             #parse metadata file
             e = et.ElementTree(None, g_paths.mus + mu_filename)
-            self.msns = self.__get_msns__(e)
+            if data_filename:
+                self.msns = self.__get_msns__(e)
             self.tdu = False
             if e.getroot().attrib["tdu"] == "true":
                 self.tdu = True
@@ -135,6 +136,10 @@ class FCOMMeta:
                     else:
                         msns.append(msn)
             return msns
+
+
+        def set_msns(self, msnlist):
+            self.msns = msnlist
 
 
     class RevisionRecord:
@@ -188,6 +193,7 @@ class FCOMMeta:
     def __process_duinv__(self, elem, sec_id, groupid=None):
         global g_paths
         duids = []
+        msnlist = []
         for s in elem.findall("du-sol"):
             data_file = os.path.basename(s.find("sol-content-ref").attrib["href"])
             meta_file = os.path.basename(s.find("sol-mdata-ref").attrib["href"])
@@ -196,7 +202,18 @@ class FCOMMeta:
             s = open(g_paths.dus + data_file).read(200)
             duid = s[s.find("code="):][6:22]
             self.dus[duid] = self.DU(data_file, meta_file, sec_id, title, groupid)
+            msns = self.dus[duid].msns
+            if msns:
+                msnlist.extend(msns)
             duids.append(duid)
+        #we may have to create a fake du if we have a set if dus that only cover part of the fleet
+        if msnlist:
+            nc = self.notcovered(msnlist)
+            if nc:
+                duid = duid.split(".")[0] + ".NA"
+                self.dus[duid] = self.DU("", meta_file, sec_id, title, groupid)
+                self.dus[duid].set_msns(nc)
+                duids.append(duid)
         self.sections[sec_id].add_du(tuple(duids))
 
 
@@ -369,11 +386,14 @@ class FCOMFactory:
         return [sid, ] + self.fcm.get_descendants(sid)
 
 
-    def make_page(self, c, sid, prevsid, nextsid):
-        global g_paths
-        filename = self.__make_filename__(sid)
-        print "Creating:", filename
-        tb = et.TreeBuilder()
+
+    def __start_page__(self, tb, sid, prevsid, nextsid):
+        """Starts a page using TreeBuilder object TB.
+
+        SID is the section ID of the page to start e.g. ('DSC', '20', '20').
+        PREVSID is the section ID of the previous section in "book order"
+        NEXTSID is the section ID of the next section in "book order"
+        """
         page_attributes = {"title": self.__make_page_title__(sid),
                            "version": self.versionstring}
         if prevsid:
@@ -383,81 +403,52 @@ class FCOMFactory:
             page_attributes["next"] = self.__make_filename__(nextsid)
             page_attributes["nexttitle"] = ".".join(nextsid) + ": " + self.fcm.get_title(nextsid)
         tb.start("page", page_attributes)
-        javascript_list = []
-        for s in self.__build_sid_list__(sid):
-            #process each section required for the page
-            tb.start("section", {"sid": ".".join(s),
-                                 "title": self.fcm.get_title(s)})
-            last_groupid = None
-            for dul in self.fcm.get_dus(s):
-                #get_dus returns a list of the form [(duid, ...), (duid, ...), ...]
-                #so dul is each (duid, ...) tuple, each tuple entry representing alternative
-                #versions of the DU. Alternative versions are neccessarily of the same group if applicable.
-                msnlist = []
-                groupid = self.fcm.get_du_group(dul[0])
-                if groupid != last_groupid:
-                    if last_groupid:
-                        tb.end("group")
-                    if groupid:
-                        tb.start("group", {"id": groupid,
-                                           "title": self.fcm.get_group_title(groupid)})
-                    last_groupid = groupid
-                tb.start("du_container", {"id": dul[0].split(".")[0],
-                                          "title": self.fcm.get_du_title(dul[0])})
-                for c, du in enumerate(dul):
-                    du_attrib = {"href": g_paths.dus + self.fcm.get_du_filename(du),
-                                 "title": self.fcm.get_du_title(du),
-                                 "id": du}
-                    if self.fcm.is_tdu(du):
-                        du_attrib["tdu"] = "tdu"
-                    tb.start("du", du_attrib)
+
+
+    def __process_du__(self, tb, du):
+        """Create DU in TreeBuilder TB.
+
+        DU is the duid of the du to build.
+        """
+        filename = self.fcm.get_du_filename(du)
+        if filename: filename = g_paths.dus + filename
+        du_attrib = {"title": self.fcm.get_du_title(du),
+                     "href": filename,
+                     "id": du}
+        if self.fcm.is_tdu(du):
+            du_attrib["tdu"] = "tdu"
+        tb.start("du", du_attrib)
+        applies = self.fcm.applies(du)
+        if applies:
+            tb.start("applies", {})
+            tb.data(self.fcm.applies_string(applies))
+            tb.end("applies")
+        tb.end("du")
+
+
+    def __build_javascript_folding_code__(self, section_list):
+        """Returns a string that is a valid javascript variable definition to enable javascript folding.
+
+        The string is of the form:
+           var folding =
+              [ [ [ duid, [msn, msn, ...], applies_string], ... ], ...];
+
+        i.e it specifies an array of du_containers with each du_container being defined by an array of dus.
+        """
+        js_array = []
+        for s in section_list:
+            for ducontainer in self.fcm.get_dus(s):
+                js_array.append([])
+                for du in ducontainer:
                     applies = self.fcm.applies(du)
                     if applies:
-                        tb.start("applies", {})
-                        applies_string = self.fcm.applies_string(applies)
-                        msnlist.append((du_attrib["id"], applies, applies_string[:100]))
-                        tb.data(applies_string)
-                        tb.end("applies")
-                    tb.end("du")
-                if msnlist:
-                    javascript_list.append(msnlist)
-                    # if dul does not cover the entire fleet, we need to add a fake extra du
-                    msns = []
-                    for msnentry in msnlist:
-                        msns.extend(msnentry[1])
-                    nc = self.fcm.notcovered(msns)
-                    if nc:
-                        du_attrib = {"href": "",
-                                     "title": self.fcm.get_du_title(dul[0]),
-                                     "id": dul[0].split(".")[0] + ".na"}
-                        if self.fcm.is_tdu(du):
-                            du_attrib["tdu"] = "tdu"
-                        tb.start("du", du_attrib)
-                        tb.start("applies", {})
-                        applies_string = self.fcm.applies_string(nc)
-                        msnlist.append((du_attrib["id"], nc, applies_string[:100]))
-                        tb.data(applies_string)
-                        tb.end("applies")
-                        tb.end("du")
-                tb.end("du_container")
-            if last_groupid: #if last_groupid hasn't been set to None, we were in a group at the end of the section
-                tb.end("group")
-            tb.end("section")
-        tb.end("page")
-        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "page.xsl", "-"],
-                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE
-                                  ).communicate(et.tostring(tb.close(), "utf-8"))[0]
-        #create javascript variables for controlling folding
-        javascript_string = ""
-        for folding_section in javascript_list:
-            javascript_string += "["
-            for dusection in folding_section:
-                javascript_string += "['%s',%s,'%s']," % dusection
-            javascript_string = javascript_string[:-1] + "],"
-        javascript_string = javascript_string[:-1] + "];\n"
-        javascript_string = "var folding = [" + javascript_string
-        page_string = page_string.replace("<!--jsvariable-->", javascript_string)
-        #replace xml links with xhtml links
+                        js_array[-1].append([du, applies, self.fcm.applies_string(applies)[:100]])
+                if js_array[-1] == []:
+                    del js_array[-1]
+        return "var folding = " + str(js_array) + ";"
+
+
+    def __process_links(self, page_string, sid):
         page_parts = re.split('<a class="duref" href="(\d+)">', page_string)
         duref_index = 1
         while duref_index < len(page_parts):
@@ -473,7 +464,51 @@ class FCOMFactory:
             else:
                 page_parts[duref_index] += duinfo[1].split()[0]
             duref_index += 2
-        page_string = "".join(page_parts)
+        return "".join(page_parts)
+
+
+
+    def make_page(self, c, sid, prevsid, nextsid):
+        global g_paths
+        filename = self.__make_filename__(sid)
+        print "Creating:", filename
+        tb = et.TreeBuilder()
+        self.__start_page__(tb, sid, prevsid, nextsid)
+        section_list = self.__build_sid_list__(sid)
+        for s in section_list:
+            #process each section required for the page
+            tb.start("section", {"sid": ".".join(s),
+                                 "title": self.fcm.get_title(s)})
+            last_groupid = None
+            for dul in self.fcm.get_dus(s):
+                #get_dus returns a list of the form [(duid, ...), (duid, ...), ...]
+                #so dul is each (duid, ...) tuple, each tuple entry representing alternative
+                #versions of the DU. Alternative versions are neccessarily of the same group if applicable.
+                groupid = self.fcm.get_du_group(dul[0])
+                if groupid != last_groupid:
+                    if last_groupid:
+                        tb.end("group")
+                    if groupid:
+                        tb.start("group", {"id": groupid,
+                                           "title": self.fcm.get_group_title(groupid)})
+                    last_groupid = groupid
+                tb.start("du_container", {"id": dul[0].split(".")[0],
+                                          "title": self.fcm.get_du_title(dul[0])})
+                for du in dul:
+                    self.__process_du__(tb, du)
+                tb.end("du_container")
+            if last_groupid: #if last_groupid hasn't been set to None, we were in a group at the end of the section
+                tb.end("group")
+            tb.end("section")
+        tb.end("page")
+        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "page.xsl", "-"],
+                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE
+                                  ).communicate(et.tostring(tb.close(), "utf-8"))[0]
+        #create javascript variables for controlling folding
+        page_string = page_string.replace("<!--jsvariable-->",
+                                          self.__build_javascript_folding_code__(section_list))
+        #replace xml links with xhtml links
+        page_string = self.__process_links(page_string, sid)
         # #insert link bar
         page_string = page_string.replace("<!--linkbar-->", self.__build_linkbar__(sid))
         of = open(g_paths.html_output + filename, "w")
