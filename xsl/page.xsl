@@ -173,7 +173,7 @@
       <img src="../images/isymbol.gif" alt=""/>
       <div class="info">
          <p><xsl:text>[</xsl:text><xsl:value-of select="ancestor::section/@sid"/>]: <xsl:value-of
-         select="ancestor::section/@title"/> / DU:<xsl:value-of select="@id"/></p>
+         select="ancestor::section/@title"/> / DU<xsl:value-of select="@id"/></p>
         <xsl:if test="applies">
           <p class="applies"><strong>Applies to</strong>: <xsl:value-of select="applies"/></p>
         </xsl:if>
