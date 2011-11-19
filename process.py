@@ -170,6 +170,7 @@ class FCOMMeta:
         self.__build_revdict__(self.global_meta.find("revisions"))
         self.aircraft = self.Aircraft(self.global_meta.find("aat"))
         for psl in self.control.getroot().findall("psl"):
+            print "Scanning", psl.attrib["pslcode"]
             self.top_level_sids.append((psl.attrib["pslcode"],))
             self.__process_psl__(psl, ())
 
