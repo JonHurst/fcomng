@@ -165,7 +165,7 @@
 	<xsl:attribute name="id">duid<xsl:value-of select="@id"/></xsl:attribute>
     <p class="duident">
       <a>
-	<xsl:attribute name="href">../<xsl:value-of select="@href"/></xsl:attribute>
+	<xsl:attribute name="href"><xsl:value-of select="@href"/></xsl:attribute>
 	<xsl:value-of select="@href"/>
       </a>
     </p>
