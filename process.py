@@ -119,14 +119,31 @@ class FCOMMeta:
             return msns
 
 
+    class RevisionRecord:
+
+        def __init__(self, revclass, change, anchor):
+            self.revclass = revclass
+            self.change = change
+            self.anchor = anchor
+
+
+        def __str__(self):
+            return "Class: %s Change: %s Anchor: %s" % (
+                self.revclass,
+                self.change,
+                self.anchor)
+
+
     def __init__(self, control_file):
         self.sections = {}
         self.dus = {}
         self.group_titles = {}
         self.top_level_sids = []
+        self.revdict = {}
         print "Scanning metadata"
         self.control = et.ElementTree(None, control_file)
         self.global_meta = et. ElementTree(None, control_file.replace(".xml", "_mdata.xml"))
+        self.__build_revdict__(self.global_meta.find("revisions"))
         self.aircraft = self.Aircraft(self.global_meta.find("aat"))
         for psl in self.control.getroot().findall("psl"):
             self.top_level_sids.append((psl.attrib["pslcode"],))
@@ -166,6 +183,21 @@ class FCOMMeta:
         self.group_titles[groupid] = elem.find("title").text
         for s in elem.findall("du-inv"):
             self.__process_duinv__(s, sec_id, groupid)
+
+
+    def __build_revdict__(self, rev_elem):
+        content_revisions = rev_elem.find("content-revisions")
+        highlights = content_revisions.find("highlights")
+        rev_marks = content_revisions.find("rev-marks")
+        path_reo = re.compile(r"//([^\[]*)[^']*'([^']*)")
+        for rev in rev_marks.findall("rev"):
+            mo = path_reo.match(rev.attrib["path"])
+            if not mo: print "regexp error"; continue
+            self.revdict[mo.group(2)] = self.RevisionRecord(
+                mo.group(1),
+                rev.attrib["chg"],
+                True if rev.attrib["anchor"] == "true" else False)
+
 
 
     def get_title(self, sid):
