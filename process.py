@@ -5,12 +5,28 @@ import xml.etree.ElementTree
 et = xml.etree.ElementTree
 import subprocess
 import re
+import sys
+import os
 
-control_file = "fcom/DATA/XML_N_FCOM_EZY_TF_N_EU_CA_20111007.xml"
-output_dir = "html/"
-data_dir= "fcom/DATA/"
-fleet_script_file = "scripts/fleet.js"
-xsl_dir = "xsl/"
+class Paths:
+
+    def initialise(self, scriptpath, startfile, outputdir):
+        basedir = os.path.dirname(os.path.abspath(startfile))
+        print basedir
+        path_tree = et.parse(startfile)
+        paths = {}
+        for cp in path_tree.findall("components-path/component-path"):
+            paths[cp.attrib["type"]] = cp.text
+        self.control = os.path.join(basedir, path_tree.find("starter").text)
+        self.global_meta = os.path.join(basedir, paths["product-metadata"])
+        self.dus = os.path.join(basedir, paths["du-content"])
+        self.mus = os.path.join(basedir, paths["du-metadata"])
+        self.html_output = os.path.join(os.path.abspath(outputdir), "html/")
+        self.js_output = os.path.join(os.path.abspath(outputdir), "scripts/")
+        self.xsldir = os.path.join(os.path.dirname(os.path.abspath(scriptpath)), "xsl/")
+
+g_paths = Paths()
+
 
 class FCOMMeta:
 
@@ -88,12 +104,14 @@ class FCOMMeta:
 
     class DU:
 
-        def __init__(self,  mu_filename, parent_sid, title, groupid):
+        def __init__(self,  data_filename, mu_filename, parent_sid, title, groupid):
+            global g_paths
+            self.data_filename = data_filename
             self.parent_sid = parent_sid
             self.title = title
             self.groupid = groupid
             #parse metadata file
-            e = et.ElementTree(None, data_dir + mu_filename)
+            e = et.ElementTree(None, g_paths.mus + mu_filename)
             self.msns = self.__get_msns__(e)
             self.tdu = False
             if e.getroot().attrib["tdu"] == "true":
@@ -134,15 +152,16 @@ class FCOMMeta:
                 self.anchor)
 
 
-    def __init__(self, control_file):
+    def __init__(self):
+        global g_paths
         self.sections = {}
         self.dus = {}
         self.group_titles = {}
         self.top_level_sids = []
         self.revdict = {}
         print "Scanning metadata"
-        self.control = et.ElementTree(None, control_file)
-        self.global_meta = et. ElementTree(None, control_file.replace(".xml", "_mdata.xml"))
+        self.control = et.ElementTree(None, g_paths.control)
+        self.global_meta = et. ElementTree(None, g_paths.global_meta)
         self.__build_revdict__(self.global_meta.find("revisions"))
         self.aircraft = self.Aircraft(self.global_meta.find("aat"))
         for psl in self.control.getroot().findall("psl"):
@@ -167,14 +186,18 @@ class FCOMMeta:
 
 
     def __process_duinv__(self, elem, sec_id, groupid=None):
-        data_files = []
+        global g_paths
+        duids = []
         for s in elem.findall("du-sol"):
-            data_file = s.find("sol-content-ref").attrib["href"]
-            meta_file = s.find("sol-mdata-ref").attrib["href"]
+            data_file = os.path.basename(s.find("sol-content-ref").attrib["href"])
+            meta_file = os.path.basename(s.find("sol-mdata-ref").attrib["href"])
             title = elem.find("title").text
-            self.dus[data_file] = self.DU(meta_file, sec_id, title, groupid)
-            data_files.append(data_file)
-        self.sections[sec_id].add_du(tuple(data_files))
+            #find duid - unfortunately only available in du file as root element code
+            s = open(g_paths.dus + data_file).read(200)
+            duid = s[s.find("code="):][6:22]
+            self.dus[duid] = self.DU(data_file, meta_file, sec_id, title, groupid)
+            duids.append(duid)
+        self.sections[sec_id].add_du(tuple(duids))
 
 
     def __process_group__(self, elem, sec_id):
@@ -204,18 +227,20 @@ class FCOMMeta:
         return self.sections[sid].title
 
 
-    def get_du_title(self, du_filename):
-        return self.dus[du_filename].title
+    def get_du_title(self, duid):
+        return self.dus[duid].title
 
 
-    def get_du_parent(self, du_filename):
-        return self.dus[du_filename].parent_sid
+    def get_du_parent(self, duid):
+        return self.dus[duid].parent_sid
 
 
-    def get_du_group(self, du_filename):
-        return self.dus[du_filename].groupid
+    def get_du_group(self, duid):
+        return self.dus[duid].groupid
 
 
+    def get_du_filename(self, duid):
+        return self.dus[duid].data_filename
     def get_group_title(self, groupid):
         return self.group_titles.get(groupid)
 
@@ -264,8 +289,8 @@ class FCOMMeta:
         return False
 
 
-    def applies(self, du_filename):
-        return self.dus[du_filename].msns
+    def applies(self, duid):
+        return self.dus[duid].msns
 
 
     def notcovered(self, msnlist):
@@ -277,8 +302,8 @@ class FCOMMeta:
 
 
 
-    def is_tdu(self, du_filename):
-        return self.dus[du_filename].tdu
+    def is_tdu(self, duid):
+        return self.dus[duid].tdu
 
 
     def dump(self):
@@ -298,16 +323,18 @@ class FCOMMeta:
         print "\n\nAircraft:\n=========\n"
         self.aircraft.dump()
         print "\n\nAircraft list test\n"
-        print self.affected("4556", "./DU/00000284.0003001.xml")
-        print self.applies("./DU/00000284.0003001.xml")
-        print self.applies("./DU/00000879.0004001.xml")
+        print self.affected("4556", "00000284.0003001")
+        print self.applies("00000284.0003001")
+        print self.applies("00000879.0004001")
 
 
 class FCOMFactory:
 
-    def __init__(self, fcm, version):
+    def __init__(self, fcm):
+        global g_paths
         self.fcm = fcm #instance of FCOMMeta
-        self.versionstring = version
+        versiondate = g_paths.control[-12:-4]
+        self.versionstring = versiondate[:4] + "-" + versiondate[4:6] + "-" + versiondate[6:]
         self.pagelist = self.fcm.get_leaves(3)
         self.pageset = set(self.pagelist)
         self.duref_lookup = {}
@@ -332,16 +359,10 @@ class FCOMFactory:
             sid_list = self.__build_sid_list__(sid)
             for s in sid_list:
                 for du_list in self.fcm.get_dus(s):
-                    duref = self.__du_to_duref__(du_list[0])[0]
+                    duref = du_list[0].split(".")[0]
                     self.duref_lookup[duref] = (
                         self.__make_filename__(sid) + "#duid" + duref,
                         ".".join(s) + ": " + self.fcm.get_du_title(du_list[0]))
-
-
-    def __du_to_duref__(self, du):
-        #this is dependent on the intrinsic link between du filenames and durefs
-        # - it may be brittle
-        return du[5:].split(".")[:-1]
 
 
     def __build_sid_list__(self, sid):
@@ -349,6 +370,7 @@ class FCOMFactory:
 
 
     def make_page(self, c, sid, prevsid, nextsid):
+        global g_paths
         filename = self.__make_filename__(sid)
         print "Creating:", filename
         tb = et.TreeBuilder()
@@ -368,8 +390,8 @@ class FCOMFactory:
                                  "title": self.fcm.get_title(s)})
             last_groupid = None
             for dul in self.fcm.get_dus(s):
-                #get_dus returns a list of the form [(du_filename, ...), (du_filename, ...), ...]
-                #so dul is each (du_filename, ...) tuple, each tuple entry representing alternative
+                #get_dus returns a list of the form [(duid, ...), (duid, ...), ...]
+                #so dul is each (duid, ...) tuple, each tuple entry representing alternative
                 #versions of the DU. Alternative versions are neccessarily of the same group if applicable.
                 msnlist = []
                 groupid = self.fcm.get_du_group(dul[0])
@@ -380,12 +402,12 @@ class FCOMFactory:
                         tb.start("group", {"id": groupid,
                                            "title": self.fcm.get_group_title(groupid)})
                     last_groupid = groupid
-                tb.start("du_container", {"id": self.__du_to_duref__(dul[0])[0],
+                tb.start("du_container", {"id": dul[0].split(".")[0],
                                           "title": self.fcm.get_du_title(dul[0])})
                 for c, du in enumerate(dul):
-                    du_attrib = {"href": data_dir + du,
+                    du_attrib = {"href": g_paths.dus + self.fcm.get_du_filename(du),
                                  "title": self.fcm.get_du_title(du),
-                                 "id": ".".join(self.__du_to_duref__(du))}
+                                 "id": du}
                     if self.fcm.is_tdu(du):
                         du_attrib["tdu"] = "tdu"
                     tb.start("du", du_attrib)
@@ -407,7 +429,7 @@ class FCOMFactory:
                     if nc:
                         du_attrib = {"href": "",
                                      "title": self.fcm.get_du_title(dul[0]),
-                                     "id": self.__du_to_duref__(dul[0])[0] + ".na"}
+                                     "id": dul[0].split(".")[0] + ".na"}
                         if self.fcm.is_tdu(du):
                             du_attrib["tdu"] = "tdu"
                         tb.start("du", du_attrib)
@@ -422,7 +444,7 @@ class FCOMFactory:
                 tb.end("group")
             tb.end("section")
         tb.end("page")
-        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "page.xsl", "-"],
+        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "page.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
         #create javascript variables for controlling folding
@@ -452,9 +474,9 @@ class FCOMFactory:
                 page_parts[duref_index] += duinfo[1].split()[0]
             duref_index += 2
         page_string = "".join(page_parts)
-        #insert link bar
+        # #insert link bar
         page_string = page_string.replace("<!--linkbar-->", self.__build_linkbar__(sid))
-        of = open(output_dir + filename, "w")
+        of = open(g_paths.html_output + filename, "w")
         of.write(page_string)
 
 
@@ -482,6 +504,7 @@ class FCOMFactory:
 
 
     def __make_node_page__(self, ident, children):
+        global g_paths
         tb = et.TreeBuilder()
         tb.start("index", {"title": self.__make_page_title__(ident),
                           "ident": ".".join(ident),
@@ -489,27 +512,29 @@ class FCOMFactory:
         for i in children:
             self.__recursive_add_section__(i, tb)
         tb.end("index")
-        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "index.xsl", "-"],
+        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "index.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
         page_string = page_string.replace("<!--linkbar-->", self.__build_linkbar__(ident))
         print "Creating node page", ident
-        of = open(output_dir + self.__make_filename__(ident), "w")
+        of = open(g_paths.html_output + self.__make_filename__(ident), "w")
         of.write(page_string)
 
 
     def make_index(self):
+        global g_paths
         tb = et.TreeBuilder()
         tb.start("index", {"title": "Contents",
                            "version": self.versionstring})
         for s in self.fcm.get_leaves(1):
             self.__recursive_add_section__(s, tb)
         tb.end("index")
-        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", xsl_dir + "index.xsl", "-"],
+
+        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "index.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
         page_string = page_string.replace("<!--linkbar-->", self.__build_linkbar__(()))
-        of = open(output_dir + "index.html", "w")
+        of = open(g_paths.html_output + "index.html", "w")
         of.write(page_string)
 
 
@@ -556,7 +581,8 @@ class FCOMFactory:
 
 
     def write_fleet_js(self):
-        open(fleet_script_file, "w").write(
+        global g_paths
+        open(os.path.join(g_paths.js_output, "fleet.js"), "w").write(
             ("var fleet = { \n" +
              ",".join(["'%s':'%s'" % X for X in self.fcm.get_fleet()]) +
              "};\n"))
@@ -564,8 +590,13 @@ class FCOMFactory:
 
 
 def main():
-    fcm = FCOMMeta(control_file)
-    ff = FCOMFactory(fcm, "October 2011")
+    global g_paths
+    if len(sys.argv) != 3:
+        print "Usage: ", sys.argv[0], "start_file output_dir"
+        sys.exit(1)
+    g_paths.initialise(*sys.argv)
+    fcm = FCOMMeta()
+    ff = FCOMFactory(fcm)
     ff.build_fcom()
 
 
