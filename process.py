@@ -6,6 +6,7 @@ import subprocess
 import re
 import sys
 import os
+import cPickle as pickle
 
 class Paths:
 
@@ -23,8 +24,49 @@ class Paths:
         self.html_output = os.path.join(os.path.abspath(outputdir), "html/")
         self.js_output = os.path.join(os.path.abspath(outputdir), "scripts/")
         self.xsldir = os.path.join(os.path.dirname(os.path.abspath(scriptpath)), "xsl/")
+        self.pickles = os.path.join(os.path.dirname(os.path.abspath(scriptpath)), "pickles/")
 
 g_paths = Paths()
+
+
+class DU:
+
+    def __init__(self,  data_filename, mu_filename, parent_sid, title, groupid):
+        global g_paths
+        self.data_filename = data_filename
+        self.parent_sid = parent_sid
+        self.title = title
+        self.groupid = groupid
+        #parse metadata file
+        e = et.ElementTree(None, g_paths.mus + mu_filename)
+        if data_filename:
+            self.msns = self.__get_msns__(e)
+        self.tdu = False
+        if e.getroot().attrib["tdu"] == "true":
+            self.tdu = True
+        self.linked_du = e.getroot().attrib["linked-du-ident"]
+        self.affected_by = None
+
+
+    def __get_msns__(self, e):
+        m = e.find("effect").find("aircraft-ranges").find("effact").find("aircraft-range")
+        if not et.iselement(m):
+            msns = None
+        else:
+            msns = []
+            for msn in m.text.split(" "):
+                #supposition: a pair of numbers together indicates all aircraft with MSNs between
+                #[:4] and [4:]
+                if len(msn) == 8:
+                    for rangemsn in range(int(msn[:4]), int(msn[4:]) + 1):
+                        msns.append(str(rangemsn))
+                else:
+                    msns.append(msn)
+        return msns
+
+
+    def set_msns(self, msnlist):
+        self.msns = msnlist
 
 
 class FCOMMeta:
@@ -101,44 +143,6 @@ class FCOMMeta:
                         print a
 
 
-    class DU:
-
-        def __init__(self,  data_filename, mu_filename, parent_sid, title, groupid):
-            global g_paths
-            self.data_filename = data_filename
-            self.parent_sid = parent_sid
-            self.title = title
-            self.groupid = groupid
-            #parse metadata file
-            e = et.ElementTree(None, g_paths.mus + mu_filename)
-            if data_filename:
-                self.msns = self.__get_msns__(e)
-            self.tdu = False
-            if e.getroot().attrib["tdu"] == "true":
-                self.tdu = True
-            self.linked_du = e.getroot().attrib["linked-du-ident"]
-            self.affected_by = None
-
-
-        def __get_msns__(self, e):
-            m = e.find("effect").find("aircraft-ranges").find("effact").find("aircraft-range")
-            if not et.iselement(m):
-                msns = None
-            else:
-                msns = []
-                for msn in m.text.split(" "):
-                    #supposition: a pair of numbers together indicates all aircraft with MSNs between
-                    #[:4] and [4:]
-                    if len(msn) == 8:
-                        for rangemsn in range(int(msn[:4]), int(msn[4:]) + 1):
-                            msns.append(str(rangemsn))
-                    else:
-                        msns.append(msn)
-            return msns
-
-
-        def set_msns(self, msnlist):
-            self.msns = msnlist
 
 
     class RevisionRecord:
@@ -160,6 +164,14 @@ class FCOMMeta:
         global g_paths
         self.sections = {}
         self.dus = {}
+        #optimisation: creatin DU instances requires parsing of thousands of m_data files, which is very slow;
+        # we pickle the resulting data structure and only parse these files if the pickle file doesn't exist.
+        du_pickle_path = g_paths.pickles + "dus"
+        dus_from_pickle = False
+        if os.path.exists(du_pickle_path):
+            du_pickles = open(du_pickle_path)
+            self.dus = pickle.Unpickler(du_pickles).load()
+            dus_from_pickle = True
         self.group_titles = {}
         self.top_level_sids = []
         self.revdict = {}
@@ -172,7 +184,10 @@ class FCOMMeta:
             print "Scanning", psl.attrib["pslcode"]
             self.top_level_sids.append((psl.attrib["pslcode"],))
             self.__process_psl__(psl, ())
-
+        #optimisation
+        if not dus_from_pickle:
+            du_pickles = open(du_pickle_path, "w")
+            pickle.Pickler(du_pickles).dump(self.dus)
 
     def __process_psl__(self, elem, sec_id):
         i = sec_id + (elem.attrib["pslcode"],)
@@ -201,7 +216,10 @@ class FCOMMeta:
             #find duid - unfortunately only available in du file as root element code
             s = open(g_paths.dus + data_file).read(200)
             duid = s[s.find("code="):][6:22]
-            self.dus[duid] = self.DU(data_file, meta_file, sec_id, title, groupid)
+            #optimisation: if we have loaded self.dus from pickle, we will already have the
+            #data and don't need to parse the MU file
+            if not self.dus.has_key(duid):
+                self.dus[duid] = DU(data_file, meta_file, sec_id, title, groupid)
             msns = self.dus[duid].msns
             if msns:
                 msnlist.extend(msns)
@@ -211,7 +229,7 @@ class FCOMMeta:
             nc = self.notcovered(msnlist)
             if nc:
                 duid = duid.split(".")[0] + ".NA"
-                self.dus[duid] = self.DU("", meta_file, sec_id, title, groupid)
+                self.dus[duid] = DU("", meta_file, sec_id, title, groupid)
                 self.dus[duid].set_msns(nc)
                 duids.append(duid)
         self.sections[sec_id].add_du(tuple(duids))
