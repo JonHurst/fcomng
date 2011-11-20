@@ -37,6 +37,7 @@ class DU:
         self.parent_sid = parent_sid
         self.title = title
         self.groupid = groupid
+        self.href = ""
         #parse metadata file
         e = et.ElementTree(None, g_paths.mus + mu_filename)
         if data_filename:
@@ -78,6 +79,7 @@ class FCOMMeta:
             self.children = []
             self.du_list = []
             self.id = npid
+            self.href = ""
 
 
         def add_child(self, sid):
@@ -342,6 +344,13 @@ class FCOMMeta:
         return self.dus[duid].tdu
 
 
+    def set_href(self, sid_or_duid, href):
+        if type(sid_or_duid) == tuple:
+            self.sections[sid_or_duid].href = href
+        else:
+            self.dus[sid_or_duid].href = href
+
+
     def dump(self):
         print "Sections:\n==========\n"
         for s in self.get_all_sids():
@@ -433,7 +442,7 @@ class FCOMFactory:
         if filename: filename = g_paths.dus + filename
         du_attrib = {"title": self.fcm.get_du_title(du),
                      "href": filename,
-                     "id": du}
+                     "id": "duid" + du}
         if self.fcm.is_tdu(du):
             du_attrib["tdu"] = "tdu"
         tb.start("du", du_attrib)
@@ -496,8 +505,10 @@ class FCOMFactory:
         section_list = self.__build_sid_list__(sid)
         for s in section_list:
             #process each section required for the page
-            tb.start("section", {"sid": ".".join(s),
-                                 "title": self.fcm.get_title(s)})
+            section_attribs = {"sid": "sid" + ".".join(s),
+                               "title": ".".join(s) + ": " + self.fcm.get_title(s)}
+            tb.start("section", section_attribs)
+            self.fcm.set_href(s, filename + "#" + section_attribs["sid"])
             last_groupid = None
             for dul in self.fcm.get_dus(s):
                 #get_dus returns a list of the form [(duid, ...), (duid, ...), ...]
@@ -508,13 +519,15 @@ class FCOMFactory:
                     if last_groupid:
                         tb.end("group")
                     if groupid:
-                        tb.start("group", {"id": groupid,
-                                           "title": self.fcm.get_group_title(groupid)})
+                        group_attribs = {"id": "gid" + groupid,
+                                         "title": self.fcm.get_group_title(groupid)}
+                        tb.start("group", group_attribs)
                     last_groupid = groupid
-                tb.start("du_container", {"id": dul[0].split(".")[0],
+                tb.start("du_container", {"id": "duid" + dul[0].split(".")[0],
                                           "title": self.fcm.get_du_title(dul[0])})
                 for du in dul:
                     self.__process_du__(tb, du)
+                    self.fcm.set_href(du, filename + "#duid" + du)
                 tb.end("du_container")
             if last_groupid: #if last_groupid hasn't been set to None, we were in a group at the end of the section
                 tb.end("group")

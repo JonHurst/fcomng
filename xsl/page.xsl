@@ -61,9 +61,9 @@
 	    <xsl:for-each select="section">
          <p><a>
            <xsl:attribute name="href">
-             #sid<xsl:value-of select="@sid"/>
+             #<xsl:value-of select="@sid"/>
            </xsl:attribute>
-           <xsl:value-of select="@sid"/>: <xsl:value-of select="@title"/>
+           <xsl:value-of select="@title"/>
          </a></p>
        </xsl:for-each>
 	  </div>
@@ -105,18 +105,18 @@
 
 <xsl:template match="section">
   <div class="section">
-    <xsl:attribute name="id">sid<xsl:value-of select="@sid"/></xsl:attribute>
-    <h1 class="sectionheading"><xsl:value-of select="@sid"/>: <xsl:value-of select="@title"/></h1>
+    <xsl:attribute name="id"><xsl:value-of select="@sid"/></xsl:attribute>
+    <h1 class="sectionheading"><xsl:value-of select="@title"/></h1>
     <xsl:if test="count(du_container) + count(group) &gt; 1">
       <div class="duindex">
         <xsl:for-each select="du_container|group">
           <p><a>
             <xsl:choose>
               <xsl:when test="self::du_container">
-                <xsl:attribute name="href">#duid<xsl:value-of select="@id"/></xsl:attribute>
+                <xsl:attribute name="href">#<xsl:value-of select="@id"/></xsl:attribute>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:attribute name="href">#gid<xsl:value-of select="@id"/></xsl:attribute>
+                <xsl:attribute name="href">#<xsl:value-of select="@id"/></xsl:attribute>
               </xsl:otherwise>
             </xsl:choose>
             <xsl:value-of select="@title"/>
@@ -132,7 +132,7 @@
 <xsl:template match="group">
   <div class="group">
     <xsl:attribute name="id">
-      <xsl:text>gid</xsl:text><xsl:value-of select="@id"/>
+      <xsl:value-of select="@id"/>
     </xsl:attribute>
     <h1>
       <xsl:value-of select="@title"/>
@@ -145,7 +145,7 @@
 <xsl:template match="du_container">
   <div class="du_container">
     <xsl:attribute name="id">
-      <xsl:text>duid</xsl:text><xsl:value-of select="@id"/>
+      <xsl:value-of select="@id"/>
     </xsl:attribute>
     <xsl:apply-templates/>
   </div>
@@ -162,7 +162,7 @@
 	<xsl:attribute name="class">main</xsl:attribute>
       </xsl:otherwise>
     </xsl:choose>
-	<xsl:attribute name="id">duid<xsl:value-of select="@id"/></xsl:attribute>
+	<xsl:attribute name="id"><xsl:value-of select="@id"/></xsl:attribute>
     <p class="duident">
       <a>
 	<xsl:attribute name="href"><xsl:value-of select="@href"/></xsl:attribute>
@@ -172,8 +172,7 @@
     <div class="infocontainer">
       <img src="../images/isymbol.gif" alt=""/>
       <div class="info">
-         <p><xsl:text>[</xsl:text><xsl:value-of select="ancestor::section/@sid"/>]: <xsl:value-of
-         select="ancestor::section/@title"/> / DU<xsl:value-of select="@id"/></p>
+         <p><xsl:value-of select="ancestor::section/@title"/>/<xsl:value-of select="substring(@id, 5)"/></p>
         <xsl:if test="applies">
           <p class="applies"><strong>Applies to</strong>: <xsl:value-of select="applies"/></p>
         </xsl:if>
