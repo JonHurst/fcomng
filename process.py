@@ -73,10 +73,11 @@ class FCOMMeta:
 
     class Section:
 
-        def __init__(self, title):
+        def __init__(self, title, npid):
             self.title = title
             self.children = []
             self.du_list = []
+            self.id = npid
 
 
         def add_child(self, sid):
@@ -192,7 +193,7 @@ class FCOMMeta:
     def __process_psl__(self, elem, sec_id):
         i = sec_id + (elem.attrib["pslcode"],)
         self.sections[i] = []
-        section = self.Section(elem.findtext("title"))
+        section = self.Section(elem.findtext("title"), elem.attrib["id"])
         self.sections[i] = section
         if self.sections.has_key(i[:-1]):
             self.sections[i[:-1]].add_child(i)
