@@ -37,7 +37,6 @@ class DU:
         self.parent_sid = parent_sid
         self.title = title
         self.groupid = groupid
-        self.href = ""
         #parse metadata file
         e = et.ElementTree(None, g_paths.mus + mu_filename)
         if data_filename:
@@ -79,7 +78,6 @@ class FCOMMeta:
             self.children = []
             self.du_list = []
             self.id = npid
-            self.href = ""
 
 
         def add_child(self, sid):
@@ -331,6 +329,10 @@ class FCOMMeta:
         return retval
 
 
+    def get_npid(self, sid):
+        return self.sections[sid].id
+
+
     def get_fleet(self):
         return [(X, self.aircraft.aircraft[X]) for X in self.aircraft.aircraft]
 
@@ -357,25 +359,6 @@ class FCOMMeta:
 
     def is_tdu(self, duid):
         return self.dus[duid].tdu
-
-
-    def set_href(self, sid_or_duid, href):
-        if type(sid_or_duid) == tuple:
-            self.sections[sid_or_duid].href = href
-        else:
-            self.dus[sid_or_duid].href = href
-
-
-    def get_href(self, ident):
-        if ident[:2] == 'NP': #a section ident
-            for s in self.sections:
-                if self.sections[s].id == ident:
-                    return self.sections[s].href
-        elif ident[:2] == 'NG':
-            return self.get_href(self.groups[ident].duids[0])
-        elif self.dus.has_key(ident):
-            return self.dus[ident].href
-        return ""
 
 
     def get_revisions(self):
@@ -414,6 +397,7 @@ class FCOMFactory:
         self.versionstring = versiondate[:4] + "-" + versiondate[4:6] + "-" + versiondate[6:]
         self.pagelist = self.fcm.get_leaves(3)
         self.pageset = set(self.pagelist)
+        self.hrefs = {}
         self.duref_lookup = {}
         self.__build_duref_lookup__()
 
@@ -430,6 +414,7 @@ class FCOMFactory:
                 nextsid = self.pagelist[c + 1]
             self.make_page(c, sid ,prevsid, nextsid)
         self.make_revision_list() # this must be done last since make_page populates hrefs
+
 
     def __build_duref_lookup__(self):
         for sid in self.pagelist:
@@ -540,7 +525,7 @@ class FCOMFactory:
             section_attribs = {"sid": "sid" + ".".join(s),
                                "title": ".".join(s) + ": " + self.fcm.get_title(s)}
             tb.start("section", section_attribs)
-            self.fcm.set_href(s, filename + "#" + section_attribs["sid"])
+            self.hrefs[self.fcm.get_npid(s)] = filename + "#" + section_attribs["sid"]
             last_groupid = None
             for dul in self.fcm.get_dus(s):
                 #get_dus returns a list of the form [(duid, ...), (duid, ...), ...]
@@ -554,12 +539,15 @@ class FCOMFactory:
                         group_attribs = {"id": "gid" + groupid,
                                          "title": self.fcm.get_group_title(groupid)}
                         tb.start("group", group_attribs)
+                        self.hrefs[groupid] = filename + "#gid" + groupid
                     last_groupid = groupid
-                tb.start("du_container", {"id": "duid" + dul[0].split(".")[0],
+                containerid = dul[0].split(".")[0]
+                tb.start("du_container", {"id": "duid" + containerid,
                                           "title": self.fcm.get_du_title(dul[0])})
+                self.hrefs[containerid] = filename + "#duid" + containerid
                 for du in dul:
                     self.__process_du__(tb, du)
-                    self.fcm.set_href(du, filename + "#duid" + du.split(".")[0])
+                    self.hrefs[du] = filename + "#duid" + containerid
                 tb.end("du_container")
             if last_groupid: #if last_groupid hasn't been set to None, we were in a group at the end of the section
                 tb.end("group")
@@ -693,7 +681,7 @@ class FCOMFactory:
         outstr = "<html><head></head><body><ul>"
         revlist = self.fcm.get_revisions()
         for r in revlist:
-            href = self.fcm.get_href(r[0])
+            href = self.hrefs.get(r[0])
             if href:
                 outstr += "<li><a href='%s'>%s</a></li>" % (href, str(r))
             else:
