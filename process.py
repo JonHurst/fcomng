@@ -90,6 +90,17 @@ class FCOMMeta:
             self.du_list.append(du_filename_tuple)
 
 
+    class Group:
+
+        def __init__(self, title):
+            self.title = title
+            self.duids = []
+
+
+        def add_duid(self, duid):
+            self.duids.append(duid)
+
+
     class Aircraft:
 
         def __init__(self, aat):
@@ -175,7 +186,7 @@ class FCOMMeta:
             du_pickles = open(du_pickle_path)
             self.dus = pickle.Unpickler(du_pickles).load()
             dus_from_pickle = True
-        self.group_titles = {}
+        self.groups = {}
         self.top_level_sids = []
         self.revdict = {}
         print "Scanning metadata"
@@ -227,6 +238,8 @@ class FCOMMeta:
             if msns:
                 msnlist.extend(msns)
             duids.append(duid)
+            if groupid:
+                self.groups[groupid].add_duid(duid)
         #we may have to create a fake du if we have a set if dus that only cover part of the fleet
         if msnlist:
             nc = self.notcovered(msnlist)
@@ -241,7 +254,7 @@ class FCOMMeta:
     def __process_group__(self, elem, sec_id):
         #note: groups don't nest, and they only contain du-inv sections
         groupid = elem.attrib["id"]
-        self.group_titles[groupid] = elem.find("title").text
+        self.groups[groupid] = self.Group(elem.find("title").text)
         for s in elem.findall("du-inv"):
             self.__process_duinv__(s, sec_id, groupid)
 
@@ -280,7 +293,7 @@ class FCOMMeta:
     def get_du_filename(self, duid):
         return self.dus[duid].data_filename
     def get_group_title(self, groupid):
-        return self.group_titles.get(groupid)
+        return self.groups[groupid].title
 
 
     def get_dus(self, sid):
@@ -371,6 +384,9 @@ class FCOMMeta:
         print self.affected("4556", "00000284.0003001")
         print self.applies("00000284.0003001")
         print self.applies("00000879.0004001")
+        print "\n\nGroups\n===========\n"
+        for k in sorted(self.groups):
+            print k, self.groups[k].duids
 
 
 class FCOMFactory:
