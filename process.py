@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # coding=utf-8
 
-import xml.etree.ElementTree as et
+import xml.etree.cElementTree as et
 import subprocess
 import re
 import sys
