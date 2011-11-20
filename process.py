@@ -267,9 +267,11 @@ class FCOMMeta:
         for rev in rev_marks.findall("rev"):
             mo = path_reo.match(rev.attrib["path"])
             if not mo: print "regexp error"; continue
+            change = rev.attrib["chg"]
+            if change == "E": continue #not interested if only change is aircraft affected
             self.revdict[mo.group(2)] = self.RevisionRecord(
                 mo.group(1),
-                rev.attrib["chg"],
+                change,
                 True if rev.attrib["anchor"] == "true" else False)
 
 
@@ -364,6 +366,20 @@ class FCOMMeta:
             self.dus[sid_or_duid].href = href
 
 
+    def get_href(self, ident):
+        if ident[:2] == 'NP': #a section ident
+            for s in self.sections:
+                if self.sections[s].id == ident:
+                    return self.sections[s].href
+        elif ident[:2] == 'NG':
+            return self.get_href(self.groups[ident].duids[0])
+        elif self.dus.has_key(ident):
+            return self.dus[ident].href
+        return ""
+
+
+    def get_revisions(self):
+        return [(k, self.revdict[k].revclass, self.revdict[k].change) for k in sorted(self.revdict)]
     def dump(self):
         print "Sections:\n==========\n"
         for s in self.get_all_sids():
@@ -413,7 +429,7 @@ class FCOMFactory:
             if c < len(self.pagelist) - 1:
                 nextsid = self.pagelist[c + 1]
             self.make_page(c, sid ,prevsid, nextsid)
-
+        self.make_revision_list() # this must be done last since make_page populates hrefs
 
     def __build_duref_lookup__(self):
         for sid in self.pagelist:
@@ -543,7 +559,7 @@ class FCOMFactory:
                                           "title": self.fcm.get_du_title(dul[0])})
                 for du in dul:
                     self.__process_du__(tb, du)
-                    self.fcm.set_href(du, filename + "#duid" + du)
+                    self.fcm.set_href(du, filename + "#duid" + du.split(".")[0])
                 tb.end("du_container")
             if last_groupid: #if last_groupid hasn't been set to None, we were in a group at the end of the section
                 tb.end("group")
@@ -670,6 +686,21 @@ class FCOMFactory:
              ",".join(["'%s':'%s'" % X for X in self.fcm.get_fleet()]) +
              "};\n"))
 
+
+
+    def make_revision_list(self):
+        global g_paths
+        outstr = "<html><head></head><body><ul>"
+        revlist = self.fcm.get_revisions()
+        for r in revlist:
+            href = self.fcm.get_href(r[0])
+            if href:
+                outstr += "<li><a href='%s'>%s</a></li>" % (href, str(r))
+            else:
+                outstr += "<li>%s</li>" % str(r)
+        outstr += "</ul></body></html>"
+        of = open(g_paths.html_output + "revisions.html", "w")
+        of.write(outstr)
 
 
 def main():
