@@ -6,3 +6,5 @@ ILLUS
 image-library
 scripts/fleet.js
 *.pyc
+pickles
+build-error.log
