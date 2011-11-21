@@ -367,10 +367,6 @@ class FCOMMeta:
         return self.dus[duid].tdu
 
 
-    def get_revisions(self):
-        return [(k, self.revdict[k].revclass, self.revdict[k].change) for k in sorted(self.revdict)]
-
-
     def get_revision_code(self, ident):
         if self.revdict.has_key(ident):
             return self.revdict[ident].change
@@ -412,6 +408,7 @@ class FCOMFactory:
         self.pagelist = self.fcm.get_leaves(3)
         self.pageset = set(self.pagelist)
         self.hrefs = {}
+        self.revisions = []
         self.duref_lookup = {}
         self.__build_duref_lookup__()
 
@@ -478,6 +475,7 @@ class FCOMFactory:
         code = self.fcm.get_revision_code(du)
         if code:
             du_attrib["revcode"] = code
+            self.revisions.append(du)
         if self.fcm.is_tdu(du):
             du_attrib["tdu"] = "tdu"
         tb.start("du", du_attrib)
@@ -696,15 +694,31 @@ class FCOMFactory:
 
     def make_revision_list(self):
         global g_paths
-        outstr = "<html><head></head><body><ul>"
-        revlist = self.fcm.get_revisions()
-        for r in revlist:
-            href = self.hrefs.get(r[0])
-            if href:
-                outstr += "<li><a href='%s'>%s</a></li>" % (href, str(r))
+        print "Writing revision list"
+        outstr = "<html><head></head><body>"
+        #split dus into lists within the same section
+        sectioned_dus = [[self.fcm.get_du_parent(self.revisions[0]), self.revisions[0]]]
+        for duid in self.revisions[1:]:
+            du_section = self.fcm.get_du_parent(duid)
+            if du_section == sectioned_dus[-1][0]:
+                sectioned_dus[-1].append(duid)
             else:
-                outstr += "<li>%s</li>" % str(r)
-        outstr += "</ul></body></html>"
+                sectioned_dus.append([du_section, duid])
+        for section in sectioned_dus:
+            section_title = ""
+            for c in range(1, len(section[0])):
+                section_title += self.fcm.get_title(section[0][:c]) + " : "
+            section_title = section_title[:-3]
+            outstr += "<h2>%s: %s</h2><ul>" % (".".join(section[0]),
+                                               section_title)
+            for duid in section[1:]:
+                outstr += "<li>(%s) %s: <a href='%s'>%s</a></li>" % (
+                    self.fcm.get_revision_code(duid)[-1:],
+                    duid,
+                    self.hrefs[duid],
+                    self.fcm.get_du_title(duid))
+            outstr += "</ul>"
+        outstr += "</body></html>"
         of = open(g_paths.html_output + "revisions.html", "w")
         of.write(outstr)
 
