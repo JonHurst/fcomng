@@ -47,6 +47,12 @@ class DU:
             self.tdu = True
         self.linked_du = e.getroot().attrib["linked-du-ident"]
         self.affected_by = None
+        self.revs = []
+        for r in e.findall("revisions/content-revisions/rev-marks/rev"):
+            path = r.attrib["path"]
+            if path == "/": continue
+            self.revs.append(path)
+        self.revs.sort()
 
 
     def __get_msns__(self, e):
@@ -298,6 +304,10 @@ class FCOMMeta:
         return self.dus[duid].revdate
 
 
+    def get_du_revs(self, duid):
+        return self.dus[duid].revs
+
+
     def get_group_title(self, groupid):
         return self.groups[groupid].title
 
@@ -473,12 +483,20 @@ class FCOMFactory:
                      "id": "duid" + du,
                      "revdate": self.fcm.get_du_revdate(du) }
         code = self.fcm.get_revision_code(du)
+        revs = self.fcm.get_du_revs(du)
         if code:
             du_attrib["revcode"] = code
-            self.revisions.append(du)
+            #only add to revision list if there are some revision paths in dumdata
+            if code[-1:] != "R" or revs: self.revisions.append(du)
         if self.fcm.is_tdu(du):
             du_attrib["tdu"] = "tdu"
         tb.start("du", du_attrib)
+        if revs:
+            tb.start("revs", {})
+            for r in revs:
+                tb.start("rev", {"path": r})
+                tb.end("rev")
+            tb.end("revs")
         applies = self.fcm.applies(du)
         if applies:
             tb.start("applies", {})
@@ -712,11 +730,13 @@ class FCOMFactory:
             outstr += "<h2>%s: %s</h2><ul>" % (".".join(section[0]),
                                                section_title)
             for duid in section[1:]:
-                outstr += "<li>(%s) %s: <a href='%s'>%s</a></li>" % (
-                    self.fcm.get_revision_code(duid)[-1:],
+                code = self.fcm.get_revision_code(duid)[-1:]
+                outstr += "<li>(%s) %s: <a href='%s'>%s</a> %s </li>" % (
+                    code,
                     duid,
                     self.hrefs[duid],
-                    self.fcm.get_du_title(duid))
+                    self.fcm.get_du_title(duid),
+                    "<a href='../oldhtml/%s'>(old)</a>" % self.hrefs[duid] if code[0] == 'R' else "")
             outstr += "</ul>"
         outstr += "</body></html>"
         of = open(g_paths.html_output + "revisions.html", "w")
