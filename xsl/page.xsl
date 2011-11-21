@@ -172,7 +172,9 @@
     <div class="infocontainer">
       <img src="../images/isymbol.gif" alt=""/>
       <div class="info">
-         <p><xsl:value-of select="ancestor::section/@title"/>/<xsl:value-of select="substring(@id, 5)"/></p>
+         <p><xsl:value-of select="ancestor::section/@title"/>/<xsl:value-of select="substring(@id,
+         5)"/></p>
+         <p><strong>Revised: </strong><xsl:value-of select="@revdate"/></p>
         <xsl:if test="applies">
           <p class="applies"><strong>Applies to</strong>: <xsl:value-of select="applies"/></p>
         </xsl:if>

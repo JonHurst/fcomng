@@ -31,12 +31,13 @@ g_paths = Paths()
 
 class DU:
 
-    def __init__(self,  data_filename, mu_filename, parent_sid, title, groupid):
+    def __init__(self,  data_filename, mu_filename, parent_sid, title, groupid, revdate):
         global g_paths
         self.data_filename = data_filename
         self.parent_sid = parent_sid
         self.title = title
         self.groupid = groupid
+        self.revdate = revdate
         #parse metadata file
         e = et.ElementTree(None, g_paths.mus + mu_filename)
         if data_filename:
@@ -225,13 +226,14 @@ class FCOMMeta:
             data_file = os.path.basename(s.find("sol-content-ref").attrib["href"])
             meta_file = os.path.basename(s.find("sol-mdata-ref").attrib["href"])
             title = elem.find("title").text
+            revdate = s.find("sol-content-ref").attrib["revdate"]
             #find duid - unfortunately only available in du file as root element code
             s = open(g_paths.dus + data_file).read(200)
             duid = s[s.find("code="):][6:22]
             #optimisation: if we have loaded self.dus from pickle, we will already have the
             #data and don't need to parse the MU file
             if not self.dus.has_key(duid):
-                self.dus[duid] = DU(data_file, meta_file, sec_id, title, groupid)
+                self.dus[duid] = DU(data_file, meta_file, sec_id, title, groupid, revdate)
             msns = self.dus[duid].msns
             if msns:
                 msnlist.extend(msns)
@@ -243,7 +245,7 @@ class FCOMMeta:
             nc = self.notcovered(msnlist)
             if nc:
                 duid = duid.split(".")[0] + ".NA"
-                self.dus[duid] = DU("", meta_file, sec_id, title, groupid)
+                self.dus[duid] = DU("", meta_file, sec_id, title, groupid, "N/A")
                 self.dus[duid].set_msns(nc)
                 duids.append(duid)
         self.sections[sec_id].add_du(tuple(duids))
@@ -292,6 +294,10 @@ class FCOMMeta:
 
     def get_du_filename(self, duid):
         return self.dus[duid].data_filename
+    def get_du_revdate(self, duid):
+        return self.dus[duid].revdate
+
+
     def get_group_title(self, groupid):
         return self.groups[groupid].title
 
@@ -459,7 +465,8 @@ class FCOMFactory:
         if filename: filename = g_paths.dus + filename
         du_attrib = {"title": self.fcm.get_du_title(du),
                      "href": filename,
-                     "id": "duid" + du}
+                     "id": "duid" + du,
+                     "revdate": self.fcm.get_du_revdate(du)}
         if self.fcm.is_tdu(du):
             du_attrib["tdu"] = "tdu"
         tb.start("du", du_attrib)
