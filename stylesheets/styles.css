@@ -688,3 +688,8 @@ a img
 {
     border:none;
 }
+
+span.rev
+{
+    color: red;
+}

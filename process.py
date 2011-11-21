@@ -369,6 +369,14 @@ class FCOMMeta:
 
     def get_revisions(self):
         return [(k, self.revdict[k].revclass, self.revdict[k].change) for k in sorted(self.revdict)]
+
+
+    def get_revision_code(self, ident):
+        if self.revdict.has_key(ident):
+            return self.revdict[ident].change
+        return None
+
+
     def dump(self):
         print "Sections:\n==========\n"
         for s in self.get_all_sids():
@@ -466,7 +474,10 @@ class FCOMFactory:
         du_attrib = {"title": self.fcm.get_du_title(du),
                      "href": filename,
                      "id": "duid" + du,
-                     "revdate": self.fcm.get_du_revdate(du)}
+                     "revdate": self.fcm.get_du_revdate(du) }
+        code = self.fcm.get_revision_code(du)
+        if code:
+            du_attrib["revcode"] = code
         if self.fcm.is_tdu(du):
             du_attrib["tdu"] = "tdu"
         tb.start("du", du_attrib)

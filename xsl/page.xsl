@@ -174,7 +174,20 @@
       <div class="info">
          <p><xsl:value-of select="ancestor::section/@title"/>/<xsl:value-of select="substring(@id,
          5)"/></p>
-         <p><strong>Revised: </strong><xsl:value-of select="@revdate"/></p>
+         <p><strong>Revised: </strong>
+         <xsl:choose>
+           <xsl:when test="@revcode">
+             <span class="rev"><xsl:value-of select="@revdate"/>
+             <xsl:text> (</xsl:text>
+             <xsl:value-of select="@revcode"/>
+             <xsl:text>)</xsl:text>
+             </span>
+           </xsl:when>
+           <xsl:otherwise>
+             <xsl:value-of select="@revdate"/>
+           </xsl:otherwise>
+         </xsl:choose>
+         </p>
         <xsl:if test="applies">
           <p class="applies"><strong>Applies to</strong>: <xsl:value-of select="applies"/></p>
         </xsl:if>
