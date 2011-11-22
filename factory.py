@@ -340,7 +340,8 @@ class FCOMFactory:
             else:
                 sectioned_dus.append([du_section, duid])
         tb = et.TreeBuilder()
-        tb.start("revisions", {"title": "Revision list"})
+        tb.start("revisions", {"title": "Revision list",
+                               "version": self.versionstring})
         for section in sectioned_dus:
             section_title = []
             for c in range(1, len(section[0])):
