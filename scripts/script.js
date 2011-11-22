@@ -64,51 +64,35 @@ function change_tab(event) {
 }
 
 
-function insert_tabs(tabs) {
-  var tagdiv = document.createElement("div");
-  tagdiv.className = "tags";
-  var class_string = "main active";
-  var label_length = 80/tabs.length;
-  for(var i=0; i<tabs.length; i++) {
-    var anchor = document.createElement("a");
-    anchor.setAttribute("href", "#duid" + tabs[i].linkend);
-    anchor.className = class_string;
-    anchor.onclick = change_tab;
-    var label = tabs[i].label.slice(0, label_length);
-    if(label.length < tabs[i].label.length) {
-      label = label.slice(0, -1) + "\u2026";
-    }
-    if(anchor.textContent != undefined)
-      anchor.textContent = label;
-    else //fix for IE
-      anchor.innerText = label;
-    tagdiv.appendChild(anchor);
-    class_string = "alternate";
-  }
-  //find du container
-  var du_container = document.getElementById("duid" + tabs[0].linkend).parentNode;
-  du_container.insertBefore(tagdiv, du_container.firstChild);
-}
-
-
 function initial_fold() {
   var msn = get_active_msn();
   for(var i=0; i<folding.length; i++) {
     var du_container = folding[i];
-    var tabs = [];
+    var tagdiv = document.getElementById("duid" + du_container[0][0]).parentNode.firstChild;
+    var tags = tagdiv.children;
+    for(var k=0;k<tags.length;k++) {
+      tags[k].onclick = change_tab;
+    }
     for(var j=0; j<du_container.length; j++) {
       var du = du_container[j];
       var msn_found = du[1].indexOf(msn);
       if(msn_found == -1) {
         var ob = document.getElementById("duid" + du[0]);
         ob.className = ob.className.replace(new RegExp("main"), "alternate folded");
-        tabs.push({linkend:du[0], label:du[2]});
       }
       else {
-        tabs.unshift({linkend:du[0], label:du[2]});
+        for(k=0; k<tags.length; k++) {
+          if(tags[k].href.split("#duid")[1] == du[0]) {
+            tags[k].className = "main active";
+            break;
+          }
+        }
+        if(k != 0) {
+          var main_tag = tagdiv.removeChild(tags[k]);
+          tagdiv.insertBefore(main_tag, tagdiv.firstChild);
+        }
       }
     }
-    insert_tabs(tabs);
   }
   add_eventlisteners_for_ipad();
 }

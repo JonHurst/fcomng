@@ -147,6 +147,23 @@
     <xsl:attribute name="id">
       <xsl:value-of select="@id"/>
     </xsl:attribute>
+    <xsl:if test="count(du) > 1">
+      <xsl:variable name="max_width" select="floor(80 div count(du))"/>
+      <div class="tags">
+      <xsl:for-each select="du">
+        <a class="alternate">
+          <xsl:attribute name="href">
+            <xsl:text>#</xsl:text><xsl:value-of select="@id"/>
+          </xsl:attribute>
+          <xsl:variable name="label" select="substring(applies, 1, $max_width)"/>
+          <xsl:value-of select="$label"/>
+          <xsl:if test="string-length($label) = $max_width">
+            <xsl:text>&#x2026;</xsl:text>
+          </xsl:if>
+        </a>
+      </xsl:for-each>
+      </div>
+    </xsl:if>
     <xsl:apply-templates/>
   </div>
 </xsl:template>
