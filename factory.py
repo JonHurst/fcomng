@@ -91,12 +91,6 @@ class FCOMFactory:
         if self.fcm.is_tdu(du):
             du_attrib["tdu"] = "tdu"
         tb.start("du", du_attrib)
-        if revs:
-            tb.start("revs", {})
-            for r in revs:
-                tb.start("rev", {"path": r})
-                tb.end("rev")
-            tb.end("revs")
         applies = self.fcm.applies(du)
         if applies:
             tb.start("applies", {})

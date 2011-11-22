@@ -188,13 +188,6 @@
            </xsl:otherwise>
          </xsl:choose>
          </p>
-         <xsl:if test="revs">
-           <ul>
-           <xsl:for-each select="revs/rev">
-             <li><xsl:value-of select="@path"/></li>
-           </xsl:for-each>
-           </ul>
-         </xsl:if>
         <xsl:if test="applies">
           <p class="applies"><strong>Applies to</strong>: <xsl:value-of select="applies"/></p>
         </xsl:if>
