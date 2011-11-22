@@ -94,10 +94,10 @@
   <xsl:choose>
     <xsl:when test="@unit = 'FL' or @unit = 'M'">
       <xsl:value-of select="@unit"/>
-      <xsl:value-of select="."/>
+      <xsl:apply-templates/>
     </xsl:when>
     <xsl:otherwise>
-      <xsl:value-of select="."/>
+      <xsl:apply-templates/>
       <xsl:value-of select="@unit"/>
     </xsl:otherwise>
   </xsl:choose>
@@ -764,7 +764,7 @@
 </xsl:template>
 
 <xsl:template match="ecamsyspage">
-  <p><xsl:value-of select="."/></p>
+  <p><xsl:apply-templates/></p>
 </xsl:template>
 
 <!-- fwspage -->
@@ -1002,17 +1002,17 @@
 
 <xsl:template match="approbation-authority">
   <!-- (#PCDATA) -->
-  <p>Authority: <xsl:value-of select="."/></p>
+  <p>Authority: <xsl:apply-templates/></p>
 </xsl:template>
 
 <xsl:template match="approval-date">
   <!-- (#PCDATA) -->
-  <p>Date: <xsl:value-of select="."/></p>
+  <p>Date: <xsl:apply-templates/></p>
 </xsl:template>
 
 <xsl:template match="approval-reference">
   <!-- (#PCDATA) -->
-  <p>Reference: <xsl:value-of select="."/></p>
+  <p>Reference: <xsl:apply-templates/></p>
 </xsl:template>
 
 <xsl:template match="approved-by">

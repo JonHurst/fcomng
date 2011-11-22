@@ -6,6 +6,7 @@ from globals import *
 import xml.etree.cElementTree as et
 import subprocess
 import re
+import tempfile
 
 class FCOMFactory:
 
@@ -153,6 +154,7 @@ class FCOMFactory:
         tb = et.TreeBuilder()
         self.__start_page__(tb, sid, prevsid, nextsid)
         section_list = self.__build_sid_list__(sid)
+        revs = []
         for s in section_list:
             #process each section required for the page
             section_attribs = {"sid": "sid" + ".".join(s),
@@ -181,14 +183,22 @@ class FCOMFactory:
                 for du in dul:
                     self.__process_du__(tb, du)
                     self.hrefs[du] = filename + "#duid" + containerid
+                    revs.extend(self.fcm.get_du_revs(du))
                 tb.end("du_container")
             if last_groupid: #if last_groupid hasn't been set to None, we were in a group at the end of the section
                 tb.end("group")
             tb.end("section")
         tb.end("page")
-        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "page.xsl", "-"],
+        stylesheet_name = g_paths.xsldir + "page.xsl"
+        tf = None
+        if revs:
+            tf = self.__make_temporary_stylesheet(stylesheet_name, revs)
+            print open(tf.name).read()
+            stylesheet_name = tf.name
+        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", stylesheet_name, "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
+        if tf: os.unlink(tf.name)
         #create javascript variables for controlling folding
         page_string = page_string.replace("<!--jsvariable-->",
                                           self.__build_javascript_folding_code__(section_list))
@@ -198,6 +208,19 @@ class FCOMFactory:
         page_string = page_string.replace("<!--linkbar-->", self.__build_linkbar__(sid))
         of = open(g_paths.html_output + filename, "w")
         of.write(page_string)
+
+    def __make_temporary_stylesheet(self, stylesheet_name, revs):
+        stylesheet = """\
+<?xml version="1.0"?>
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:import href="%s"/>
+<xsl:template match="%s"><xsl:call-template name="revised_text"/></xsl:template>
+</xsl:stylesheet>""" % (stylesheet_name, " | ".join([r[2:] for r in revs]))
+        tf = tempfile.NamedTemporaryFile(delete=False)
+        tf.write(stylesheet)
+        tf.close()
+        return tf
+
 
 
     def __make_page_title__(self, sid):

@@ -216,4 +216,11 @@
   </div>
 </xsl:template>
 
+
+<xsl:template name="revised_text">
+  <span class="rev">
+    <xsl:value-of select="."/>
+  </span>
+</xsl:template>
+
 </xsl:stylesheet>
