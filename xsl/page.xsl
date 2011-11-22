@@ -164,6 +164,18 @@
       </xsl:for-each>
       </div>
     </xsl:if>
+    <xsl:if test="@overridden_by">
+      <div class="tdu_warning">
+        <p>This DU is overridden by TDU
+        <a>
+          <xsl:attribute name="href">
+            <xsl:text>#duid</xsl:text>
+            <xsl:value-of select="@overridden_by"/>
+          </xsl:attribute>
+          <xsl:value-of select="@overridden_by"/>
+        </a></p>
+      </div>
+    </xsl:if>
     <xsl:apply-templates/>
   </div>
 </xsl:template>

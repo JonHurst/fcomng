@@ -694,3 +694,11 @@ span.rev
 {
     background-color: #FFFF90;
 }
+
+div.tdu_warning
+{
+    border: solid yellow 10px;
+    font-size: 1.4em;
+    font-weight: bold;
+    text-align: center;
+}

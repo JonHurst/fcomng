@@ -179,6 +179,10 @@ class FCOMMeta:
             print "Scanning", psl.attrib["pslcode"]
             self.top_level_sids.append((psl.attrib["pslcode"],))
             self.__process_psl__(psl, ())
+        self.overridden_ducontainers = {}
+        for duid in self.dus:
+            linked_du = self.dus[duid].linked_du
+            if linked_du: self.overridden_ducontainers[linked_du] = duid.split(".")[0]
         #optimisation
         if not dus_from_pickle:
             du_pickles = open(du_pickle_path, "w")
@@ -357,6 +361,10 @@ class FCOMMeta:
         if self.revdict.has_key(ident):
             return self.revdict[ident].change
         return None
+
+
+    def get_overriding(self, ident):
+        return self.overridden_ducontainers.get(ident)
 
 
     def dump(self):

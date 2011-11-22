@@ -171,8 +171,12 @@ class FCOMFactory:
                         self.hrefs[groupid] = filename + "#gid" + groupid
                     last_groupid = groupid
                 containerid = dul[0].split(".")[0]
-                tb.start("du_container", {"id": "duid" + containerid,
-                                          "title": self.fcm.get_du_title(dul[0])})
+                du_container_attrib = {"id": "duid" + containerid,
+                                       "title": self.fcm.get_du_title(dul[0])}
+                overriding_tdu = self.fcm.get_overriding(containerid)
+                if overriding_tdu:
+                    du_container_attrib["overridden_by"] = overriding_tdu
+                tb.start("du_container", du_container_attrib)
                 self.hrefs[containerid] = filename + "#duid" + containerid
                 for du in dul:
                     self.__process_du__(tb, du)
