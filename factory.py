@@ -193,7 +193,6 @@ class FCOMFactory:
         tf = None
         if revs:
             tf = self.__make_temporary_stylesheet(stylesheet_name, revs)
-            print open(tf.name).read()
             stylesheet_name = tf.name
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", stylesheet_name, "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
@@ -269,6 +268,9 @@ class FCOMFactory:
         tb = et.TreeBuilder()
         tb.start("index", {"title": "Contents",
                            "version": self.versionstring})
+        tb.start("page", {"href": "revisions.html"})
+        tb.data("Revision list")
+        tb.end("page")
         for s in self.fcm.get_leaves(1):
             self.__recursive_add_section__(s, tb)
         tb.end("index")
@@ -335,7 +337,6 @@ class FCOMFactory:
     def make_revision_list(self):
         global g_paths
         print "Writing revision list"
-        outstr = "<html><head></head><body>"
         #split dus into lists within the same section
         sectioned_dus = [[self.fcm.get_du_parent(self.revisions[0]), self.revisions[0]]]
         for duid in self.revisions[1:]:
@@ -344,22 +345,25 @@ class FCOMFactory:
                 sectioned_dus[-1].append(duid)
             else:
                 sectioned_dus.append([du_section, duid])
+        tb = et.TreeBuilder()
+        tb.start("revisions", {"title": "Revision list"})
         for section in sectioned_dus:
-            section_title = ""
+            section_title = []
             for c in range(1, len(section[0])):
-                section_title += self.fcm.get_title(section[0][:c]) + " : "
-            section_title = section_title[:-3]
-            outstr += "<h2>%s: %s</h2><ul>" % (".".join(section[0]),
-                                               section_title)
+                section_title.append(self.fcm.get_title(section[0][:c]))
+            section_title = " : ".join(section_title)
+            tb.start("section", {"title": ".".join(section[0]) + " " + section_title})
             for duid in section[1:]:
-                code = self.fcm.get_revision_code(duid)[-1:]
-                outstr += "<li>(%s) %s: <a href='%s'>%s</a> %s </li>" % (
-                    code,
-                    duid,
-                    self.hrefs[duid],
-                    self.fcm.get_du_title(duid),
-                    "<a href='../oldhtml/%s'>(old)</a>" % self.hrefs[duid] if code[0] == 'R' else "")
-            outstr += "</ul>"
-        outstr += "</body></html>"
+                tb.start("rev", {"code": self.fcm.get_revision_code(duid)[-1:],
+                                 "duid": duid,
+                                 "href": self.hrefs[duid],
+                                 "title": self.fcm.get_du_title(duid)})
+                tb.end("rev")
+            tb.end("section")
+        tb.end("revisions")
+        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "revisions.xsl", "-"],
+                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE
+                                  ).communicate(et.tostring(tb.close(), "utf-8"))[0]
+        page_string = page_string.replace("<!--linkbar-->", self.__build_linkbar__(("REV",)))
         of = open(g_paths.html_output + "revisions.html", "w")
-        of.write(outstr)
+        of.write(page_string)
