@@ -95,6 +95,15 @@ function initial_fold() {
     }
   }
   add_eventlisteners_for_ipad();
+  //With long pages the ...#duid... url was jumping to the wrong place - force
+  //it into view after processing is complete
+  var linkjump = window.location.hash.slice(1);
+  if (linkjump) {
+    var targetElement = document.getElementById(linkjump);
+    targetElement.scrollIntoView();
+  }
+
+
 }
 
 
