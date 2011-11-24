@@ -46,8 +46,8 @@ keys. The identifier can be either a DU identifier
 (e.g. '00001234'), a group identifier (e.g. NG12345), a section
 identifier (e.g. NP02699) or a section tuple (e.g. ('DSC', '22',
 '40'). Each dictionary entry references an object with at least a
-parentID attribute and a list of childID attributes. Other useful data
-is stored with this object as appropriate.
+parentID attribute, a list of childID attributes and a title. Other
+useful data is stored with this object as appropriate.
 
 """
 from globals import *
