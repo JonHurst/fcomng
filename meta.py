@@ -55,38 +55,51 @@ import cPickle as pickle
 import re
 
 
-class _DU:
+class _Node:
 
-    def __init__(self,  data_filename, mu_filename, parent_sid, title, groupid, revdate):
-        global g_paths
-        self.data_filename = data_filename
-        self.parent_sid = parent_sid
+    def __init__(self, parent, title):
+        self.parent = parent
+        self.children = []
         self.title = title
-        self.groupid = groupid
+
+
+    def add_child(self, child_id):
+        self.children.append(child_id)
+
+
+class _DU(_Node):
+
+    node_type = "du"
+
+    def __init__(self, parent, title, data_filename, mu_filename, revdate):
+        global g_paths
+        _Node.__init__(self, parent, title)
+        self.data_filename = data_filename
         self.revdate = revdate
         #parse metadata file
         e = et.ElementTree(None, g_paths.mus + mu_filename)
+        #extract ident - this is the easiest place to get it from
         self.ident = e.getroot().attrib["code"]
+        #extract aircraft applicability
         if data_filename:
-            self.msns = self.__get_msns__(e)
-        self.tdu = False
-        if e.getroot().attrib["tdu"] == "true":
-            self.tdu = True
+            self.msns = self._get_msns(e)
+        #extract tdu info
+        self.tdu = True if e.getroot().attrib["tdu"] == "true" else False
         self.linked_du = e.getroot().attrib["linked-du-ident"]
-        self.affected_by = None
+        #extract revision info
         self.revs = []
         for r in e.findall("revisions/content-revisions/rev-marks/rev"):
             path = r.attrib["path"]
             if path == "/": continue
-            self.revs.append(path)
+            if r.attrib["chg"][-1:] == "N": path += "/"
+            self.revs.append(path + "/text()")
         self.revs.sort()
 
 
-    def __get_msns__(self, e):
-        m = e.find("effect").find("aircraft-ranges").find("effact").find("aircraft-range")
-        if not et.iselement(m):
-            msns = None
-        else:
+    def _get_msns(self, e):
+        m = e.find("effect/aircraft-ranges/effact/aircraft-range")
+        msns = None
+        if et.iselement(m):
             msns = []
             for msn in m.text.split(" "):
                 #supposition: a pair of numbers together indicates all aircraft with MSNs between
@@ -99,38 +112,29 @@ class _DU:
         return msns
 
 
-    def set_msns(self, msnlist):
-        self.msns = msnlist
+class _DU_Container(_Node):
+
+    node_type = "du_container"
+
+    def __init__(self, parent, title):
+        _Node.__init__(self, parent, title)
+        self.overridden_by = None
 
 
+class _Section(_Node):
+
+    node_type = "section"
+
+    def __init__(self, parent, title, pslcode):
+        _Node.__init__(self, parent, title)
+        self.pslcode = pslcode
 
 
-class _Section:
+class _Group(_Node):
+    node_type = "group"
+    def __init__(self, parent, title):
+        _Node.__init__(self, parent, title)
 
-    def __init__(self, title, npid):
-        self.title = title
-        self.children = []
-        self.du_list = []
-        self.id = npid
-
-
-    def add_child(self, sid):
-        self.children.append(sid)
-
-
-    def add_du(self, du_filename_tuple):
-        self.du_list.append(du_filename_tuple)
-
-
-class _Group:
-
-    def __init__(self, title):
-        self.title = title
-        self.duids = []
-
-
-    def add_duid(self, duid):
-        self.duids.append(duid)
 
 
 class _Aircraft:
@@ -208,85 +212,94 @@ class _RevisionRecord:
 class FCOMMeta:
 
 
-    def __init__(self):
+    def __init__(self, use_pickle=False):
         global g_paths
-        self.sections = {}
-        self.dus = {}
-        self.groups = {}
-        self.top_level_sids = []
-        self.revdict = {}
         print "Scanning metadata"
-        self.control = et.ElementTree(None, g_paths.control)
-        self.global_meta = et. ElementTree(None, g_paths.global_meta)
-        self.__build_revdict__(self.global_meta.find("revisions"))
-        self.aircraft = _Aircraft(self.global_meta.find("aat"))
-        for psl in self.control.getroot().findall("psl"):
-            print "Scanning", psl.attrib["pslcode"]
-            self.top_level_sids.append((psl.attrib["pslcode"],))
-            self.__process_psl__(psl, ())
-        self.overridden_ducontainers = {}
-        for duid in self.dus:
-            linked_du = self.dus[duid].linked_du
-            if linked_du: self.overridden_ducontainers[linked_du] = duid.split(".")[0]
+        if use_pickle:
+            pickle_file = open(g_paths.pickles + "meta.pkl") #may throw IOError
+            (self.revdict, self.aircraft, self.nodes) = pickle.load(pickle_file)
+            pickle_file.close()
+        else:
+            self.global_meta = et. ElementTree(None, g_paths.global_meta)
+            self.aircraft = _Aircraft(self.global_meta.find("aat"))
+            self.revdict = {}
+            self._build_revdict(self.global_meta.find("revisions"))
+            self.nodes = {"root": _Section(None, "", ())}
+            self.control = et.ElementTree(None, g_paths.control)
+            for psl in self.control.getroot().findall("psl"):
+                print "Scanning", psl.attrib["pslcode"]
+                self._process_psl(psl, "root")
+            pickle_file = open(g_paths.pickles + "meta.pkl", "w")
+            pickle.dump((self.revdict, self.aircraft, self.nodes), pickle_file)
+            pickle_file.close()
 
 
-    def __process_psl__(self, elem, sec_id):
-        i = sec_id + (elem.attrib["pslcode"],)
-        self.sections[i] = []
-        section = _Section(elem.findtext("title"), elem.attrib["id"])
-        self.sections[i] = section
-        if self.sections.has_key(i[:-1]):
-            self.sections[i[:-1]].add_child(i)
+    def _process_psl(self, elem, parent_id):
+        pslcode = self.nodes[parent_id].pslcode + (elem.attrib["pslcode"],)
+        #create and link up new section
+        section = _Section(parent_id, elem.findtext("title"), pslcode)
+        ident = elem.attrib["id"]
+        self.nodes[ident] = section
+        self.nodes[pslcode] = section
+        self.nodes[parent_id].add_child(ident)
+        #process section
         for e in elem:
             if e.tag == "du-inv":
-                self.__process_duinv__(e, i)
+                self._process_duinv(e, ident)
             elif e.tag == "group":
-                self.__process_group__(e, i)
+                self._process_group(e, ident)
             elif e.tag == "psl":
-                self.__process_psl__(e, i)
+                self._process_psl(e, ident)
 
 
-    def __process_duinv__(self, elem, sec_id, groupid=None):
+    def _process_duinv(self, elem, parent_id):
         global g_paths
-        duids = []
+        #create and link up new DU container
+        container = _DU_Container(parent_id, elem.find("title").text)
+        container_id = elem.attrib["code"]
+        self.nodes[container_id] = container
+        self.nodes[parent_id].add_child(container_id)
+        #process each solution
         msnlist = []
         for s in elem.findall("du-sol"):
+            #extract relevant data from XML
             data_file = os.path.basename(s.find("sol-content-ref").attrib["href"])
             meta_file = os.path.basename(s.find("sol-mdata-ref").attrib["href"])
             title = elem.find("title").text
             revdate = s.find("sol-content-ref").attrib["revdate"]
-            new_du = _DU(data_file, meta_file, sec_id, title, groupid, revdate)
-            duid = new_du.ident
-            self.dus[duid] = new_du
-            msns = self.dus[duid].msns
-            if msns:
-                msnlist.extend(msns)
-            duids.append(duid)
-            if groupid:
-                self.groups[groupid].add_duid(duid)
+            #create and link the new DU
+            du = _DU(container_id, title, data_file, meta_file, revdate)
+            duid = du.ident
+            self.nodes[duid] = du
+            container.add_child(duid)
+            #check for TDU status and update relevant container if set
+            if du.tdu and du.linked_du: self.nodes[du.linked_du].overridden_by = duid
+            #the DU self populates with an msn list on creation; use this to add to total coverage list
+            msns = du.msns
+            if msns: msnlist.extend(msns)
         #we may have to create a fake du if we have a set if dus that only cover part of the fleet
-        if msnlist:
+        if msnlist: #msnlist will be None or a list containing the entire fleet if the entire fleet is covered
             nc = self.notcovered(msnlist)
             if nc:
-                duid = duid.split(".")[0] + ".NA"
-                self.dus[duid] = _DU("", meta_file, sec_id, title, groupid, "N/A")
-                self.dus[duid].set_msns(nc)
-                duids.append(duid)
-        self.sections[sec_id].add_du(tuple(duids))
+                duid = container_id + ".NA"
+                self.nodes[duid] = _DU(container_id, title, "", meta_file, "N/A")
+                self.nodes[duid].msns = nc
+                container.add_child(duid)
 
 
-    def __process_group__(self, elem, sec_id):
+    def _process_group(self, elem, parent_id):
         #note: groups don't nest, and they only contain du-inv sections
         groupid = elem.attrib["id"]
-        self.groups[groupid] = _Group(elem.find("title").text)
+        self.nodes[groupid] = _Group(parent_id, elem.find("title").text)
+        self.nodes[parent_id].add_child(groupid)
         for s in elem.findall("du-inv"):
-            self.__process_duinv__(s, sec_id, groupid)
+            self._process_duinv(s, groupid)
 
 
-    def __build_revdict__(self, rev_elem):
-        content_revisions = rev_elem.find("content-revisions")
-        highlights = content_revisions.find("highlights")
-        rev_marks = content_revisions.find("rev-marks")
+    def _build_revdict(self, rev_elem):
+        rev_marks = rev_elem.find("content-revisions/rev-marks")
+        #path is of th form //du-sol[@code='00002261.0003001']
+        #group(1) is the node type, group(2) is the ident
         path_reo = re.compile(r"//([^\[]*)[^']*'([^']*)")
         for rev in rev_marks.findall("rev"):
             mo = path_reo.match(rev.attrib["path"])
@@ -300,86 +313,14 @@ class FCOMMeta:
 
 
 
-    def get_title(self, sid):
-        return self.sections[sid].title
-
-
-    def get_du_title(self, duid):
-        return self.dus[duid].title
-
-
-    def get_du_parent(self, duid):
-        return self.dus[duid].parent_sid
-
-
-    def get_du_group(self, duid):
-        return self.dus[duid].groupid
-
-
-    def get_du_filename(self, duid):
-        return self.dus[duid].data_filename
-    def get_du_revdate(self, duid):
-        return self.dus[duid].revdate
-
-
-    def get_du_revs(self, duid):
-        return self.dus[duid].revs
-
-
-    def get_group_title(self, groupid):
-        return self.groups[groupid].title
-
-
-    def get_dus(self, sid):
-        return self.sections[sid].du_list
-
-
-    def get_children(self, sid):
-        return self.sections[sid].children
-
-
-    def get_all_sids(self):
-        retval = []
-        for s in self.top_level_sids:
-            retval.append(s)
-            retval += self.get_descendants(s)
-        return retval
-
-
-    def get_descendants(self, sid):
-        retval = []
-        for c in self.get_children(sid):
-            retval.append(c)
-            retval += self.get_descendants(c)
-        return retval
-
-
-    def get_leaves(self, prune=3):
-        retval = []
-        for s in self.get_all_sids():
-            if len(s) > prune: continue
-            if len(s) == prune or not self.get_children(s):
-                retval.append(s)
-        return retval
-
-
-    def get_npid(self, sid):
-        return self.sections[sid].id
 
 
     def get_fleet(self):
         return [(X, self.aircraft.aircraft[X]) for X in self.aircraft.aircraft]
 
 
-    def affected(self, msn, du_filename):
-        ac_list = self.dus[du_filename].msns
-        if not ac_list or msn in ac_list:
-            return True
-        return False
-
-
     def applies(self, duid):
-        return self.dus[duid].msns
+        return self.nodes[duid].msns
 
 
     def notcovered(self, msnlist):
@@ -390,45 +331,79 @@ class FCOMMeta:
         return self.aircraft.applies_string(msnlist)
 
 
+    def _dump_element(self, ident, spaces):
+        if isinstance(self.nodes[ident], _DU) and self.nodes[ident].tdu:
+            print "+" * 20
+        elif isinstance(self.nodes[ident], _DU_Container) and self.nodes[ident].overridden_by:
+            print "-" * 10, "Overridden by", self.nodes[ident].overridden_by
+        print spaces, ident, self.nodes[ident].node_type, self.nodes[ident].title
+        for c in self.nodes[ident].children:
+            self._dump_element(c, spaces + "  ")
 
-    def is_tdu(self, duid):
-        return self.dus[duid].tdu
+    def dump(self):
+        self._dump_element("root", "")
+        for ident in self.get_nodes('section'):
+            print ident, self.get_pslcode(ident)
+
+
+    def get_title(self, ident):
+        return self.nodes[ident].title
+
+
+    def get_children(self, ident):
+        return tuple(self.nodes[ident].children)
+
+
+    def get_type(self, ident):
+        return self.nodes[ident].node_type
+
+
+    def get_pslcode(self, ident):
+        return self.nodes[ident].pslcode
+
+
+    def get_root_nodes(self):
+        return self.nodes["root"].children
+
+
+    def get_filename(self, ident):
+        return self.nodes[ident].data_filename
+
+
+    def get_revdate(self, ident):
+        return self.nodes[ident].revdate
+
+
+    def get_parent(self, ident):
+        return self.nodes[ident].parent
 
 
     def get_revision_code(self, ident):
-        if self.revdict.has_key(ident):
-            return self.revdict[ident].change
-        return None
+        r =  self.revdict.get(ident)
+        return None if not r else r.change
+
+    def get_du_revs(self, ident):
+        return self.nodes[ident].revs
 
 
     def get_overriding(self, ident):
-        return self.overridden_ducontainers.get(ident)
+        return self.nodes[ident].overridden_by
 
 
-    def dump(self):
-        print "Sections:\n==========\n"
-        for s in self.get_all_sids():
-            section = self.sections[s]
-            indent = " " * ((len(s) - 1) * 4)
-            print indent, ".".join(s), ": ", section.title
-            for du in self.get_dus(s):
-                print indent, " ", du
-        print "DUs:\n============\n"
-        for du in sorted(self.dus):
-            print du, self.dus[du].parent_sid, self.dus[du].msns, self.dus[du].tdu
-        print "\n\nLeaves:\n=======\n"
-        for l in self.get_leaves():
-            print ".".join(l), ": ", self.get_title(l)
-        print "\n\nAircraft:\n=========\n"
-        self.aircraft.dump()
-        print "\n\nAircraft list test\n"
-        print self.affected("4556", "00000284.0003001")
-        print self.applies("00000284.0003001")
-        print self.applies("00000879.0004001")
-        print "\n\nGroups\n===========\n"
-        for k in sorted(self.groups):
-            print k, self.groups[k].duids
+    def is_valid(self, ident):
+        return ident in self.nodes
 
+
+    def is_tdu(self, ident):
+        return self.nodes[ident].tdu
+
+
+    def get_ancestors(self, ident):
+        ancestors = []
+        ident = self.nodes[ident].parent
+        while ident != "root":
+            ancestors.append(ident)
+            ident = self.nodes[ident].parent
 
 if __name__ == "__main__":
     global g_paths
@@ -437,5 +412,6 @@ if __name__ == "__main__":
         print "Usage: ", sys.argv[0], "start_file"
         sys.exit(1)
     g_paths.initialise(*sys.argv + ["."])
-    fcm = FCOMMeta()
+    fcm = FCOMMeta(True)
     fcm.dump()
+

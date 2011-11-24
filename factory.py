@@ -15,198 +15,190 @@ class FCOMFactory:
         self.fcm = fcm #instance of FCOMMeta
         versiondate = g_paths.control[-12:-4]
         self.versionstring = versiondate[:4] + "-" + versiondate[4:6] + "-" + versiondate[6:]
-        self.pagelist = self.fcm.get_leaves(3)
-        self.pageset = set(self.pagelist)
         self.hrefs = {}
         self.revisions = []
-        self.duref_lookup = {}
-        self.__build_duref_lookup__()
 
 
     def build_fcom(self):
         self.errorlog = open("build-error.log", "w")
         self.write_fleet_js()
+        self.content_pages = []
+        self.node_pages = []
+        for ident in self.fcm.get_root_nodes():
+            #self.content_pages and self.node_pages are filled in by this recursive call
+            self._recursive_process_pagelist(ident)
         self.make_index()
-        for c, sid in enumerate(self.pagelist):
-            prevsid, nextsid = None, None
-            if c > 0:
-                prevsid = self.pagelist[c - 1]
-            if c < len(self.pagelist) - 1:
-                nextsid = self.pagelist[c + 1]
-            self.make_page(c, sid ,prevsid, nextsid)
+        for make_page_args in zip(self.content_pages,
+                                  [None] + self.content_pages[:-1],
+                                  self.content_pages[1:] + [None]):
+            self.make_page(*make_page_args)
         self.make_revision_list() # this must be done last since make_page populates hrefs
 
 
-    def __build_duref_lookup__(self):
-        for sid in self.pagelist:
-            sid_list = self.__build_sid_list__(sid)
-            for s in sid_list:
-                for du_list in self.fcm.get_dus(s):
-                    duref = du_list[0].split(".")[0]
-                    self.duref_lookup[duref] = (
-                        self.__make_filename__(sid) + "#duid" + duref,
-                        ".".join(s) + ": " + self.fcm.get_du_title(du_list[0]))
+    def _recursive_process_pagelist(self, ident):
+        chunk_depth = 3 #generalise this to a setting later
+        if (len(self.fcm.get_pslcode(ident)) == chunk_depth or
+            self.fcm.get_type(self.fcm.get_children(ident)[0]) != 'section'):
+                self.content_pages.append(ident)
+        else:
+            self.node_pages.append(ident)
+            for ident in self.fcm.get_children(ident):
+                self._recursive_process_pagelist(ident)
 
-
-    def __build_sid_list__(self, sid):
-        return [sid, ] + self.fcm.get_descendants(sid)
-
-
-
-    def __start_page__(self, tb, sid, prevsid, nextsid):
-        """Starts a page using TreeBuilder object TB.
-
-        SID is the section ID of the page to start e.g. ('DSC', '20', '20').
-        PREVSID is the section ID of the previous section in "book order"
-        NEXTSID is the section ID of the next section in "book order"
-        """
-        page_attributes = {"title": self.__make_page_title__(sid),
-                           "version": self.versionstring}
-        if prevsid:
-            page_attributes["prev"] = self.__make_filename__(prevsid)
-            page_attributes["prevtitle"] = ".".join(prevsid) + ": " + self.fcm.get_title(prevsid)
-        if nextsid:
-            page_attributes["next"] = self.__make_filename__(nextsid)
-            page_attributes["nexttitle"] = ".".join(nextsid) + ": " + self.fcm.get_title(nextsid)
-        tb.start("page", page_attributes)
-
-
-    def __process_du__(self, tb, du):
-        """Create DU in TreeBuilder TB.
-
-        DU is the duid of the du to build.
-        """
-        filename = self.fcm.get_du_filename(du)
-        if filename: filename = g_paths.dus + filename
-        du_attrib = {"title": self.fcm.get_du_title(du),
-                     "href": filename,
-                     "id": "duid" + du,
-                     "revdate": self.fcm.get_du_revdate(du) }
-        code = self.fcm.get_revision_code(du)
-        revs = self.fcm.get_du_revs(du)
-        if code:
-            du_attrib["revcode"] = code
-            #only add to revision list if there are some revision paths in dumdata
-            if code[-1:] != "R" or revs: self.revisions.append(du)
-        if self.fcm.is_tdu(du):
-            du_attrib["tdu"] = "tdu"
-        tb.start("du", du_attrib)
-        applies = self.fcm.applies(du)
-        if applies:
-            tb.start("applies", {})
-            tb.data(self.fcm.applies_string(applies))
-            tb.end("applies")
-        tb.end("du")
-
-
-    def __build_javascript_folding_code__(self, section_list):
-        """Returns a string that is a valid javascript variable definition to enable javascript folding.
-
-        The string is of the form:
-           var folding =
-              [ [ [ duid, [msn, msn, ...], applies_string], ... ], ...];
-
-        i.e it specifies an array of du_containers with each du_container being defined by an array of dus.
-        """
-        js_array = []
-        for s in section_list:
-            for ducontainer in self.fcm.get_dus(s):
-                js_array.append([])
-                for du in ducontainer:
-                    applies = self.fcm.applies(du)
-                    if applies:
-                        js_array[-1].append([du, applies, self.fcm.applies_string(applies)[:100]])
-                if js_array[-1] == []:
-                    del js_array[-1]
-        return "var folding = " + str(js_array) + ";"
-
-
-    def __process_links(self, page_string, sid):
+    def _process_links(self, page_string):
         page_parts = re.split('<a class="duref" href="(\d+)">', page_string)
         duref_index = 1
         while duref_index < len(page_parts):
-            duinfo = self.duref_lookup.get(page_parts[duref_index])
-            if not duinfo: #protect against bad links in source
-                print >> self.errorlog, "Reference to unknown DU", page_parts[duref_index], "whilst processing", ".".join(sid)
-                duinfo = ("", "!!!DU REFERENCE ERROR!!!")
-            page_parts[duref_index] = ('<a class="duref" href="' +
-                                       duinfo[0] +
-                                       '">')
-            if page_parts[duref_index + 1][:2] == "</":
-                page_parts[duref_index] += duinfo[1]
+            ident = page_parts[duref_index]
+            if not self.fcm.is_valid(ident):
+                print >> self.errorlog, "Reference to unknown DU", page_parts[duref_index], "whilst processing", ident
+                page_parts[duref_index] = "!!!DU REFERENCE ERROR!!!"
             else:
-                page_parts[duref_index] += duinfo[1].split()[0]
+                #find the correct href
+                i = self.fcm.get_parent(ident)
+                while i not in self.content_pages:
+                    i = self.fcm.get_parent(i)
+                href = self._make_filename(i) + "#duid" + ident
+                #find the parent section
+                i = self.fcm.get_parent(ident)
+                while self.fcm.get_type(i) != 'section':
+                    i = self.fcm.get_parent(i)
+                anchor_string = ".".join(self.fcm.get_pslcode(i)) + ": " + self.fcm.get_title(ident)
+                if page_parts[duref_index + 1][:2] != "</":
+                    anchor_string = anchor_string.split()[0]
+                page_parts[duref_index] = '<a class="duref" href="%s">%s' % (
+                    href,
+                    anchor_string)
             duref_index += 2
         return "".join(page_parts)
 
 
+    def _recursive_build_node(self, tb, ident, filename):
+        node_type = self.fcm.get_type(ident)
+        if  node_type == 'section':
+            self._process_section(tb, ident, filename)
+        elif node_type == 'group':
+            self._process_group(tb, ident, filename)
+        elif node_type == 'du_container':
+            self._process_ducontainer(tb, ident, filename)
 
-    def make_page(self, c, sid, prevsid, nextsid):
+
+    def _process_page(self, tb, sid, prevsid, nextsid, filename):
+        page_attributes = {"title": self._make_page_title(sid),
+                           "version": self.versionstring}
+        if prevsid:
+            page_attributes["prev"] = self._make_filename(prevsid)
+            page_attributes["prevtitle"] = ".".join(self.fcm.get_pslcode(prevsid)) + ": " + self.fcm.get_title(prevsid)
+        if nextsid:
+            page_attributes["next"] = self._make_filename(nextsid)
+            page_attributes["nexttitle"] = ".".join(self.fcm.get_pslcode(nextsid)) + ": " + self.fcm.get_title(nextsid)
+        tb.start("page", page_attributes)
+        self._recursive_build_node(tb, sid, filename)
+        tb.end("page")
+
+
+    def _process_section(self, tb, ident, filename):
+        section_attribs = {"sid": "sid" + ".".join(self.fcm.get_pslcode(ident)),
+                           "title": ".".join(self.fcm.get_pslcode(ident)) + ": " + self.fcm.get_title(ident)}
+        self.hrefs[ident] = filename + "#" + section_attribs["sid"]
+        tb.start("section", section_attribs)
+        if self.fcm.get_type(self.fcm.get_children(ident)[0]) == 'section':
+            #this causes the sections to be layed out flat rather than in a hierarchy
+            tb.end("section")
+            for c in self.fcm.get_children(ident):
+                self._recursive_build_node(tb, c, filename)
+        else:
+            for c in self.fcm.get_children(ident):
+                self._recursive_build_node(tb, c, filename)
+            tb.end("section")
+
+
+    def _process_group(self, tb, ident, filename):
+        group_attribs = {"id": "gid" + ident,
+                         "title": self.fcm.get_title(ident)}
+        tb.start("group", group_attribs)
+        self.hrefs[ident] = filename + "#gid" + ident
+        for c in self.fcm.get_children(ident):
+            self._recursive_build_node(tb, c, filename)
+        tb.end("group")
+
+
+    def _process_ducontainer(self, tb, ident, filename):
+        du_container_attrib = {"id": "duid" + ident,
+                               "title": self.fcm.get_title(ident)}
+        overriding_tdu = self.fcm.get_overriding(ident)
+        if overriding_tdu:
+            du_container_attrib["overridden_by"] = self.fcm.get_parent(overriding_tdu)
+        tb.start("du_container", du_container_attrib)
+        self.hrefs[ident] = filename + "#duid" + ident
+        self.jsarray.append([])
+        for c in self.fcm.get_children(ident):
+            self._process_du(tb, c)
+        if self.jsarray[-1] == []: del self.jsarray[-1]
+        tb.end("du_container")
+
+
+    def _process_du(self, tb, ident):
+        """Create DU in TreeBuilder TB.
+
+        DU is the duid of the du to build.
+        """
+        filename = self.fcm.get_filename(ident)
+        if filename: filename = g_paths.dus + filename
+        du_attrib = {"title": self.fcm.get_title(ident),
+                     "href": filename,
+                     "id": "duid" + ident,
+                     "revdate": self.fcm.get_revdate(ident)}
+        code = self.fcm.get_revision_code(ident)
+        revs = self.fcm.get_du_revs(ident)
+        if code:
+            du_attrib["revcode"] = code
+            #only add to revision list if there are some revision paths in dumdata
+            if code[-1:] != "R" or revs: self.revisions.append(ident)
+        if self.fcm.is_tdu(ident):
+            du_attrib["tdu"] = "tdu"
+        tb.start("du", du_attrib)
+        applies = self.fcm.applies(ident)
+        if applies:
+            tb.start("applies", {})
+            tb.data(self.fcm.applies_string(applies))
+            tb.end("applies")
+            self.jsarray[-1].append([ident, applies, self.fcm.applies_string(applies)[:100]])
+        tb.end("du")
+        self.revs.extend(revs)
+
+
+    def make_page(self, sid, prevsid, nextsid):
         global g_paths
-        filename = self.__make_filename__(sid)
+        filename = self._make_filename(sid)
         print "Creating:", filename
         tb = et.TreeBuilder()
-        self.__start_page__(tb, sid, prevsid, nextsid)
-        section_list = self.__build_sid_list__(sid)
-        revs = []
-        for s in section_list:
-            #process each section required for the page
-            section_attribs = {"sid": "sid" + ".".join(s),
-                               "title": ".".join(s) + ": " + self.fcm.get_title(s)}
-            tb.start("section", section_attribs)
-            self.hrefs[self.fcm.get_npid(s)] = filename + "#" + section_attribs["sid"]
-            last_groupid = None
-            for dul in self.fcm.get_dus(s):
-                #get_dus returns a list of the form [(duid, ...), (duid, ...), ...]
-                #so dul is each (duid, ...) tuple, each tuple entry representing alternative
-                #versions of the DU. Alternative versions are neccessarily of the same group if applicable.
-                groupid = self.fcm.get_du_group(dul[0])
-                if groupid != last_groupid:
-                    if last_groupid:
-                        tb.end("group")
-                    if groupid:
-                        group_attribs = {"id": "gid" + groupid,
-                                         "title": self.fcm.get_group_title(groupid)}
-                        tb.start("group", group_attribs)
-                        self.hrefs[groupid] = filename + "#gid" + groupid
-                    last_groupid = groupid
-                containerid = dul[0].split(".")[0]
-                du_container_attrib = {"id": "duid" + containerid,
-                                       "title": self.fcm.get_du_title(dul[0])}
-                overriding_tdu = self.fcm.get_overriding(containerid)
-                if overriding_tdu:
-                    du_container_attrib["overridden_by"] = overriding_tdu
-                tb.start("du_container", du_container_attrib)
-                self.hrefs[containerid] = filename + "#duid" + containerid
-                for du in dul:
-                    self.__process_du__(tb, du)
-                    self.hrefs[du] = filename + "#duid" + containerid
-                    revs.extend(self.fcm.get_du_revs(du))
-                tb.end("du_container")
-            if last_groupid: #if last_groupid hasn't been set to None, we were in a group at the end of the section
-                tb.end("group")
-            tb.end("section")
-        tb.end("page")
+        self.revs = []
+        self.jsarray = []
+        self._process_page(tb, sid, prevsid, nextsid, filename)
         stylesheet_name = g_paths.xsldir + "page.xsl"
         tf = None
-        if revs:
-            tf = self.__make_temporary_stylesheet(stylesheet_name, revs)
+        if self.revs:
+            tf = self._make_temporary_stylesheet(stylesheet_name, self.revs)
             stylesheet_name = tf.name
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", stylesheet_name, "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
         if tf: os.unlink(tf.name)
         #create javascript variables for controlling folding
-        page_string = page_string.replace("<!--jsvariable-->",
-                                          self.__build_javascript_folding_code__(section_list))
+        page_string = page_string.replace(
+            "<!--jsvariable-->",
+            "var folding = " + str(self.jsarray) + ";")
         #replace xml links with xhtml links
-        page_string = self.__process_links(page_string, sid)
-        # #insert link bar
-        page_string = page_string.replace("<!--linkbar-->", self.__build_linkbar__(sid))
+        page_string = self._process_links(page_string)
+        #insert link bar
+        page_string = page_string.replace("<!--linkbar-->", self._build_linkbar(sid))
+        #write the file
         of = open(g_paths.html_output + filename, "w")
         of.write(page_string)
 
-    def __make_temporary_stylesheet(self, stylesheet_name, revs):
+
+    def _make_temporary_stylesheet(self, stylesheet_name, revs):
         stylesheet = """\
 <?xml version="1.0"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
@@ -220,45 +212,49 @@ class FCOMFactory:
 
 
 
-    def __make_page_title__(self, sid):
+    def _make_page_title(self, sid):
         titleparts = []
-        for c in range(1, len(sid) + 1):
-            titleparts.append(self.fcm.get_title(sid[:c]))
-        return "[%s] %s" % (".".join(sid), " : ".join(titleparts))
+        ident = sid
+        while ident:
+            titleparts.insert(0, self.fcm.get_title(ident))
+            ident = self.fcm.get_parent(ident)
+        return "[%s] %s" % (".".join(self.fcm.get_pslcode(sid)), " : ".join(titleparts[1:]))
 
 
-    def __recursive_add_section__(self, ident, tb):
-        if ident not in self.pageset:
+    def _recursive_add_section(self, ident, tb):
+        if ident in self.node_pages:
             children = self.fcm.get_children(ident)
-            self.__make_node_page__(ident, children)
+            self._make_node_page(ident, children)
             tb.start("section", {"title": self.fcm.get_title(ident),
-                                 "ident": ".".join(ident),
-                                 "href": self.__make_filename__(ident)})
+                                 "ident": ".".join(self.fcm.get_pslcode(ident)),
+                                 "href": self._make_filename(ident)})
             for s in children:
-                self.__recursive_add_section__(s, tb)
+                self._recursive_add_section(s, tb)
             tb.end("section")
         else:
-            tb.start("page", {"href": self.__make_filename__(ident)})
-            tb.data(".".join(ident) + ": " + self.fcm.get_title(ident))
+            tb.start("page", {"href": self._make_filename(ident)})
+            tb.data(".".join(self.fcm.get_pslcode(ident)) + ": " + self.fcm.get_title(ident))
             tb.end("page")
 
 
-    def __make_node_page__(self, ident, children):
+    def _make_node_page(self, ident, children):
         global g_paths
         tb = et.TreeBuilder()
-        tb.start("index", {"title": self.__make_page_title__(ident),
-                          "ident": ".".join(ident),
+        tb.start("index", {"title": self._make_page_title(ident),
+                           "ident": ".".join(self.fcm.get_pslcode(ident)),
                            "version": self.versionstring})
         for i in children:
-            self.__recursive_add_section__(i, tb)
+            self._recursive_add_section(i, tb)
         tb.end("index")
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "index.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
-        page_string = page_string.replace("<!--linkbar-->", self.__build_linkbar__(ident))
-        print "Creating node page", ident
-        of = open(g_paths.html_output + self.__make_filename__(ident), "w")
+        page_string = page_string.replace("<!--linkbar-->", self._build_linkbar(ident))
+        print "Creating node page", ident, self.fcm.get_pslcode(ident)
+        filename = g_paths.html_output + self._make_filename(ident)
+        of = open(filename, "w")
         of.write(page_string)
+        self.hrefs[ident] = filename
 
 
     def make_index(self):
@@ -269,41 +265,48 @@ class FCOMFactory:
         tb.start("page", {"href": "revisions.html"})
         tb.data("Revision list")
         tb.end("page")
-        for s in self.fcm.get_leaves(1):
-            self.__recursive_add_section__(s, tb)
+        for s in self.fcm.get_root_nodes():
+            self._recursive_add_section(s, tb)
         tb.end("index")
 
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "index.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
-        page_string = page_string.replace("<!--linkbar-->", self.__build_linkbar__(()))
+        page_string = page_string.replace("<!--linkbar-->", self._build_linkbar(()))
         of = open(g_paths.html_output + "index.html", "w")
         of.write(page_string)
 
 
-    def __make_filename__(self, sid):
+    def _make_filename(self, sid):
         retval = ""
         if sid:
-            retval = ".".join(sid) + ".html"
+            retval = ".".join(self.fcm.get_pslcode(sid)) + ".html"
         return retval
 
 
-    def __build_linkbar__(self, sid):
+    def _build_linkbar(self, ident):
         title_crop = 30
         tb = et.TreeBuilder()
         tb.start("div", {"class": "linkbar"})
         tb.start("p", {})
-        if sid: #contents page passes in empty list
+        if ident: #contents page passes in empty list
             tb.start("a", {"title": "Contents",
                            "href": "index.html"})
             tb.data("Contents")
             tb.end("a")
-            for c in range(1, len(sid)):
+            ident_list = []
+            if ident == "REV":
+                i = None
+            else:
+                i = self.fcm.get_parent(ident)
+            while i:
+                ident_list.insert(0, i)
+                i = self.fcm.get_parent(i)
+            for i in ident_list[1:]:
                 tb.data(" >> ")
-                ident = sid[:c]
-                title = ".".join(ident) + ": " + self.fcm.get_title(ident)
+                title = ".".join(self.fcm.get_pslcode(i)) + ": " + self.fcm.get_title(i)
                 tb.start("a", {"title": title,
-                               "href": self.__make_filename__(ident)})
+                               "href": self._make_filename(i)})
                 tb.data(title[:title_crop])
                 if len(title) > title_crop:
                     tb.data("...")
@@ -332,13 +335,28 @@ class FCOMFactory:
 
 
 
+
+
+    def _parent_section(self, ident):
+        section = self.fcm.get_parent(ident)
+        while self.fcm.get_type(section) != 'section':
+            section = self.fcm.get_parent(section)
+        return section
+
+
+    def _page_section(self, ident):
+        while ident not in self.content_pages:
+            ident = self.fcm.get_parent(ident)
+        return ident
+
+
     def make_revision_list(self):
         global g_paths
         print "Writing revision list"
         #split dus into lists within the same section
-        sectioned_dus = [[self.fcm.get_du_parent(self.revisions[0]), self.revisions[0]]]
-        for duid in self.revisions[1:]:
-            du_section = self.fcm.get_du_parent(duid)
+        sectioned_dus = [[self._parent_section(self.revisions[0])]]
+        for duid in self.revisions:
+            du_section = self._parent_section(duid)
             if du_section == sectioned_dus[-1][0]:
                 sectioned_dus[-1].append(duid)
             else:
@@ -348,21 +366,35 @@ class FCOMFactory:
                                "version": self.versionstring})
         for section in sectioned_dus:
             section_title = []
-            for c in range(1, len(section[0])):
-                section_title.append(self.fcm.get_title(section[0][:c]))
-            section_title = " : ".join(section_title)
-            tb.start("section", {"title": ".".join(section[0]) + " " + section_title})
+            s = section[0]
+            while s:
+                section_title.insert(0, self.fcm.get_title(s))
+                s = self.fcm.get_parent(s)
+            section_title = " : ".join(section_title[1:-1])
+            tb.start("section", {"title": ".".join(self.fcm.get_pslcode(section[0])) + " " + section_title})
             for duid in section[1:]:
                 tb.start("rev", {"code": self.fcm.get_revision_code(duid)[-1:],
                                  "duid": duid,
-                                 "href": self.hrefs[duid],
-                                 "title": self.fcm.get_du_title(duid)})
+                                 "href": self.hrefs[self.fcm.get_parent(duid)],
+                                 "title": self.fcm.get_title(duid)})
                 tb.end("rev")
             tb.end("section")
         tb.end("revisions")
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "revisions.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
-        page_string = page_string.replace("<!--linkbar-->", self.__build_linkbar__(("REV",)))
+        page_string = page_string.replace("<!--linkbar-->", self._build_linkbar("REV"))
         of = open(g_paths.html_output + "revisions.html", "w")
         of.write(page_string)
+
+
+if __name__ == "__main__":
+    global g_paths
+    import sys
+    import meta
+    if len(sys.argv) != 2:
+        print "Usage: ", sys.argv[0], "start_file"
+        sys.exit(1)
+    g_paths.initialise(*sys.argv + ["."])
+    fcm = meta.FCOMMeta(True)
+    f = FCOMFactory(fcm)
