@@ -1,6 +1,55 @@
 #!/usr/bin/python
 # coding=utf-8
 
+"""\
+This module encapsulates the meta data for an Airbus manual.
+
+There are three sources for the metadata. The paths to these sources
+are available in the global variable g_paths which is populated from
+the 'Start.xml' file in the root of the XML data.
+
+g_paths.control is the source for the structure of the manual. The
+main structural components of the document are sections, groups,
+du_containers and dus. In the file, the top level element (<product>)
+contains a number of sections (<psl>). Each section may contain other
+sections xor a mixture of groups (<group>) and du_containers
+(<du-inv>). A group only contains du_containers and neither groups nor
+du_containers can nest. The effect is a tree of section nodes with
+content node leaves, i.e. there is no content above the lowest level
+of the hierarchy. Groups appear to be a syntactic hint to not display
+individual DU titles, instead displaying the single group title for
+all the contained DUs. Indexes should also point at the group and omit
+the contained DUs. The du_containers each reference one or more
+'solutions' (<du-sol>), a solution being a pair of file references,
+one to a DU file and the other to its accompanying DU metadata file
+(see below). If multiple solutions are referenced, each solution
+pertains to a subsection of the fleet.
+
+The <product> element of g_paths.control also contains the manual name
+and a revdate that can be used to describe the version of the whole
+manual.
+
+g_paths.global_meta contains a list linking aircraft registration,
+type and msn and a list of revisions at section level.
+
+Individual DU mdata files contain a list of msns that the paired DU is
+applicable to and a list of revisions at DU level. The root <dumdata>
+file also has the DU identity, whether it is a TDU and if it is a TDU,
+the identity of the DU that it overrides.
+
+To use the module, just create a FCOMMeta object after creating the
+global g_paths object.
+
+The main data structure used is a dictionary with identifiers as
+keys. The identifier can be either a DU identifier
+(e.g. '00001234.0000123'), a DU container identifier
+(e.g. '00001234'), a group identifier (e.g. NG12345), a section
+identifier (e.g. NP02699) or a section tuple (e.g. ('DSC', '22',
+'40'). Each dictionary entry references an object with at least a
+parentID attribute and a list of childID attributes. Other useful data
+is stored with this object as appropriate.
+
+"""
 from globals import *
 import cPickle as pickle
 import re
