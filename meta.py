@@ -54,7 +54,8 @@ from globals import *
 import cPickle as pickle
 import re
 
-class DU:
+
+class _DU:
 
     def __init__(self,  data_filename, mu_filename, parent_sid, title, groupid, revdate):
         global g_paths
@@ -102,107 +103,109 @@ class DU:
         self.msns = msnlist
 
 
-class FCOMMeta:
-
-    class Section:
-
-        def __init__(self, title, npid):
-            self.title = title
-            self.children = []
-            self.du_list = []
-            self.id = npid
 
 
-        def add_child(self, sid):
-            self.children.append(sid)
+class _Section:
+
+    def __init__(self, title, npid):
+        self.title = title
+        self.children = []
+        self.du_list = []
+        self.id = npid
 
 
-        def add_du(self, du_filename_tuple):
-            self.du_list.append(du_filename_tuple)
+    def add_child(self, sid):
+        self.children.append(sid)
 
 
-    class Group:
-
-        def __init__(self, title):
-            self.title = title
-            self.duids = []
+    def add_du(self, du_filename_tuple):
+        self.du_list.append(du_filename_tuple)
 
 
-        def add_duid(self, duid):
-            self.duids.append(duid)
+class _Group:
+
+    def __init__(self, title):
+        self.title = title
+        self.duids = []
 
 
-    class Aircraft:
+    def add_duid(self, duid):
+        self.duids.append(duid)
 
-        def __init__(self, aat):
-            self.aircraft = {}
-            self.fleets = {}
-            self.pseudofleets = {}
-            for a in aat.findall("aircraft-item"):
-                if a.attrib["acn"]:
-                    self.aircraft[a.attrib["msn"]] = a.attrib["acn"]
-                    if not self.pseudofleets.has_key(a.attrib["acn"][:-1] + "*"):
-                        self.pseudofleets[a.attrib["acn"][:-1] + "*"] = set()
-                    self.pseudofleets[a.attrib["acn"][:-1] + "*"].add(a.attrib["msn"])
+
+class _Aircraft:
+
+    def __init__(self, aat):
+        self.aircraft = {}
+        self.fleets = {}
+        self.pseudofleets = {}
+        for a in aat.findall("aircraft-item"):
+            if a.attrib["acn"]:
+                self.aircraft[a.attrib["msn"]] = a.attrib["acn"]
+                if not self.pseudofleets.has_key(a.attrib["acn"][:-1] + "*"):
+                    self.pseudofleets[a.attrib["acn"][:-1] + "*"] = set()
+                self.pseudofleets[a.attrib["acn"][:-1] + "*"].add(a.attrib["msn"])
+            else:
+                self.aircraft[a.attrib["msn"]] = a.attrib["msn"]
+            m = a.attrib["aircraft-model"]
+            if not self.fleets.has_key(m):
+                self.fleets[m] = set()
+            self.fleets[m].add(a.attrib["msn"])
+
+
+    def applies_string(self, msnlist):
+        msnset = set(msnlist)
+        fleets = []
+        for f in self.fleets.keys():
+           if self.fleets[f] <= msnset:
+                fleets.append(f + " fleet")
+                msnset = msnset.difference(self.fleets[f])
+        pseudofleets = []
+        for p in self.pseudofleets.keys():
+            if self.pseudofleets[p] <= msnset:
+                pseudofleets.append(p)
+                msnset = msnset.difference(self.pseudofleets[p])
+        remaining = pseudofleets + [self.aircraft[X] for X in list(msnset)]
+        remaining.sort()
+        fleets.sort()
+        return ", ".join(fleets + remaining)
+
+
+    def msn_to_reg(self, msn):
+        return self.aircraft[msn]
+
+
+    def all(self):
+        return self.aircraft
+
+
+    def dump(self):
+        for k in self.fleets.keys():
+            print "\n", k, "fleet: "
+            for a in self.fleets[k]:
+                if self.aircraft[a]:
+                    print self.aircraft[a]
                 else:
-                    self.aircraft[a.attrib["msn"]] = a.attrib["msn"]
-                m = a.attrib["aircraft-model"]
-                if not self.fleets.has_key(m):
-                    self.fleets[m] = set()
-                self.fleets[m].add(a.attrib["msn"])
+                    print a
 
 
-        def applies_string(self, msnlist):
-            msnset = set(msnlist)
-            fleets = []
-            for f in self.fleets.keys():
-               if self.fleets[f] <= msnset:
-                    fleets.append(f + " fleet")
-                    msnset = msnset.difference(self.fleets[f])
-            pseudofleets = []
-            for p in self.pseudofleets.keys():
-                if self.pseudofleets[p] <= msnset:
-                    pseudofleets.append(p)
-                    msnset = msnset.difference(self.pseudofleets[p])
-            remaining = pseudofleets + [self.aircraft[X] for X in list(msnset)]
-            remaining.sort()
-            fleets.sort()
-            return ", ".join(fleets + remaining)
+class _RevisionRecord:
+
+    def __init__(self, revclass, change, anchor):
+        self.revclass = revclass
+        self.change = change
+        self.anchor = anchor
 
 
-        def msn_to_reg(self, msn):
-            return self.aircraft[msn]
-
-
-        def all(self):
-            return self.aircraft
-
-
-        def dump(self):
-            for k in self.fleets.keys():
-                print "\n", k, "fleet: "
-                for a in self.fleets[k]:
-                    if self.aircraft[a]:
-                        print self.aircraft[a]
-                    else:
-                        print a
+    def __str__(self):
+        return "Class: %s Change: %s Anchor: %s" % (
+            self.revclass,
+            self.change,
+            self.anchor)
 
 
 
-
-    class RevisionRecord:
-
-        def __init__(self, revclass, change, anchor):
-            self.revclass = revclass
-            self.change = change
-            self.anchor = anchor
-
-
-        def __str__(self):
-            return "Class: %s Change: %s Anchor: %s" % (
-                self.revclass,
-                self.change,
-                self.anchor)
+class FCOMMeta:
 
 
     def __init__(self):
@@ -216,7 +219,7 @@ class FCOMMeta:
         self.control = et.ElementTree(None, g_paths.control)
         self.global_meta = et. ElementTree(None, g_paths.global_meta)
         self.__build_revdict__(self.global_meta.find("revisions"))
-        self.aircraft = self.Aircraft(self.global_meta.find("aat"))
+        self.aircraft = _Aircraft(self.global_meta.find("aat"))
         for psl in self.control.getroot().findall("psl"):
             print "Scanning", psl.attrib["pslcode"]
             self.top_level_sids.append((psl.attrib["pslcode"],))
@@ -225,15 +228,12 @@ class FCOMMeta:
         for duid in self.dus:
             linked_du = self.dus[duid].linked_du
             if linked_du: self.overridden_ducontainers[linked_du] = duid.split(".")[0]
-        #optimisation
-        if not dus_from_pickle:
-            du_pickles = open(du_pickle_path, "w")
-            pickle.Pickler(du_pickles).dump(self.dus)
+
 
     def __process_psl__(self, elem, sec_id):
         i = sec_id + (elem.attrib["pslcode"],)
         self.sections[i] = []
-        section = self.Section(elem.findtext("title"), elem.attrib["id"])
+        section = _Section(elem.findtext("title"), elem.attrib["id"])
         self.sections[i] = section
         if self.sections.has_key(i[:-1]):
             self.sections[i[:-1]].add_child(i)
@@ -269,7 +269,7 @@ class FCOMMeta:
             nc = self.notcovered(msnlist)
             if nc:
                 duid = duid.split(".")[0] + ".NA"
-                self.dus[duid] = DU("", meta_file, sec_id, title, groupid, "N/A")
+                self.dus[duid] = _DU("", meta_file, sec_id, title, groupid, "N/A")
                 self.dus[duid].set_msns(nc)
                 duids.append(duid)
         self.sections[sec_id].add_du(tuple(duids))
@@ -278,7 +278,7 @@ class FCOMMeta:
     def __process_group__(self, elem, sec_id):
         #note: groups don't nest, and they only contain du-inv sections
         groupid = elem.attrib["id"]
-        self.groups[groupid] = self.Group(elem.find("title").text)
+        self.groups[groupid] = _Group(elem.find("title").text)
         for s in elem.findall("du-inv"):
             self.__process_duinv__(s, sec_id, groupid)
 
@@ -293,7 +293,7 @@ class FCOMMeta:
             if not mo: print "regexp error"; continue
             change = rev.attrib["chg"]
             if change == "E": continue #not interested if only change is aircraft affected
-            self.revdict[mo.group(2)] = self.RevisionRecord(
+            self.revdict[mo.group(2)] = _RevisionRecord(
                 mo.group(1),
                 change,
                 True if rev.attrib["anchor"] == "true" else False)
