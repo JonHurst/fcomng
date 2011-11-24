@@ -209,14 +209,6 @@ class FCOMMeta:
         global g_paths
         self.sections = {}
         self.dus = {}
-        #optimisation: creatin DU instances requires parsing of thousands of m_data files, which is very slow;
-        # we pickle the resulting data structure and only parse these files if the pickle file doesn't exist.
-        du_pickle_path = g_paths.pickles + "dus"
-        dus_from_pickle = False
-        if os.path.exists(du_pickle_path):
-            du_pickles = open(du_pickle_path)
-            self.dus = pickle.Unpickler(du_pickles).load()
-            dus_from_pickle = True
         self.groups = {}
         self.top_level_sids = []
         self.revdict = {}
@@ -263,10 +255,6 @@ class FCOMMeta:
             meta_file = os.path.basename(s.find("sol-mdata-ref").attrib["href"])
             title = elem.find("title").text
             revdate = s.find("sol-content-ref").attrib["revdate"]
-            #optimisation: if we have loaded self.dus from pickle, we will already have the
-            #data and don't need to parse the MU file
-            # if not self.dus.has_key(duid):
-            #     self.dus[duid] = DU(data_file, meta_file, sec_id, title, groupid, revdate)
             new_du = _DU(data_file, meta_file, sec_id, title, groupid, revdate)
             duid = new_du.ident
             self.dus[duid] = new_du
