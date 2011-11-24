@@ -441,3 +441,12 @@ class FCOMMeta:
             print k, self.groups[k].duids
 
 
+if __name__ == "__main__":
+    global g_paths
+    import sys
+    if len(sys.argv) != 2:
+        print "Usage: ", sys.argv[0], "start_file"
+        sys.exit(1)
+    g_paths.initialise(*sys.argv + ["."])
+    fcm = FCOMMeta()
+    fcm.dump()
