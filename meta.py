@@ -65,6 +65,7 @@ class DU:
         self.revdate = revdate
         #parse metadata file
         e = et.ElementTree(None, g_paths.mus + mu_filename)
+        self.ident = e.getroot().attrib["code"]
         if data_filename:
             self.msns = self.__get_msns__(e)
         self.tdu = False
@@ -262,13 +263,13 @@ class FCOMMeta:
             meta_file = os.path.basename(s.find("sol-mdata-ref").attrib["href"])
             title = elem.find("title").text
             revdate = s.find("sol-content-ref").attrib["revdate"]
-            #find duid - unfortunately only available in du file as root element code
-            s = open(g_paths.dus + data_file).read(200)
-            duid = s[s.find("code="):][6:22]
             #optimisation: if we have loaded self.dus from pickle, we will already have the
             #data and don't need to parse the MU file
-            if not self.dus.has_key(duid):
-                self.dus[duid] = DU(data_file, meta_file, sec_id, title, groupid, revdate)
+            # if not self.dus.has_key(duid):
+            #     self.dus[duid] = DU(data_file, meta_file, sec_id, title, groupid, revdate)
+            new_du = _DU(data_file, meta_file, sec_id, title, groupid, revdate)
+            duid = new_du.ident
+            self.dus[duid] = new_du
             msns = self.dus[duid].msns
             if msns:
                 msnlist.extend(msns)
