@@ -129,10 +129,11 @@ class FCOMFactory:
         if overriding_tdu:
             du_container_attrib["overridden_by"] = self.fcm.get_parent(overriding_tdu)
         tb.start("du_container", du_container_attrib)
-        self.jsarray.append([])
+        jsarray = other['jsarray']
+        jsarray.append([])
         for c in self.fcm.get_children(ident):
             self._process_du(tb, c, **other)
-        if self.jsarray[-1] == []: del self.jsarray[-1]
+        if jsarray[-1] == []: del jsarray[-1]
         tb.end("du_container")
 
 
@@ -161,9 +162,9 @@ class FCOMFactory:
             tb.start("applies", {})
             tb.data(self.fcm.applies_string(applies))
             tb.end("applies")
-            self.jsarray[-1].append([ident, applies, self.fcm.applies_string(applies)[:100]])
+            other['jsarray'][-1].append([ident, applies, self.fcm.applies_string(applies)[:100]])
         tb.end("du")
-        self.revs.extend(revs)
+        other['revs'].extend(revs)
 
 
     def make_page(self, sid, prevsid, nextsid):
@@ -171,13 +172,13 @@ class FCOMFactory:
         filename = self._make_href(sid)
         print "Creating:", filename
         tb = et.TreeBuilder()
-        self.revs = []
-        self.jsarray = []
-        self._process_page(tb, sid, prevsid, nextsid)
+        revs = []
+        jsarray = []
+        self._process_page(tb, sid, prevsid, nextsid, jsarray=jsarray, revs=revs)
         stylesheet_name = g_paths.xsldir + "page.xsl"
         tf = None
-        if self.revs:
-            tf = self._make_temporary_stylesheet(stylesheet_name, self.revs)
+        if revs:
+            tf = self._make_temporary_stylesheet(stylesheet_name, revs)
             stylesheet_name = tf.name
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", stylesheet_name, "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
@@ -186,7 +187,7 @@ class FCOMFactory:
         #create javascript variables for controlling folding
         page_string = page_string.replace(
             "<!--jsvariable-->",
-            "var folding = " + str(self.jsarray) + ";")
+            "var folding = " + str(jsarray) + ";")
         #replace xml links with xhtml links
         page_string = self._process_links(page_string)
         #insert link bar
