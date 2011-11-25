@@ -25,14 +25,13 @@ class FCOMFactory:
         self.write_fleet_js()
         content_pages = []
         for ident in self.fcm.get_root_nodes():
-            #self.content_pages filled in by this recursive call
             self._recursive_process_pagelist(ident, content_pages)
         self.make_index()
         for make_page_args in zip(content_pages,
                                   [None] + content_pages[:-1],
                                   content_pages[1:] + [None]):
             self.make_page(*make_page_args)
-        self.make_revision_list() # this must be done last
+        self.make_revision_list() # this must be done last - self.revisions is filled in by make_page
 
 
     def _recursive_process_pagelist(self, ident, content_pages):
