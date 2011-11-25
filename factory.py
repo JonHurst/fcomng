@@ -16,8 +16,8 @@ class FCOMFactory:
         self.fcm = fcm #instance of FCOMMeta
         versiondate = g_paths.control[-12:-4]
         self.versionstring = versiondate[:4] + "-" + versiondate[4:6] + "-" + versiondate[6:]
-        self.hrefs = {}
         self.revisions = []
+        self.chunk_depth = 3
 
 
     def build_fcom(self):
@@ -37,14 +37,14 @@ class FCOMFactory:
 
 
     def _recursive_process_pagelist(self, ident):
-        chunk_depth = 3 #generalise this to a setting later
-        if (len(self.fcm.get_pslcode(ident)) == chunk_depth or
+        if (len(self.fcm.get_pslcode(ident)) == self.chunk_depth or
             self.fcm.get_type(self.fcm.get_children(ident)[0]) != meta.TYPE_SECTION):
                 self.content_pages.append(ident)
         else:
             self.node_pages.append(ident)
             for ident in self.fcm.get_children(ident):
                 self._recursive_process_pagelist(ident)
+
 
     def _process_links(self, page_string):
         page_parts = re.split('<a class="duref" href="(\d+)">', page_string)
@@ -101,7 +101,6 @@ class FCOMFactory:
     def _process_section(self, tb, ident, filename):
         section_attribs = {"sid": "sid" + ".".join(self.fcm.get_pslcode(ident)),
                            "title": ".".join(self.fcm.get_pslcode(ident)) + ": " + self.fcm.get_title(ident)}
-        self.hrefs[ident] = filename + "#" + section_attribs["sid"]
         tb.start("section", section_attribs)
         if self.fcm.get_type(self.fcm.get_children(ident)[0]) == meta.TYPE_SECTION:
             #this causes the sections to be layed out flat rather than in a hierarchy
@@ -118,7 +117,6 @@ class FCOMFactory:
         group_attribs = {"id": "gid" + ident,
                          "title": self.fcm.get_title(ident)}
         tb.start("group", group_attribs)
-        self.hrefs[ident] = filename + "#gid" + ident
         for c in self.fcm.get_children(ident):
             self._recursive_build_node(tb, c, filename)
         tb.end("group")
@@ -131,7 +129,6 @@ class FCOMFactory:
         if overriding_tdu:
             du_container_attrib["overridden_by"] = self.fcm.get_parent(overriding_tdu)
         tb.start("du_container", du_container_attrib)
-        self.hrefs[ident] = filename + "#duid" + ident
         self.jsarray.append([])
         for c in self.fcm.get_children(ident):
             self._process_du(tb, c)
@@ -171,7 +168,7 @@ class FCOMFactory:
 
     def make_page(self, sid, prevsid, nextsid):
         global g_paths
-        filename = self._make_filename(sid)
+        filename = self._make_href(sid)
         print "Creating:", filename
         tb = et.TreeBuilder()
         self.revs = []
@@ -251,7 +248,6 @@ class FCOMFactory:
         filename = g_paths.html_output + self._make_filename(ident)
         of = open(filename, "w")
         of.write(page_string)
-        self.hrefs[ident] = filename
 
 
     def make_index(self):
@@ -363,7 +359,7 @@ class FCOMFactory:
             for duid in section[1:]:
                 tb.start("rev", {"code": self.fcm.get_revision_code(duid)[-1:],
                                  "duid": duid,
-                                 "href": self.hrefs[self.fcm.get_parent(duid)],
+                                 "href": self._make_href(self.fcm.get_parent(duid)),
                                  "title": self.fcm.get_title(duid)})
                 tb.end("rev")
             tb.end("section")
@@ -376,6 +372,36 @@ class FCOMFactory:
         of.write(page_string)
 
 
+    def _make_href(self, ident):
+        """Convert IDENT to an href.
+
+        If the ident is of a section that references a page or node
+        page, returns the relative filename (e.g. 'DSC.20.html").
+
+        Otherwise returns a link with a hash part
+        (e.g. 'GEN.html#duid00014071') which can be used in an <a> tag
+        to jump to the section"""
+        ident_list = self.fcm.get_ancestors(ident) + [ident]
+        section_list = [i for i in ident_list if self.fcm.get_type(i) == meta.TYPE_SECTION][:self.chunk_depth]
+        href = ".".join(self.fcm.get_pslcode(section_list[-1])) + ".html"
+        if ident != section_list[-1]:
+            href += "#" + self._make_html_identifier(ident)
+        return href
+
+
+    def _make_html_identifier(self, ident):
+        """Creates an identifier suitable for an html id attribute
+        from IDENT"""
+        node_type = self.fcm.get_type(ident)
+        prefixes = {meta.TYPE_DU: "duid",
+                    meta.TYPE_DUCONTAINER: "duid",
+                    meta.TYPE_GROUP: "gid",
+                    meta.TYPE_SECTION: "sid"}
+        if node_type == meta.TYPE_SECTION:
+            ident = ".".join(self.fcm.get_pslcode(ident))
+        return prefixes[node_type] + ident
+
+
 if __name__ == "__main__":
     global g_paths
     import sys
@@ -386,3 +412,10 @@ if __name__ == "__main__":
     g_paths.initialise(*sys.argv + ["."])
     fcm = meta.FCOMMeta(True)
     f = FCOMFactory(fcm)
+    print f._make_href("00014071")
+    print f._make_href("NG01223")
+    print f._make_href(('GEN',))
+    print f._make_href(('DSC','21','20'))
+
+
+
