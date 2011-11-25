@@ -7,6 +7,7 @@ import xml.etree.cElementTree as et
 import subprocess
 import re
 import tempfile
+import meta
 
 class FCOMFactory:
 
@@ -38,7 +39,7 @@ class FCOMFactory:
     def _recursive_process_pagelist(self, ident):
         chunk_depth = 3 #generalise this to a setting later
         if (len(self.fcm.get_pslcode(ident)) == chunk_depth or
-            self.fcm.get_type(self.fcm.get_children(ident)[0]) != 'section'):
+            self.fcm.get_type(self.fcm.get_children(ident)[0]) != meta.TYPE_SECTION):
                 self.content_pages.append(ident)
         else:
             self.node_pages.append(ident)
@@ -61,7 +62,7 @@ class FCOMFactory:
                 href = self._make_filename(i) + "#duid" + ident
                 #find the parent section
                 i = self.fcm.get_parent(ident)
-                while self.fcm.get_type(i) != 'section':
+                while self.fcm.get_type(i) != meta.TYPE_SECTION:
                     i = self.fcm.get_parent(i)
                 anchor_string = ".".join(self.fcm.get_pslcode(i)) + ": " + self.fcm.get_title(ident)
                 if page_parts[duref_index + 1][:2] != "</":
@@ -75,11 +76,11 @@ class FCOMFactory:
 
     def _recursive_build_node(self, tb, ident, filename):
         node_type = self.fcm.get_type(ident)
-        if  node_type == 'section':
+        if  node_type == meta.TYPE_SECTION:
             self._process_section(tb, ident, filename)
-        elif node_type == 'group':
+        elif node_type == meta.TYPE_GROUP:
             self._process_group(tb, ident, filename)
-        elif node_type == 'du_container':
+        elif node_type == meta.TYPE_DUCONTAINER:
             self._process_ducontainer(tb, ident, filename)
 
 
@@ -102,7 +103,7 @@ class FCOMFactory:
                            "title": ".".join(self.fcm.get_pslcode(ident)) + ": " + self.fcm.get_title(ident)}
         self.hrefs[ident] = filename + "#" + section_attribs["sid"]
         tb.start("section", section_attribs)
-        if self.fcm.get_type(self.fcm.get_children(ident)[0]) == 'section':
+        if self.fcm.get_type(self.fcm.get_children(ident)[0]) == meta.TYPE_SECTION:
             #this causes the sections to be layed out flat rather than in a hierarchy
             tb.end("section")
             for c in self.fcm.get_children(ident):
@@ -331,7 +332,7 @@ class FCOMFactory:
 
     def _parent_section(self, ident):
         section = self.fcm.get_parent(ident)
-        while self.fcm.get_type(section) != 'section':
+        while self.fcm.get_type(section) != meta.TYPE_SECTION:
             section = self.fcm.get_parent(section)
         return section
 

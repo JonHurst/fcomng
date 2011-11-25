@@ -54,6 +54,9 @@ from globals import *
 import cPickle as pickle
 import re
 
+#enums
+TYPE_DU, TYPE_DUCONTAINER, TYPE_GROUP, TYPE_SECTION = range(4)
+
 
 class _Node:
 
@@ -69,7 +72,7 @@ class _Node:
 
 class _DU(_Node):
 
-    node_type = "du"
+    node_type = TYPE_DU
 
     def __init__(self, parent, title, data_filename, mu_filename, revdate):
         global g_paths
@@ -114,7 +117,7 @@ class _DU(_Node):
 
 class _DU_Container(_Node):
 
-    node_type = "du_container"
+    node_type = TYPE_DUCONTAINER
 
     def __init__(self, parent, title):
         _Node.__init__(self, parent, title)
@@ -123,7 +126,7 @@ class _DU_Container(_Node):
 
 class _Section(_Node):
 
-    node_type = "section"
+    node_type = TYPE_SECTION
 
     def __init__(self, parent, title, pslcode):
         _Node.__init__(self, parent, title)
@@ -131,7 +134,7 @@ class _Section(_Node):
 
 
 class _Group(_Node):
-    node_type = "group"
+    node_type = TYPE_GROUP
     def __init__(self, parent, title):
         _Node.__init__(self, parent, title)
 
