@@ -74,17 +74,17 @@ class FCOMFactory:
         return "".join(page_parts)
 
 
-    def _recursive_build_node(self, tb, ident):
+    def _recursive_build_node(self, tb, ident, **other):
         node_type = self.fcm.get_type(ident)
         if  node_type == meta.TYPE_SECTION:
-            self._process_section(tb, ident)
+            self._process_section(tb, ident, **other)
         elif node_type == meta.TYPE_GROUP:
-            self._process_group(tb, ident)
+            self._process_group(tb, ident, **other)
         elif node_type == meta.TYPE_DUCONTAINER:
-            self._process_ducontainer(tb, ident)
+            self._process_ducontainer(tb, ident, **other)
 
 
-    def _process_page(self, tb, sid, prevsid, nextsid):
+    def _process_page(self, tb, sid, prevsid, nextsid, **other):
         page_attributes = {"title": self._make_page_title(sid),
                            "version": self.versionstring}
         if prevsid:
@@ -94,11 +94,11 @@ class FCOMFactory:
             page_attributes["next"] = self._make_href(nextsid)
             page_attributes["nexttitle"] = ".".join(self.fcm.get_pslcode(nextsid)) + ": " + self.fcm.get_title(nextsid)
         tb.start("page", page_attributes)
-        self._recursive_build_node(tb, sid)
+        self._recursive_build_node(tb, sid, **other)
         tb.end("page")
 
 
-    def _process_section(self, tb, ident):
+    def _process_section(self, tb, ident, **other):
         section_attribs = {"sid": self._make_html_identifier(ident),
                            "title": ".".join(self.fcm.get_pslcode(ident)) + ": " + self.fcm.get_title(ident)}
         tb.start("section", section_attribs)
@@ -106,23 +106,23 @@ class FCOMFactory:
             #this causes the sections to be layed out flat rather than in a hierarchy
             tb.end("section")
             for c in self.fcm.get_children(ident):
-                self._recursive_build_node(tb, c)
+                self._recursive_build_node(tb, c, **other)
         else:
             for c in self.fcm.get_children(ident):
-                self._recursive_build_node(tb, c)
+                self._recursive_build_node(tb, c, **other)
             tb.end("section")
 
 
-    def _process_group(self, tb, ident):
+    def _process_group(self, tb, ident, **other):
         group_attribs = {"id": self._make_html_identifier(ident),
                          "title": self.fcm.get_title(ident)}
         tb.start("group", group_attribs)
         for c in self.fcm.get_children(ident):
-            self._recursive_build_node(tb, c)
+            self._recursive_build_node(tb, c, **other)
         tb.end("group")
 
 
-    def _process_ducontainer(self, tb, ident):
+    def _process_ducontainer(self, tb, ident, **other):
         du_container_attrib = {"id": self._make_html_identifier(ident),
                                "title": self.fcm.get_title(ident)}
         overriding_tdu = self.fcm.get_overriding(ident)
@@ -131,12 +131,12 @@ class FCOMFactory:
         tb.start("du_container", du_container_attrib)
         self.jsarray.append([])
         for c in self.fcm.get_children(ident):
-            self._process_du(tb, c)
+            self._process_du(tb, c, **other)
         if self.jsarray[-1] == []: del self.jsarray[-1]
         tb.end("du_container")
 
 
-    def _process_du(self, tb, ident):
+    def _process_du(self, tb, ident, **other):
         """Create DU in TreeBuilder TB.
 
         DU is the duid of the du to build.
