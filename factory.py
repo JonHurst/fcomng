@@ -54,9 +54,7 @@ class FCOMFactory:
                 page_parts[duref_index] = "!!!DU REFERENCE ERROR!!!"
             else:
                 href = self._make_href(ident)
-                #find the parent section
-                i = [X for X in self.fcm.get_ancestors(ident) if self.fcm.get_type(X) == meta.TYPE_SECTION][-1]
-                anchor_string = ".".join(self.fcm.get_pslcode(i)) + ": " + self.fcm.get_title(ident)
+                anchor_string = self._make_title(ident)
                 if page_parts[duref_index + 1][:2] != "</":
                     anchor_string = anchor_string.split()[0]
                 page_parts[duref_index] = '<a class="duref" href="%s">%s' % (
@@ -77,14 +75,14 @@ class FCOMFactory:
 
 
     def _process_page(self, tb, sid, prevsid, nextsid, **other):
-        page_attributes = {"title": self._make_page_title(sid),
+        page_attributes = {"title": self._make_title(sid, True),
                            "version": self.versionstring}
         if prevsid:
             page_attributes["prev"] = self._make_href(prevsid)
-            page_attributes["prevtitle"] = ".".join(self.fcm.get_pslcode(prevsid)) + ": " + self.fcm.get_title(prevsid)
+            page_attributes["prevtitle"] = self._make_title(prevsid)
         if nextsid:
             page_attributes["next"] = self._make_href(nextsid)
-            page_attributes["nexttitle"] = ".".join(self.fcm.get_pslcode(nextsid)) + ": " + self.fcm.get_title(nextsid)
+            page_attributes["nexttitle"] = self._make_title(nextsid)
         tb.start("page", page_attributes)
         self._recursive_build_node(tb, sid, **other)
         tb.end("page")
@@ -92,7 +90,7 @@ class FCOMFactory:
 
     def _process_section(self, tb, ident, **other):
         section_attribs = {"sid": self._make_html_identifier(ident),
-                           "title": ".".join(self.fcm.get_pslcode(ident)) + ": " + self.fcm.get_title(ident)}
+                           "title": self._make_title(ident)}
         tb.start("section", section_attribs)
         if self.fcm.get_type(self.fcm.get_children(ident)[0]) == meta.TYPE_SECTION:
             #this causes the sections to be layed out flat rather than in a hierarchy
@@ -202,12 +200,6 @@ class FCOMFactory:
         return tf
 
 
-
-    def _make_page_title(self, sid):
-        titleparts = [self.fcm.get_title(i) for i in self.fcm.get_ancestors(sid) + [sid]]
-        return "[%s] %s" % (".".join(self.fcm.get_pslcode(sid)), " : ".join(titleparts))
-
-
     def _recursive_add_section(self, ident, tb):
         if (len(self.fcm.get_pslcode(ident)) < self.chunk_depth and
             self.fcm.get_type(self.fcm.get_children(ident)[0]) == meta.TYPE_SECTION):
@@ -228,7 +220,7 @@ class FCOMFactory:
     def _make_node_page(self, ident, children):
         global g_paths
         tb = et.TreeBuilder()
-        tb.start("index", {"title": self._make_page_title(ident),
+        tb.start("index", {"title": self._make_title(ident, True),
                            "ident": ".".join(self.fcm.get_pslcode(ident)),
                            "version": self.versionstring})
         for i in children:
@@ -279,7 +271,7 @@ class FCOMFactory:
                 ident_list = self.fcm.get_ancestors(ident)
             for i in ident_list:
                 tb.data(" >> ")
-                title = ".".join(self.fcm.get_pslcode(i)) + ": " + self.fcm.get_title(i)
+                title = self._make_title(i)
                 tb.start("a", {"title": title,
                                "href": self._make_href(i)})
                 tb.data(title[:title_crop])
@@ -307,9 +299,6 @@ class FCOMFactory:
             ("var fleet = { \n" +
              ",".join(["'%s':'%s'" % X for X in self.fcm.get_fleet()]) +
              "};\n"))
-
-
-
 
 
     def _parent_section(self, ident):
@@ -341,7 +330,7 @@ class FCOMFactory:
                                "version": self.versionstring})
         for section in sectioned_dus:
             section_title = []
-            tb.start("section", {"title": self._make_page_title(section[0])})
+            tb.start("section", {"title": self._make_title(section[0], True)})
             for duid in section[1:]:
                 tb.start("rev", {"code": self.fcm.get_revision_code(duid)[-1:],
                                  "duid": duid,
@@ -386,6 +375,19 @@ class FCOMFactory:
         if node_type == meta.TYPE_SECTION:
             ident = ".".join(self.fcm.get_pslcode(ident))
         return prefixes[node_type] + ident
+
+
+    def _make_title(self, ident, all_sections=False):
+        sections = [X for X in self.fcm.get_ancestors(ident) + [ident]
+                    if self.fcm.get_type(X) == meta.TYPE_SECTION]
+        prefix = ".".join(self.fcm.get_pslcode(sections[-1]))
+        if all_sections:
+            titleparts = [self.fcm.get_title(X) for X in sections]
+            return "[%s] %s" % (prefix, " : ".join(titleparts))
+        else:
+            return "%s: %s" % (prefix, self.fcm.get_title(ident))
+
+
 
 
 if __name__ == "__main__":
