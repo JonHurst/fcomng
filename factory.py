@@ -59,7 +59,7 @@ class FCOMFactory:
                 i = self.fcm.get_parent(ident)
                 while i not in self.content_pages:
                     i = self.fcm.get_parent(i)
-                href = self._make_filename(i) + "#duid" + ident
+                href = self._make_href(ident)
                 #find the parent section
                 i = self.fcm.get_parent(ident)
                 while self.fcm.get_type(i) != meta.TYPE_SECTION:
@@ -74,56 +74,56 @@ class FCOMFactory:
         return "".join(page_parts)
 
 
-    def _recursive_build_node(self, tb, ident, filename):
+    def _recursive_build_node(self, tb, ident):
         node_type = self.fcm.get_type(ident)
         if  node_type == meta.TYPE_SECTION:
-            self._process_section(tb, ident, filename)
+            self._process_section(tb, ident)
         elif node_type == meta.TYPE_GROUP:
-            self._process_group(tb, ident, filename)
+            self._process_group(tb, ident)
         elif node_type == meta.TYPE_DUCONTAINER:
-            self._process_ducontainer(tb, ident, filename)
+            self._process_ducontainer(tb, ident)
 
 
-    def _process_page(self, tb, sid, prevsid, nextsid, filename):
+    def _process_page(self, tb, sid, prevsid, nextsid):
         page_attributes = {"title": self._make_page_title(sid),
                            "version": self.versionstring}
         if prevsid:
-            page_attributes["prev"] = self._make_filename(prevsid)
+            page_attributes["prev"] = self._make_href(prevsid)
             page_attributes["prevtitle"] = ".".join(self.fcm.get_pslcode(prevsid)) + ": " + self.fcm.get_title(prevsid)
         if nextsid:
-            page_attributes["next"] = self._make_filename(nextsid)
+            page_attributes["next"] = self._make_href(nextsid)
             page_attributes["nexttitle"] = ".".join(self.fcm.get_pslcode(nextsid)) + ": " + self.fcm.get_title(nextsid)
         tb.start("page", page_attributes)
-        self._recursive_build_node(tb, sid, filename)
+        self._recursive_build_node(tb, sid)
         tb.end("page")
 
 
-    def _process_section(self, tb, ident, filename):
-        section_attribs = {"sid": "sid" + ".".join(self.fcm.get_pslcode(ident)),
+    def _process_section(self, tb, ident):
+        section_attribs = {"sid": self._make_html_identifier(ident),
                            "title": ".".join(self.fcm.get_pslcode(ident)) + ": " + self.fcm.get_title(ident)}
         tb.start("section", section_attribs)
         if self.fcm.get_type(self.fcm.get_children(ident)[0]) == meta.TYPE_SECTION:
             #this causes the sections to be layed out flat rather than in a hierarchy
             tb.end("section")
             for c in self.fcm.get_children(ident):
-                self._recursive_build_node(tb, c, filename)
+                self._recursive_build_node(tb, c)
         else:
             for c in self.fcm.get_children(ident):
-                self._recursive_build_node(tb, c, filename)
+                self._recursive_build_node(tb, c)
             tb.end("section")
 
 
-    def _process_group(self, tb, ident, filename):
-        group_attribs = {"id": "gid" + ident,
+    def _process_group(self, tb, ident):
+        group_attribs = {"id": self._make_html_identifier(ident),
                          "title": self.fcm.get_title(ident)}
         tb.start("group", group_attribs)
         for c in self.fcm.get_children(ident):
-            self._recursive_build_node(tb, c, filename)
+            self._recursive_build_node(tb, c)
         tb.end("group")
 
 
-    def _process_ducontainer(self, tb, ident, filename):
-        du_container_attrib = {"id": "duid" + ident,
+    def _process_ducontainer(self, tb, ident):
+        du_container_attrib = {"id": self._make_html_identifier(ident),
                                "title": self.fcm.get_title(ident)}
         overriding_tdu = self.fcm.get_overriding(ident)
         if overriding_tdu:
@@ -173,7 +173,7 @@ class FCOMFactory:
         tb = et.TreeBuilder()
         self.revs = []
         self.jsarray = []
-        self._process_page(tb, sid, prevsid, nextsid, filename)
+        self._process_page(tb, sid, prevsid, nextsid)
         stylesheet_name = g_paths.xsldir + "page.xsl"
         tf = None
         if self.revs:
@@ -221,12 +221,12 @@ class FCOMFactory:
             self._make_node_page(ident, children)
             tb.start("section", {"title": self.fcm.get_title(ident),
                                  "ident": ".".join(self.fcm.get_pslcode(ident)),
-                                 "href": self._make_filename(ident)})
+                                 "href": self._make_href(ident)})
             for s in children:
                 self._recursive_add_section(s, tb)
             tb.end("section")
         else:
-            tb.start("page", {"href": self._make_filename(ident)})
+            tb.start("page", {"href": self._make_href(ident)})
             tb.data(".".join(self.fcm.get_pslcode(ident)) + ": " + self.fcm.get_title(ident))
             tb.end("page")
 
@@ -245,7 +245,7 @@ class FCOMFactory:
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
         page_string = page_string.replace("<!--linkbar-->", self._build_linkbar(ident))
         print "Creating node page", ident, self.fcm.get_pslcode(ident)
-        filename = g_paths.html_output + self._make_filename(ident)
+        filename = g_paths.html_output + self._make_href(ident)
         of = open(filename, "w")
         of.write(page_string)
 
@@ -270,13 +270,6 @@ class FCOMFactory:
         of.write(page_string)
 
 
-    def _make_filename(self, sid):
-        retval = ""
-        if sid:
-            retval = ".".join(self.fcm.get_pslcode(sid)) + ".html"
-        return retval
-
-
     def _build_linkbar(self, ident):
         title_crop = 30
         tb = et.TreeBuilder()
@@ -295,7 +288,7 @@ class FCOMFactory:
                 tb.data(" >> ")
                 title = ".".join(self.fcm.get_pslcode(i)) + ": " + self.fcm.get_title(i)
                 tb.start("a", {"title": title,
-                               "href": self._make_filename(i)})
+                               "href": self._make_href(i)})
                 tb.data(title[:title_crop])
                 if len(title) > title_crop:
                     tb.data("...")
