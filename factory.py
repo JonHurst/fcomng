@@ -138,7 +138,7 @@ class FCOMFactory:
         if filename: filename = g_paths.dus + filename
         du_attrib = {"title": self.fcm.get_title(ident),
                      "href": filename,
-                     "id": "duid" + ident,
+                     "id": self._make_html_identifier(ident),
                      "revdate": self.fcm.get_revdate(ident)}
         code = self.fcm.get_revision_code(ident)
         revs = self.fcm.get_du_revs(ident)
