@@ -212,7 +212,7 @@ class FCOMFactory:
             tb.end("section")
         else:
             tb.start("page", {"href": self._make_href(ident)})
-            tb.data(".".join(self.fcm.get_pslcode(ident)) + ": " + self.fcm.get_title(ident))
+            tb.data(self._make_title(ident))
             tb.end("page")
 
 
