@@ -64,6 +64,7 @@ class _Node:
         self.parent = parent
         self.children = []
         self.title = title
+        self.parent_section = None
 
 
     def add_child(self, child_id):
@@ -74,11 +75,12 @@ class _DU(_Node):
 
     node_type = TYPE_DU
 
-    def __init__(self, parent, title, data_filename, mu_filename, revdate):
+    def __init__(self, parent, title, data_filename, mu_filename, revdate, parent_section_id):
         global g_paths
         _Node.__init__(self, parent, title)
         self.data_filename = data_filename
         self.revdate = revdate
+        self.parent_section = parent_section_id
         #parse metadata file
         e = et.ElementTree(None, g_paths.mus + mu_filename)
         #extract ident - this is the easiest place to get it from
@@ -119,9 +121,10 @@ class _DU_Container(_Node):
 
     node_type = TYPE_DUCONTAINER
 
-    def __init__(self, parent, title):
+    def __init__(self, parent, title, parent_section_id):
         _Node.__init__(self, parent, title)
         self.overridden_by = None
+        self.parent_section = parent_section_id
 
 
 class _Section(_Node):
@@ -131,12 +134,14 @@ class _Section(_Node):
     def __init__(self, parent, title, pslcode):
         _Node.__init__(self, parent, title)
         self.pslcode = pslcode
+        self.parent_section = parent
 
 
 class _Group(_Node):
     node_type = TYPE_GROUP
     def __init__(self, parent, title):
         _Node.__init__(self, parent, title)
+        self.parent_section = parent #groups don't nest
 
 
 
@@ -248,17 +253,17 @@ class FCOMMeta:
         #process section
         for e in elem:
             if e.tag == "du-inv":
-                self._process_duinv(e, ident)
+                self._process_duinv(e, ident, ident)
             elif e.tag == "group":
                 self._process_group(e, ident)
             elif e.tag == "psl":
                 self._process_psl(e, ident)
 
 
-    def _process_duinv(self, elem, parent_id):
+    def _process_duinv(self, elem, parent_id, parent_section_id):
         global g_paths
         #create and link up new DU container
-        container = _DU_Container(parent_id, elem.find("title").text)
+        container = _DU_Container(parent_id, elem.find("title").text, parent_section_id)
         container_id = elem.attrib["code"]
         self.nodes[container_id] = container
         self.nodes[parent_id].add_child(container_id)
@@ -271,7 +276,7 @@ class FCOMMeta:
             title = elem.find("title").text
             revdate = s.find("sol-content-ref").attrib["revdate"]
             #create and link the new DU
-            du = _DU(container_id, title, data_file, meta_file, revdate)
+            du = _DU(container_id, title, data_file, meta_file, revdate, parent_section_id)
             duid = du.ident
             self.nodes[duid] = du
             container.add_child(duid)
@@ -285,7 +290,7 @@ class FCOMMeta:
             nc = self.notcovered(msnlist)
             if nc:
                 duid = container_id + ".NA"
-                self.nodes[duid] = _DU(container_id, title, "", meta_file, "N/A")
+                self.nodes[duid] = _DU(container_id, title, "", meta_file, "N/A", parent_section_id)
                 self.nodes[duid].msns = nc
                 container.add_child(duid)
 
@@ -296,7 +301,7 @@ class FCOMMeta:
         self.nodes[groupid] = _Group(parent_id, elem.find("title").text)
         self.nodes[parent_id].add_child(groupid)
         for s in elem.findall("du-inv"):
-            self._process_duinv(s, groupid)
+            self._process_duinv(s, groupid, parent_id)
 
 
     def _build_revdict(self, rev_elem):
@@ -408,6 +413,14 @@ class FCOMMeta:
         return ancestors
 
 
+    def get_parent_section(self, ident):
+        return self.nodes[ident].parent_section
+
+
+    def get_section_depth(self, ident):
+        return len(self.nodes[ident].pslcode)
+
+
 if __name__ == "__main__":
     global g_paths
     import sys
@@ -416,5 +429,6 @@ if __name__ == "__main__":
         sys.exit(1)
     g_paths.initialise(*sys.argv + ["."])
     fcm = FCOMMeta()
-    fcm.dump()
+    parent_section_test = fcm.get_parent_section(('DSC', '20', '10'))
+    print parent_section_test, fcm.get_pslcode(parent_section_test)
 
