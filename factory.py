@@ -35,7 +35,7 @@ class FCOMFactory:
 
 
     def _recursive_process_pagelist(self, ident, content_pages):
-        if (len(self.fcm.get_pslcode(ident)) == self.chunk_depth or
+        if (self.fcm.get_section_depth(ident) == self.chunk_depth or
             self.fcm.get_type(self.fcm.get_children(ident)[0]) != meta.TYPE_SECTION):
                 content_pages.append(ident)
         else:
@@ -200,7 +200,7 @@ class FCOMFactory:
 
 
     def _recursive_add_section(self, ident, tb):
-        if (len(self.fcm.get_pslcode(ident)) < self.chunk_depth and
+        if (self.fcm.get_section_depth(ident) < self.chunk_depth and
             self.fcm.get_type(self.fcm.get_children(ident)[0]) == meta.TYPE_SECTION):
             children = self.fcm.get_children(ident)
             self._make_node_page(ident, children)
@@ -300,26 +300,13 @@ class FCOMFactory:
              "};\n"))
 
 
-    def _parent_section(self, ident):
-        section = self.fcm.get_parent(ident)
-        while self.fcm.get_type(section) != meta.TYPE_SECTION:
-            section = self.fcm.get_parent(section)
-        return section
-
-
-    def _page_section(self, ident):
-        while ident not in self.content_pages:
-            ident = self.fcm.get_parent(ident)
-        return ident
-
-
     def make_revision_list(self):
         global g_paths
         print "Writing revision list"
         #split dus into lists within the same section
-        sectioned_dus = [[self._parent_section(self.revisions[0])]]
+        sectioned_dus = [[self.fcm.get_parent_section(self.revisions[0])]]
         for duid in self.revisions:
-            du_section = self._parent_section(duid)
+            du_section = self.fcm.get_parent_section(duid)
             if du_section == sectioned_dus[-1][0]:
                 sectioned_dus[-1].append(duid)
             else:
@@ -355,10 +342,13 @@ class FCOMFactory:
         Otherwise returns a link with a hash part
         (e.g. 'GEN.html#duid00014071') which can be used in an <a> tag
         to jump to the section"""
-        ident_list = self.fcm.get_ancestors(ident) + [ident]
-        section_list = [i for i in ident_list if self.fcm.get_type(i) == meta.TYPE_SECTION][:self.chunk_depth]
-        href = ".".join(self.fcm.get_pslcode(section_list[-1])) + ".html"
-        if ident != section_list[-1]:
+        section = ident
+        if self.fcm.get_type(ident) != meta.TYPE_SECTION:
+            section = self.fcm.get_parent_section(ident)
+        if self.fcm.get_section_depth(section) > self.chunk_depth:
+            section = self.fcm.get_ancestors(section)[self.chunk_depth - 1]
+        href = ".".join(self.fcm.get_pslcode(section)) + ".html"
+        if ident != section:
             href += "#" + self._make_html_identifier(ident)
         return href
 
