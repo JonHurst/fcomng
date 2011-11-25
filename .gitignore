@@ -8,3 +8,4 @@ scripts/fleet.js
 *.pyc
 pickles
 build-error.log
+unit-test-target
