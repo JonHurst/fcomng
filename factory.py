@@ -213,12 +213,8 @@ class FCOMFactory:
 
 
     def _make_page_title(self, sid):
-        titleparts = []
-        ident = sid
-        while ident:
-            titleparts.insert(0, self.fcm.get_title(ident))
-            ident = self.fcm.get_parent(ident)
-        return "[%s] %s" % (".".join(self.fcm.get_pslcode(sid)), " : ".join(titleparts[1:]))
+        titleparts = [self.fcm.get_title(i) for i in self.fcm.get_ancestors(sid) + [sid]]
+        return "[%s] %s" % (".".join(self.fcm.get_pslcode(sid)), " : ".join(titleparts))
 
 
     def _recursive_add_section(self, ident, tb):
@@ -294,15 +290,11 @@ class FCOMFactory:
                            "href": "index.html"})
             tb.data("Contents")
             tb.end("a")
-            ident_list = []
             if ident == "REV":
-                i = None
+                ident_list = []
             else:
-                i = self.fcm.get_parent(ident)
-            while i:
-                ident_list.insert(0, i)
-                i = self.fcm.get_parent(i)
-            for i in ident_list[1:]:
+                ident_list = self.fcm.get_ancestors(ident)
+            for i in ident_list:
                 tb.data(" >> ")
                 title = ".".join(self.fcm.get_pslcode(i)) + ": " + self.fcm.get_title(i)
                 tb.start("a", {"title": title,
@@ -366,12 +358,7 @@ class FCOMFactory:
                                "version": self.versionstring})
         for section in sectioned_dus:
             section_title = []
-            s = section[0]
-            while s:
-                section_title.insert(0, self.fcm.get_title(s))
-                s = self.fcm.get_parent(s)
-            section_title = " : ".join(section_title[1:-1])
-            tb.start("section", {"title": ".".join(self.fcm.get_pslcode(section[0])) + " " + section_title})
+            tb.start("section", {"title": self._make_page_title(section[0])})
             for duid in section[1:]:
                 tb.start("rev", {"code": self.fcm.get_revision_code(duid)[-1:],
                                  "duid": duid,

@@ -224,11 +224,11 @@ class FCOMMeta:
             self.aircraft = _Aircraft(self.global_meta.find("aat"))
             self.revdict = {}
             self._build_revdict(self.global_meta.find("revisions"))
-            self.nodes = {"root": _Section(None, "", ())}
+            self.nodes = {None: _Section(None, "", ())}
             self.control = et.ElementTree(None, g_paths.control)
             for psl in self.control.getroot().findall("psl"):
                 print "Scanning", psl.attrib["pslcode"]
-                self._process_psl(psl, "root")
+                self._process_psl(psl, None)
             pickle_file = open(g_paths.pickles + "meta.pkl", "w")
             pickle.dump((self.revdict, self.aircraft, self.nodes), pickle_file)
             pickle_file.close()
@@ -341,9 +341,7 @@ class FCOMMeta:
             self._dump_element(c, spaces + "  ")
 
     def dump(self):
-        self._dump_element("root", "")
-        for ident in self.get_nodes('section'):
-            print ident, self.get_pslcode(ident)
+        self._dump_element(None, "")
 
 
     def get_title(self, ident):
@@ -363,7 +361,7 @@ class FCOMMeta:
 
 
     def get_root_nodes(self):
-        return self.nodes["root"].children
+        return self.nodes[None].children
 
 
     def get_filename(self, ident):
@@ -401,9 +399,11 @@ class FCOMMeta:
     def get_ancestors(self, ident):
         ancestors = []
         ident = self.nodes[ident].parent
-        while ident != "root":
-            ancestors.append(ident)
+        while ident:
+            ancestors.insert(0, ident)
             ident = self.nodes[ident].parent
+        return ancestors
+
 
 if __name__ == "__main__":
     global g_paths
@@ -412,6 +412,6 @@ if __name__ == "__main__":
         print "Usage: ", sys.argv[0], "start_file"
         sys.exit(1)
     g_paths.initialise(*sys.argv + ["."])
-    fcm = FCOMMeta(True)
+    fcm = FCOMMeta()
     fcm.dump()
 
