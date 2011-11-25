@@ -23,27 +23,25 @@ class FCOMFactory:
     def build_fcom(self):
         self.errorlog = open("build-error.log", "w")
         self.write_fleet_js()
-        self.content_pages = []
-        self.node_pages = []
+        content_pages = []
         for ident in self.fcm.get_root_nodes():
-            #self.content_pages and self.node_pages are filled in by this recursive call
-            self._recursive_process_pagelist(ident)
+            #self.content_pages filled in by this recursive call
+            self._recursive_process_pagelist(ident, content_pages)
         self.make_index()
-        for make_page_args in zip(self.content_pages,
-                                  [None] + self.content_pages[:-1],
-                                  self.content_pages[1:] + [None]):
+        for make_page_args in zip(content_pages,
+                                  [None] + content_pages[:-1],
+                                  content_pages[1:] + [None]):
             self.make_page(*make_page_args)
-        self.make_revision_list() # this must be done last since make_page populates hrefs
+        self.make_revision_list() # this must be done last
 
 
-    def _recursive_process_pagelist(self, ident):
+    def _recursive_process_pagelist(self, ident, content_pages):
         if (len(self.fcm.get_pslcode(ident)) == self.chunk_depth or
             self.fcm.get_type(self.fcm.get_children(ident)[0]) != meta.TYPE_SECTION):
-                self.content_pages.append(ident)
+                content_pages.append(ident)
         else:
-            self.node_pages.append(ident)
             for ident in self.fcm.get_children(ident):
-                self._recursive_process_pagelist(ident)
+                self._recursive_process_pagelist(ident, content_pages)
 
 
     def _process_links(self, page_string):
@@ -55,15 +53,9 @@ class FCOMFactory:
                 print >> self.errorlog, "Reference to unknown DU", page_parts[duref_index], "whilst processing", ident
                 page_parts[duref_index] = "!!!DU REFERENCE ERROR!!!"
             else:
-                #find the correct href
-                i = self.fcm.get_parent(ident)
-                while i not in self.content_pages:
-                    i = self.fcm.get_parent(i)
                 href = self._make_href(ident)
                 #find the parent section
-                i = self.fcm.get_parent(ident)
-                while self.fcm.get_type(i) != meta.TYPE_SECTION:
-                    i = self.fcm.get_parent(i)
+                i = [X for X in self.fcm.get_ancestors(ident) if self.fcm.get_type(X) == meta.TYPE_SECTION][-1]
                 anchor_string = ".".join(self.fcm.get_pslcode(i)) + ": " + self.fcm.get_title(ident)
                 if page_parts[duref_index + 1][:2] != "</":
                     anchor_string = anchor_string.split()[0]
@@ -217,7 +209,8 @@ class FCOMFactory:
 
 
     def _recursive_add_section(self, ident, tb):
-        if ident in self.node_pages:
+        if (len(self.fcm.get_pslcode(ident)) < self.chunk_depth and
+            self.fcm.get_type(self.fcm.get_children(ident)[0]) == meta.TYPE_SECTION):
             children = self.fcm.get_children(ident)
             self._make_node_page(ident, children)
             tb.start("section", {"title": self.fcm.get_title(ident),
@@ -262,7 +255,6 @@ class FCOMFactory:
         for s in self.fcm.get_root_nodes():
             self._recursive_add_section(s, tb)
         tb.end("index")
-
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "index.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
