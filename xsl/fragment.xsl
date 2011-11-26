@@ -243,30 +243,33 @@
 
 <xsl:template match="equal">
   <!-- (equ-l,equ-r) -->
-  <xsl:if test="not(preceding-sibling::equal)">
+  <xsl:if test="name(preceding-sibling::*[1]) != 'equal'">
     <div class="equal">
     <table class="equal">
-      <tr>
-	<th class="equ-l">
-	  <xsl:apply-templates select="equ-l"/>
-	</th>
-	<td class="equ-r">
-	  <xsl:apply-templates select="equ-r"/>
-	</td>
-      </tr>
-      <xsl:for-each select="following-sibling::equal">
-	<tr>
-	  <th class="equ-l">
-	    <xsl:apply-templates select="equ-l"/>
-	  </th>
-	  <td class="equ-r">
-	    <xsl:apply-templates select="equ-r"/>
-	  </td>
-	</tr>
-      </xsl:for-each>
+      <xsl:call-template name="recursive-process-equal">
+        <xsl:with-param name="equal-node" select="."/>
+      </xsl:call-template>
     </table>
     </div>
   </xsl:if>
+</xsl:template>
+
+
+<xsl:template name="recursive-process-equal">
+  <xsl:param name="equal-node"/>
+	<tr>
+	  <th class="equ-l">
+	    <xsl:apply-templates select="$equal-node/equ-l"/>
+	  </th>
+	  <td class="equ-r">
+	    <xsl:apply-templates select="$equal-node/equ-r"/>
+	  </td>
+	</tr>
+   <xsl:if test="name($equal-node/following-sibling::*[1]) = 'equal'">
+     <xsl:call-template name="recursive-process-equal">
+       <xsl:with-param name="equal-node" select="$equal-node/following-sibling::equal[1]"/>
+     </xsl:call-template>
+   </xsl:if>
 </xsl:template>
 
 
