@@ -25,7 +25,7 @@ class FCOMFactory:
         self.write_fleet_js()
         content_pages = []
         for ident in self.fcm.get_root_nodes():
-            self._recursive_process_pagelist(ident, content_pages)
+            self._recursive_process_section(ident, content_pages)
         self._make_node_page(None)#make contents page
         for make_page_args in zip(content_pages,
                                   [None] + content_pages[:-1],
@@ -34,14 +34,14 @@ class FCOMFactory:
         self.make_revision_list() # this must be done last - self.revisions is filled in by make_page
 
 
-    def _recursive_process_pagelist(self, ident, content_pages):
+    def _recursive_process_section(self, ident, content_pages):
         if (self.fcm.get_section_depth(ident) == self.chunk_depth or
             self.fcm.get_type(self.fcm.get_children(ident)[0]) != meta.TYPE_SECTION):
             content_pages.append(ident)
         else:
             self._make_node_page(ident)
             for ident in self.fcm.get_children(ident):
-                self._recursive_process_pagelist(ident, content_pages)
+                self._recursive_process_section(ident, content_pages)
 
 
     def _process_links(self, page_string):
