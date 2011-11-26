@@ -50,7 +50,7 @@ class FCOMFactory:
             ident = page_parts[duref_index]
             if not self.fcm.is_valid(ident):
                 print >> self.errorlog, "Reference to unknown DU", page_parts[duref_index], "whilst processing", ident
-                page_parts[duref_index] = "!!!DU REFERENCE ERROR!!!"
+                page_parts[duref_index] = "<a class='duref' href='#'>!!!DU REFERENCE ERROR:%s!!!" % ident
             else:
                 href = self._make_href(ident)
                 anchor_string = self._make_title(ident)
