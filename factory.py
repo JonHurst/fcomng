@@ -26,7 +26,7 @@ class FCOMFactory:
         content_pages = []
         for ident in self.fcm.get_root_nodes():
             self._recursive_process_pagelist(ident, content_pages)
-        self.make_index()
+        self._make_node_page(None)#make contents page
         for make_page_args in zip(content_pages,
                                   [None] + content_pages[:-1],
                                   content_pages[1:] + [None]):
@@ -37,8 +37,9 @@ class FCOMFactory:
     def _recursive_process_pagelist(self, ident, content_pages):
         if (self.fcm.get_section_depth(ident) == self.chunk_depth or
             self.fcm.get_type(self.fcm.get_children(ident)[0]) != meta.TYPE_SECTION):
-                content_pages.append(ident)
+            content_pages.append(ident)
         else:
+            self._make_node_page(ident)
             for ident in self.fcm.get_children(ident):
                 self._recursive_process_pagelist(ident, content_pages)
 
@@ -199,16 +200,14 @@ class FCOMFactory:
         return tf
 
 
-    def _recursive_add_section(self, ident, tb):
+    def _recursive_add_index_section(self, ident, tb):
         if (self.fcm.get_section_depth(ident) < self.chunk_depth and
             self.fcm.get_type(self.fcm.get_children(ident)[0]) == meta.TYPE_SECTION):
-            children = self.fcm.get_children(ident)
-            self._make_node_page(ident, children)
             tb.start("section", {"title": self.fcm.get_title(ident),
                                  "ident": ".".join(self.fcm.get_pslcode(ident)),
                                  "href": self._make_href(ident)})
-            for s in children:
-                self._recursive_add_section(s, tb)
+            for s in self.fcm.get_children(ident):
+                self._recursive_add_index_section(s, tb)
             tb.end("section")
         else:
             tb.start("page", {"href": self._make_href(ident)})
@@ -216,41 +215,32 @@ class FCOMFactory:
             tb.end("page")
 
 
-    def _make_node_page(self, ident, children):
+    def _make_node_page(self, ident):
         global g_paths
         tb = et.TreeBuilder()
-        tb.start("index", {"title": self._make_title(ident, True),
-                           "ident": ".".join(self.fcm.get_pslcode(ident)),
-                           "version": self.versionstring})
-        for i in children:
-            self._recursive_add_section(i, tb)
+        if ident:
+            index_attribs = {"title": self._make_title(ident, True),
+                             "ident": ".".join(self.fcm.get_pslcode(ident)),
+                             "version": self.versionstring}
+            filename = self._make_href(ident)
+        else: #contents page
+            index_attribs =  {"title": "Contents",
+                              "version": self.versionstring}
+            filename = "index.html"
+        tb.start("index", index_attribs)
+        if not ident:#inject revisions list link into index.html
+            tb.start("page", {"href": "revisions.html"})
+            tb.data("Revision list")
+            tb.end("page")
+        for i in self.fcm.get_children(ident):
+            self._recursive_add_index_section(i, tb)
         tb.end("index")
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "index.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(et.tostring(tb.close(), "utf-8"))[0]
         page_string = page_string.replace("<!--linkbar-->", self._build_linkbar(ident))
-        print "Creating node page", ident, self.fcm.get_pslcode(ident)
-        filename = g_paths.html_output + self._make_href(ident)
-        of = open(filename, "w")
-        of.write(page_string)
-
-
-    def make_index(self):
-        global g_paths
-        tb = et.TreeBuilder()
-        tb.start("index", {"title": "Contents",
-                           "version": self.versionstring})
-        tb.start("page", {"href": "revisions.html"})
-        tb.data("Revision list")
-        tb.end("page")
-        for s in self.fcm.get_root_nodes():
-            self._recursive_add_section(s, tb)
-        tb.end("index")
-        page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "index.xsl", "-"],
-                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE
-                                  ).communicate(et.tostring(tb.close(), "utf-8"))[0]
-        page_string = page_string.replace("<!--linkbar-->", self._build_linkbar(()))
-        of = open(g_paths.html_output + "index.html", "w")
+        print "Creating", filename
+        of = open(g_paths.html_output + filename, "w")
         of.write(page_string)
 
 
