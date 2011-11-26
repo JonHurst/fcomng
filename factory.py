@@ -101,20 +101,6 @@ class FCOMFactory:
             tb.end("du_container")
 
 
-    def _process_page(self, tb, sid, prevsid, nextsid, **other):
-        page_attributes = {"title": self._make_title(sid, True),
-                           "version": self.versionstring}
-        if prevsid:
-            page_attributes["prev"] = self._make_href(prevsid)
-            page_attributes["prevtitle"] = self._make_title(prevsid)
-        if nextsid:
-            page_attributes["next"] = self._make_href(nextsid)
-            page_attributes["nexttitle"] = self._make_title(nextsid)
-        tb.start("page", page_attributes)
-        self._recursive_build_node(tb, sid, **other)
-        tb.end("page")
-
-
     def _process_du(self, tb, ident, **other):
         """Create DU in TreeBuilder TB.
 
@@ -152,7 +138,17 @@ class FCOMFactory:
         tb = et.TreeBuilder()
         revs = []
         jsarray = []
-        self._process_page(tb, sid, prevsid, nextsid, jsarray=jsarray, revs=revs)
+        page_attributes = {"title": self._make_title(sid, True),
+                           "version": self.versionstring}
+        if prevsid:
+            page_attributes["prev"] = self._make_href(prevsid)
+            page_attributes["prevtitle"] = self._make_title(prevsid)
+        if nextsid:
+            page_attributes["next"] = self._make_href(nextsid)
+            page_attributes["nexttitle"] = self._make_title(nextsid)
+        tb.start("page", page_attributes)
+        self._recursive_build_node(tb, sid, jsarray=jsarray, revs=revs)
+        tb.end("page")
         stylesheet_name = g_paths.xsldir + "page.xsl"
         tf = None
         if revs:
