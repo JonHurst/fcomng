@@ -26,7 +26,7 @@ class FCOMFactory:
         content_pages = []
         for ident in self.fcm.get_root_nodes():
             self._recursive_process_section(ident, content_pages)
-        self._make_node_page(None)#make contents page
+        self.make_node_page(None)#make contents page
         for make_page_args in zip(content_pages,
                                   [None] + content_pages[:-1],
                                   content_pages[1:] + [None]):
@@ -39,7 +39,7 @@ class FCOMFactory:
             self.fcm.get_type(self.fcm.get_children(ident)[0]) != meta.TYPE_SECTION):
             content_pages.append(ident)
         else:
-            self._make_node_page(ident)
+            self.make_node_page(ident)
             for ident in self.fcm.get_children(ident):
                 self._recursive_process_section(ident, content_pages)
 
@@ -199,7 +199,7 @@ class FCOMFactory:
             tb.end("page")
 
 
-    def _make_node_page(self, ident):
+    def make_node_page(self, ident):
         global g_paths
         tb = et.TreeBuilder()
         if ident:
