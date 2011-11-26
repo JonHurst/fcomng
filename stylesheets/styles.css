@@ -338,9 +338,9 @@ table.equal
     width:100%;
 }
 
-table.equal td.equ-l
+table.equal th.equ-l
 {
-    /* width:35%; */
+    min-width:15%;
 }
 
 /************************************************************/
