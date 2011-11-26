@@ -67,11 +67,38 @@ class FCOMFactory:
     def _recursive_build_node(self, tb, ident, **other):
         node_type = self.fcm.get_type(ident)
         if  node_type == meta.TYPE_SECTION:
-            self._process_section(tb, ident, **other)
+            section_attribs = {"sid": self._make_html_identifier(ident),
+                               "title": self._make_title(ident)}
+            tb.start("section", section_attribs)
+            if self.fcm.get_type(self.fcm.get_children(ident)[0]) == meta.TYPE_SECTION:
+                #this causes the sections to be layed out flat rather than in a hierarchy
+                tb.end("section")
+                for c in self.fcm.get_children(ident):
+                    self._recursive_build_node(tb, c, **other)
+            else:
+                for c in self.fcm.get_children(ident):
+                    self._recursive_build_node(tb, c, **other)
+                tb.end("section")
         elif node_type == meta.TYPE_GROUP:
-            self._process_group(tb, ident, **other)
+            group_attribs = {"id": self._make_html_identifier(ident),
+                             "title": self.fcm.get_title(ident)}
+            tb.start("group", group_attribs)
+            for c in self.fcm.get_children(ident):
+                self._recursive_build_node(tb, c, **other)
+            tb.end("group")
         elif node_type == meta.TYPE_DUCONTAINER:
-            self._process_ducontainer(tb, ident, **other)
+            du_container_attrib = {"id": self._make_html_identifier(ident),
+                                   "title": self.fcm.get_title(ident)}
+            overriding_tdu = self.fcm.get_overriding(ident)
+            if overriding_tdu:
+                du_container_attrib["overridden_by"] = self.fcm.get_parent(overriding_tdu)
+            tb.start("du_container", du_container_attrib)
+            jsarray = other['jsarray']
+            jsarray.append([])
+            for c in self.fcm.get_children(ident):
+                self._process_du(tb, c, **other)
+            if jsarray[-1] == []: del jsarray[-1]
+            tb.end("du_container")
 
 
     def _process_page(self, tb, sid, prevsid, nextsid, **other):
@@ -86,45 +113,6 @@ class FCOMFactory:
         tb.start("page", page_attributes)
         self._recursive_build_node(tb, sid, **other)
         tb.end("page")
-
-
-    def _process_section(self, tb, ident, **other):
-        section_attribs = {"sid": self._make_html_identifier(ident),
-                           "title": self._make_title(ident)}
-        tb.start("section", section_attribs)
-        if self.fcm.get_type(self.fcm.get_children(ident)[0]) == meta.TYPE_SECTION:
-            #this causes the sections to be layed out flat rather than in a hierarchy
-            tb.end("section")
-            for c in self.fcm.get_children(ident):
-                self._recursive_build_node(tb, c, **other)
-        else:
-            for c in self.fcm.get_children(ident):
-                self._recursive_build_node(tb, c, **other)
-            tb.end("section")
-
-
-    def _process_group(self, tb, ident, **other):
-        group_attribs = {"id": self._make_html_identifier(ident),
-                         "title": self.fcm.get_title(ident)}
-        tb.start("group", group_attribs)
-        for c in self.fcm.get_children(ident):
-            self._recursive_build_node(tb, c, **other)
-        tb.end("group")
-
-
-    def _process_ducontainer(self, tb, ident, **other):
-        du_container_attrib = {"id": self._make_html_identifier(ident),
-                               "title": self.fcm.get_title(ident)}
-        overriding_tdu = self.fcm.get_overriding(ident)
-        if overriding_tdu:
-            du_container_attrib["overridden_by"] = self.fcm.get_parent(overriding_tdu)
-        tb.start("du_container", du_container_attrib)
-        jsarray = other['jsarray']
-        jsarray.append([])
-        for c in self.fcm.get_children(ident):
-            self._process_du(tb, c, **other)
-        if jsarray[-1] == []: del jsarray[-1]
-        tb.end("du_container")
 
 
     def _process_du(self, tb, ident, **other):
