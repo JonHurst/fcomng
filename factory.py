@@ -113,13 +113,8 @@ class FCOMFactory:
                      "id": self._make_html_identifier(ident),
                      "revdate": self.fcm.get_revdate(ident)}
         code = self.fcm.get_revision_code(ident)
-        revs = self.fcm.get_du_revs(ident)
-        if code:
-            du_attrib["revcode"] = code
-            #only add to revision list if there are some revision paths in dumdata
-            if code[-1:] != "R" or revs: self.revisions.append(ident)
-        if self.fcm.is_tdu(ident):
-            du_attrib["tdu"] = "tdu"
+        if code: du_attrib["revcode"] = code
+        if self.fcm.is_tdu(ident): du_attrib["tdu"] = "tdu"
         tb.start("du", du_attrib)
         applies = self.fcm.applies(ident)
         if applies:
@@ -128,7 +123,7 @@ class FCOMFactory:
             tb.end("applies")
             other['jsarray'][-1].append([ident, applies, self.fcm.applies_string(applies)[:100]])
         tb.end("du")
-        other['revs'].extend(revs)
+        other['revs'].extend(self.fcm.get_du_revs(ident))
 
 
     def make_page(self, sid, prevsid, nextsid):
@@ -274,30 +269,37 @@ class FCOMFactory:
              "};\n"))
 
 
+    def _recursive_add_revision_node(self, tb, ident):
+        if self.fcm.get_type(ident) == meta.TYPE_DU:
+            code = self.fcm.get_revision_code(ident)
+            if code:
+                code = code[-1:] # strip E from 2 letter codes
+                revs = self.fcm.get_du_revs(ident)
+                #only add (R) to revision list if there are some real revision paths in dumdata
+                if code != "R" or revs:
+                    tb.start("rev", {"code": code,
+                                     "duid": ident,
+                                     "href": self._make_href(self.fcm.get_parent(ident)),#href is for container
+                                     "title": self.fcm.get_title(ident)})
+                    tb.end("rev")
+        elif (self.fcm.get_type(ident) == meta.TYPE_SECTION and
+              self.fcm.get_type(self.fcm.get_children(ident)[0]) != meta.TYPE_SECTION):
+            tb.start("section", {"title": self._make_title(ident, True)})
+            for c in self.fcm.get_children(ident):
+                self._recursive_add_revision_node(tb, c)
+            tb.end("section")
+        else:
+            for c in self.fcm.get_children(ident):
+                self._recursive_add_revision_node(tb, c)
+
+
     def make_revision_list(self):
         global g_paths
         print "Writing revision list"
-        #split dus into lists within the same section
-        sectioned_dus = [[self.fcm.get_parent_section(self.revisions[0])]]
-        for duid in self.revisions:
-            du_section = self.fcm.get_parent_section(duid)
-            if du_section == sectioned_dus[-1][0]:
-                sectioned_dus[-1].append(duid)
-            else:
-                sectioned_dus.append([du_section, duid])
         tb = et.TreeBuilder()
         tb.start("revisions", {"title": "Revision list",
                                "version": self.versionstring})
-        for section in sectioned_dus:
-            section_title = []
-            tb.start("section", {"title": self._make_title(section[0], True)})
-            for duid in section[1:]:
-                tb.start("rev", {"code": self.fcm.get_revision_code(duid)[-1:],
-                                 "duid": duid,
-                                 "href": self._make_href(self.fcm.get_parent(duid)),
-                                 "title": self.fcm.get_title(duid)})
-                tb.end("rev")
-            tb.end("section")
+        self._recursive_add_revision_node(tb, None)
         tb.end("revisions")
         page_string= subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + "revisions.xsl", "-"],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE

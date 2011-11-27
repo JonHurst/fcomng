@@ -49,12 +49,14 @@
 
 
 <xsl:template match="section">
-  <div class="section">
-    <h2><xsl:value-of select="@title"></xsl:value-of></h2>
-    <ul>
-      <xsl:apply-templates/>
-    </ul>
-  </div>
+  <xsl:if test="rev">
+    <div class="section">
+      <h2><xsl:value-of select="@title"></xsl:value-of></h2>
+      <ul>
+        <xsl:apply-templates/>
+      </ul>
+    </div>
+  </xsl:if>
 </xsl:template>
 
 
