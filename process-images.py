@@ -41,7 +41,8 @@ def cgmtopng(matchobj):
             pngzoom = p
     if png != None:
         png_filename = png.get("href")
-        shutil.copyfile(image_library + png_filename, image_output + png_filename)
+        if not os.path.exists(image_output + png_filename):
+            shutil.copyfile(image_library + png_filename, image_output + png_filename)
         width, height = png.get("size").split("x")
         tag = "<img %s src='../images/%s' width='%s' height='%s' alt='png'/>" % (
             class_attrib,
