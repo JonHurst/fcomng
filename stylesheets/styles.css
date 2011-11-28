@@ -703,3 +703,9 @@ div.tdu_warning
     text-align: center;
     margin-top:1em;
 }
+
+img.ifinstalled
+{
+    padding: 0 2px;
+
+}

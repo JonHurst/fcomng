@@ -56,7 +56,7 @@
 
 <xsl:template match="if-installed">
   <!-- (#PCDATA|emph|abb|f-phase|tech-label)* -->
-  <xsl:apply-templates/><span class="ifinst"> (if inst)</span>
+  <xsl:apply-templates/><img class="ifinstalled" src="../images/if-installed.gif" alt=""/>
 </xsl:template>
 
 
