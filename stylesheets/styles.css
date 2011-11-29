@@ -709,3 +709,9 @@ img.ifinstalled
     padding: 0 2px;
 
 }
+
+span.ecam_underline
+{
+    text-transform: uppercase;
+    text-decoration: underline;
+}

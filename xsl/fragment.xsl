@@ -62,7 +62,22 @@
 
 <xsl:template match="tech-label">
   <!-- (#PCDATA|emph|if-installed)* -->
-  <xsl:apply-templates/>
+  <xsl:choose>
+    <xsl:when test="@type = 's-page'">
+      <span class="ecam_underline"><xsl:apply-templates/></span>
+      <xsl:text> SD page</xsl:text>
+    </xsl:when>
+    <xsl:when test="@type = 'ecamsys'">
+      <span class="ecam_underline"><xsl:apply-templates/></span>
+    </xsl:when>
+    <xsl:when test="@type = 'pb'">
+      <xsl:apply-templates/>
+      <xsl:text> pb</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:apply-templates/>
+    </xsl:otherwise>
+  </xsl:choose>
 </xsl:template>
 
 
