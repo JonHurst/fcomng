@@ -231,6 +231,9 @@
      <xsl:when test="@href != ''">
        <xsl:apply-templates select="document(@href)"/>
      </xsl:when>
+     <xsl:when test="@tdu">
+       <p>TDU does not apply to selected aircraft. If applicable, use original DU.</p>
+     </xsl:when>
      <xsl:otherwise>
        <p>DU does not apply to selected aircraft.</p>
      </xsl:otherwise>
