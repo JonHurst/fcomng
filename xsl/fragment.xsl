@@ -852,6 +852,7 @@
 <xsl:template match="flightphase-proc">
   <div class="flight-phase">
     <!-- ((procbody+,comment?)) -->
+    <h2 class="flightphase"><xsl:value-of select="@pof"/></h2>
     <xsl:apply-templates/>
   </div>
 </xsl:template>

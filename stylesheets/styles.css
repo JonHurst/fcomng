@@ -716,6 +716,11 @@ span.ecam_underline
     text-decoration: underline;
 }
 
+h2.flightphase
+{
+    text-decoration: underline;
+}
+
 div.anytime
 {
     border: solid green 3px;
