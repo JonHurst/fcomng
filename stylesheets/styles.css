@@ -715,3 +715,10 @@ span.ecam_underline
     text-transform: uppercase;
     text-decoration: underline;
 }
+
+div.anytime
+{
+    border: solid green 3px;
+    padding: 0.5em;
+    margin: 1em 0 1em -0.5em;
+}

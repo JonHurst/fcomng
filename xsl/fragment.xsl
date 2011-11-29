@@ -604,7 +604,13 @@
 
 <xsl:template match="condition">
   <!-- ((intro|introblock),procdesc?,procbody,endofproc?) -->
-  <div class="condition">
+  <div>
+    <xsl:attribute name="class">
+      <xsl:text>condition</xsl:text>
+      <xsl:if test="@at-any-time = 'true'">
+        <xsl:text> anytime</xsl:text>
+      </xsl:if>
+    </xsl:attribute>
     <xsl:apply-templates/>
   </div>
 </xsl:template>
