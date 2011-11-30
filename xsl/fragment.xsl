@@ -90,6 +90,14 @@
       <xsl:apply-templates/>
       <xsl:text> pb-sw</xsl:text>
     </xsl:when>
+    <xsl:when test="@type = 'light'">
+      <xsl:apply-templates/>
+      <xsl:text> light</xsl:text>
+    </xsl:when>
+    <xsl:when test="@type = 'sw'">
+      <xsl:apply-templates/>
+      <xsl:text> sw</xsl:text>
+    </xsl:when>
     <xsl:otherwise>
       <xsl:apply-templates/>
     </xsl:otherwise>
