@@ -51,7 +51,8 @@ def cgmtopng(matchobj):
             height)
         if pngzoom != None:
             pngzoom_filename = pngzoom.get("href")
-            shutil.copyfile(image_library + pngzoom_filename, image_output + pngzoom_filename)
+            if not os.path.exists(image_output + pngzoom_filename):
+                shutil.copyfile(image_library + pngzoom_filename, image_output + pngzoom_filename)
             tag += '<p><a href="../images/' + pngzoom_filename + '">Zoom</a></p>'
     print "Processed", cgm_filename
     return tag
