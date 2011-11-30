@@ -469,7 +469,7 @@
 	<th class="callout"><xsl:apply-templates select="gritem"/></th>
 	<td class="callout">
 	  <xsl:if test="title">
-	    <h1><xsl:value-of select="title"/></h1>
+	    <h1><xsl:apply-templates select="title"/></h1>
 	  </xsl:if>
 	<xsl:apply-templates select="itembody"/></td>
       </tr>
