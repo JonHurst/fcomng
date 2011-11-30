@@ -53,6 +53,9 @@ class FCOMFactory:
                 print >> self.errorlog, "Reference to unknown DU", page_parts[duref_index], "whilst processing", ident
                 page_parts[duref_index] = "<a class='duref' href='#'>!!!DU REFERENCE ERROR:%s!!!" % ident
             else:
+                parent = self.fcm.get_parent(ident)
+                if self.fcm.get_type(parent) == meta.TYPE_GROUP:
+                    ident = parent
                 href = self._make_href(ident)
                 anchor_string = self._make_title(ident)
                 if page_parts[duref_index + 1][:2] != "</":
