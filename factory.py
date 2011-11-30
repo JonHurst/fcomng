@@ -59,8 +59,9 @@ class FCOMFactory:
                 href = self._make_href(ident)
                 anchor_string = self._make_title(ident)
                 if page_parts[duref_index + 1][:2] != "</":
-                    anchor_string = anchor_string.split()[0]
-                page_parts[duref_index] = '<a class="duref" href="%s">%s' % (
+                    anchor_string = ""
+                page_parts[duref_index] = '%s<a class="duref" href="%s">%s' % (
+                    "refer to " if anchor_string else "",
                     href,
                     anchor_string)
             duref_index += 2
