@@ -74,6 +74,22 @@
       <xsl:apply-templates/>
       <xsl:text> pb</xsl:text>
     </xsl:when>
+    <xsl:when test="@type = 'knob'">
+      <xsl:apply-templates/>
+      <xsl:text> knob</xsl:text>
+    </xsl:when>
+    <xsl:when test="@type = 'sel'">
+      <xsl:apply-templates/>
+      <xsl:text> selector</xsl:text>
+    </xsl:when>
+    <xsl:when test="@type = 'rotsel'">
+      <xsl:apply-templates/>
+      <xsl:text> rotary selector</xsl:text>
+    </xsl:when>
+    <xsl:when test="@type = 'pb-sw'">
+      <xsl:apply-templates/>
+      <xsl:text> pb-sw</xsl:text>
+    </xsl:when>
     <xsl:otherwise>
       <xsl:apply-templates/>
     </xsl:otherwise>
