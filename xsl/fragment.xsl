@@ -123,6 +123,9 @@
 <xsl:template match="measure">
   <!-- (#PCDATA) -->
   <xsl:choose>
+    <xsl:when test="@show-unit = 'false'">
+      <xsl:apply-templates/>
+    </xsl:when>
     <xsl:when test="@unit = 'FL' or @unit = 'M'">
       <xsl:value-of select="@unit"/>
       <xsl:apply-templates/>
