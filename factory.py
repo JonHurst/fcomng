@@ -60,8 +60,7 @@ class FCOMFactory:
                 anchor_string = self._make_title(ident)
                 if page_parts[duref_index + 1][:2] != "</":
                     anchor_string = ""
-                page_parts[duref_index] = '%s<a class="duref" href="%s">%s' % (
-                    "refer to " if anchor_string else "",
+                page_parts[duref_index] = 'Refer to <a class="duref" href="%s">%s' % (
                     href,
                     anchor_string)
             duref_index += 2

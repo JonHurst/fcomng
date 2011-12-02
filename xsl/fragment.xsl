@@ -195,6 +195,7 @@
   <xsl:variable name="marker" select="normalize-space(text())"/>
   <xsl:choose>
     <xsl:when test="$marker">
+      <xsl:text>See </xsl:text>
       <xsl:value-of select="$marker"/>
     </xsl:when>
     <xsl:otherwise>
