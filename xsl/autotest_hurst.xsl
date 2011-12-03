@@ -62,6 +62,9 @@
 <xsl:template match="xhtml:div[@class='ecaminop']/xhtml:h1">
   <xsl:text>Inop SYS</xsl:text>
 </xsl:template>
+<xsl:template match="xhtml:div[@class='otherinop']/xhtml:h1">
+  <xsl:text>Other inop SYS</xsl:text>
+</xsl:template>
 <xsl:template match="xhtml:div[@class='condsys']">
   <xsl:apply-templates select="xhtml:div[@class='condbody']"/>
   (<xsl:apply-templates select="xhtml:p[@class='intro']"/>)
