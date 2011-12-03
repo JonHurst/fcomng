@@ -134,7 +134,7 @@
     <xsl:attribute name="id">
       <xsl:value-of select="@id"/>
     </xsl:attribute>
-    <h1>
+    <h1 class="group_heading">
       <xsl:value-of select="@title"/>
    </h1>
     <xsl:apply-templates/>
