@@ -188,9 +188,9 @@ def make_page_list(m):
 def main():
     m = meta.FCOMMeta(True)
     f = factory.FCOMFactory(m)
-    for p in make_page_list(m):
+    for c, p in enumerate(make_page_list(m)):
         filename = f._make_href(p)
-        print filename
+        print c , filename
         if filename[:11] == "PRO.NOR.SOP": continue
         lpcbrowser_dus = get_lpcbrowser_dus(m, p)
         compare_dus(filename, lpcbrowser_dus)
