@@ -262,6 +262,8 @@ class FCOMMeta:
 
     def _process_duinv(self, elem, parent_id, parent_section_id):
         global g_paths
+        #Don't process duinv with the phrase "Paper Only" in their title
+        if elem.find("title").text.find("Paper Only") != -1: return
         #create and link up new DU container
         container = _DU_Container(parent_id, elem.find("title").text, parent_section_id)
         container_id = elem.attrib["code"]
