@@ -70,14 +70,6 @@
     <xsl:when test="@type = 'ecamsys'">
       <span class="ecam_underline"><xsl:apply-templates/></span>
     </xsl:when>
-    <xsl:when test="@type = 'pb'">
-      <xsl:apply-templates/>
-      <xsl:text> pb</xsl:text>
-    </xsl:when>
-    <xsl:when test="@type = 'knob'">
-      <xsl:apply-templates/>
-      <xsl:text> knob</xsl:text>
-    </xsl:when>
     <xsl:when test="@type = 'sel'">
       <xsl:apply-templates/>
       <xsl:text> selector</xsl:text>
@@ -86,20 +78,16 @@
       <xsl:apply-templates/>
       <xsl:text> rotary selector</xsl:text>
     </xsl:when>
-    <xsl:when test="@type = 'pb-sw'">
+    <xsl:when test="@type='keyboard' or @type='key' or
+                    @type='instrument' or @type='announcement' or
+                    @type = 'panel' or @type='indicator' or
+                    @type = 'l-light'">
       <xsl:apply-templates/>
-      <xsl:text> pb-sw</xsl:text>
-    </xsl:when>
-    <xsl:when test="@type = 'light'">
-      <xsl:apply-templates/>
-      <xsl:text> light</xsl:text>
-    </xsl:when>
-    <xsl:when test="@type = 'sw'">
-      <xsl:apply-templates/>
-      <xsl:text> sw</xsl:text>
     </xsl:when>
     <xsl:otherwise>
       <xsl:apply-templates/>
+      <xsl:text> </xsl:text>
+      <xsl:value-of select="@type"/>
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
