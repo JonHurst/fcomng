@@ -223,9 +223,14 @@
       </div>
     </div>
    <xsl:if test="not(ancestor::group)">
-     <h1>
-       <xsl:value-of select="@title"/>
-     </h1>
+     <xsl:choose>
+       <xsl:when test="@href != ''">
+           <xsl:apply-templates select="document(@href)/*/title|document(@href)/*/xtitle/title" mode="singleton"/>
+       </xsl:when>
+       <xsl:otherwise>
+         <h1><xsl:value-of select="@title"/></h1>
+       </xsl:otherwise>
+     </xsl:choose>
    </xsl:if>
    <xsl:choose>
      <xsl:when test="@href != ''">

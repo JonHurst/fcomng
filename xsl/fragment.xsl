@@ -375,6 +375,13 @@
 </xsl:template>
 
 
+<xsl:template match="title" mode="singleton">
+  <!-- (Standard inline elements)* -->
+  <h1><xsl:apply-templates/></h1>
+</xsl:template>
+
+
+
 <xsl:template match="item">
   <!-- (Standard block elements)+ -->
   <li><xsl:apply-templates/></li>
