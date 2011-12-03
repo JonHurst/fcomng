@@ -180,17 +180,21 @@
 
 <xsl:template match="refint">
   <!-- (#PCDATA|symbol)* -->
-  <xsl:variable name="marker" select="normalize-space(text())"/>
+  <xsl:variable name="footnote_id">
+    <xsl:value-of select="generate-id(key('ftnote-ids', @ref))"/>
+  </xsl:variable>
   <xsl:choose>
-    <xsl:when test="$marker">
-      <xsl:text>See </xsl:text>
-      <xsl:value-of select="$marker"/>
+    <xsl:when test="name(key('ftnote-ids', @ref)) = 'ftnote'">
+      <a class="footnoteref">
+        <xsl:attribute name="href">#fnid<xsl:value-of select="$footnote_id"/></xsl:attribute>
+        <xsl:text>(</xsl:text>
+        <xsl:value-of select="count(key('ftnote-ids', @ref)/preceding-sibling::ftnote) + 1"/>
+        <xsl:text>)</xsl:text>
+      </a>
     </xsl:when>
     <xsl:otherwise>
-      <a class="footnoteref">
-	<xsl:attribute name="href">#fnid<xsl:value-of select="generate-id(key('ftnote-ids', @ref))"/></xsl:attribute>
-	(<xsl:value-of select="count(key('ftnote-ids', @ref)/preceding-sibling::ftnote) + 1"/>)
-      </a>
+      <xsl:text>See </xsl:text>
+      <xsl:apply-templates/>
     </xsl:otherwise>
   </xsl:choose>
 </xsl:template>
