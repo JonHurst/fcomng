@@ -22,7 +22,9 @@
     <xsl:if test="../preceding-sibling::*[1][@class='group_heading']">
       <xsl:apply-templates select="../preceding-sibling::xhtml:h1"/>
     </xsl:if>
-    <xsl:if test="xhtml:div[@class='status']">
+    <xsl:if test="xhtml:div[@class='status']|
+                  xhtml:div[@class='limitations']|
+                  xhtml:div[@class='deferred-proc']">
       <xsl:text>Status</xsl:text>
     </xsl:if>
   <xsl:apply-templates/>
