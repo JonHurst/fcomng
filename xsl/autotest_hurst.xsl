@@ -19,6 +19,9 @@
     <xsl:attribute name="id">
       <xsl:value-of select="@id"/>
     </xsl:attribute>
+    <xsl:if test="../preceding-sibling::*[1][@class='group_heading']">
+      <xsl:apply-templates select="../preceding-sibling::xhtml:h1"/>
+    </xsl:if>
   <xsl:apply-templates/>
   </dul:du>
 </xsl:template>
@@ -26,15 +29,14 @@
 
 <xsl:template match="text()">
   <xsl:value-of select="."/>
-  <xsl:text> </xsl:text>
 </xsl:template>
 
 
 <!--Filters-->
 <xsl:template match="xhtml:p[@class='duident']"/>
 <xsl:template match="xhtml:div[@class='infocontainer']"/>
+<xsl:template match="xhtml:span[@class='sectionref']"/>
 <xsl:template match="xhtml:th[@class='callout']"/>
-<xsl:template match="xhtml:a"/>
 
 
 </xsl:stylesheet>
