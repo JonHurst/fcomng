@@ -558,8 +558,26 @@
 </xsl:template>
 
 
+<xsl:template match="xtitle" mode="singleton">
+  <!-- (ecamsystem?,title,subtitle*) -->
+  <h1>
+    <xsl:if test="ecamsystem">
+      <span class="ecam_underline">
+        <xsl:value-of select="ecamsystem"/>
+      </span>
+      <xsl:text> </xsl:text>
+    </xsl:if>
+    <xsl:apply-templates select="title" mode="xtitle"/>
+  </h1>
+  <xsl:for-each select="subtitle">
+    <h2><xsl:apply-templates/></h2>
+  </xsl:for-each>
+</xsl:template>
 <xsl:template match="xtitle"/>
-<!-- du heading is used instead -->
+
+<xsl:template match="title" mode="xtitle">
+  <xsl:apply-templates/>
+</xsl:template>
 
 
 <xsl:template match="procitem">

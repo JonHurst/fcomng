@@ -225,7 +225,7 @@
    <xsl:if test="not(ancestor::group)">
      <xsl:choose>
        <xsl:when test="@href != ''">
-           <xsl:apply-templates select="document(@href)/*/title|document(@href)/*/xtitle/title" mode="singleton"/>
+           <xsl:apply-templates select="document(@href)/*/title|document(@href)/*/xtitle" mode="singleton"/>
        </xsl:when>
        <xsl:otherwise>
          <h1><xsl:value-of select="@title"/></h1>
