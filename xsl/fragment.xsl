@@ -161,17 +161,17 @@
   <xsl:choose>
     <xsl:when test="@product = 'FCOM'">
       <a class="duref">
-	<xsl:attribute name="href">
-	  <xsl:value-of select="@ref"/>
-	</xsl:attribute>
-	<xsl:value-of select="linktext"/>
+        <xsl:attribute name="href">
+          <xsl:value-of select="@ref"/>
+        </xsl:attribute>
+        <xsl:value-of select="linktext"/>
       </a>
     </xsl:when>
     <xsl:otherwise>
-      <span class="duref">See <xsl:value-of select="@product"/>
+      <span class="duref">Refer to <xsl:value-of select="@product"/>
       <xsl:if test="linktext">
-	<xsl:text>: </xsl:text>
-	<xsl:value-of select="linktext"/></xsl:if>
+        <xsl:text> / </xsl:text>
+      <xsl:value-of select="linktext"/></xsl:if>
       </span>
     </xsl:otherwise>
   </xsl:choose>
