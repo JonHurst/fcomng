@@ -55,11 +55,6 @@ div.main, div.alternate
     padding-bottom: 2em;
 }
 
-div.group div.main, div.group div.alternate
-{
-    border-top: none;
-    padding-bottom: 0;
-}
 
 div.group
 {
