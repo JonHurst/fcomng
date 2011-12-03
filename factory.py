@@ -57,7 +57,11 @@ class FCOMFactory:
                 if self.fcm.get_type(parent) == meta.TYPE_GROUP:
                     ident = parent
                 href = self._make_href(ident)
-                anchor_string = self._make_title(ident)
+                labels = self._make_title(ident).split(":", 1)
+                if len(labels) == 2:
+                    anchor_string = "<span class='sectionref'>%s</span>%s" % tuple(labels)
+                else:
+                    anchor_string = labels[0]
                 if page_parts[duref_index + 1][:2] != "</":
                     anchor_string = ""
                 page_parts[duref_index] = 'Refer to <a class="duref" href="%s">%s' % (
