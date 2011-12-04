@@ -17,7 +17,6 @@ hurst_xsl = 'autotest_hurst.xsl'
 lpcbrowser_xsl = 'autotest_lpcbrowser.xsl'
 chunk_depth = 3
 lpcbrowser_data_path = 'lpc_browser_xhtml/'
-identical, different = 0, 0
 
 
 def _recursive_process_nodes(m, f, ident):
@@ -93,7 +92,7 @@ def index_of_first_difference(hurst_text, lpc_text):
 
 
 
-def compare_dus(filename, lpcbrowser_dus):
+def compare_dus(filename, lpcbrowser_dus, counts):
     global identical, different
     source_filename = g_paths.html_output + filename
     xml_string = subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + hurst_xsl, '-'],
@@ -108,15 +107,16 @@ def compare_dus(filename, lpcbrowser_dus):
             du.text = unicode(du.text, "utf-8")
         hurst_text = re.sub(u"[\=\s \u200B:\u2222\u2022]+", "", du.text).upper()
         if hurst_text == lpcbrowser_dus.get(ident):
-            print ident, "identical"
-            identical += 1
+            print ident, "identical", counts
+            counts[0] += 1
         else:
-            different += 1
             print filename
             if not lpcbrowser_dus.has_key(ident):
-                print ident, "not found in LPC browser\n"
+                print ident, "not found in LPC browser\n", counts
+                counts[2] += 1
                 continue
-            print ident
+            counts[1] += 1
+            print ident, counts
             print "=" * 30
             c = index_of_first_difference(hurst_text, lpcbrowser_dus[ident])
             print hurst_text[c:][:100].encode("utf8")
@@ -188,13 +188,15 @@ def make_page_list(m):
 def main():
     m = meta.FCOMMeta(True)
     f = factory.FCOMFactory(m)
+    counts = [0, 0, 0]
     for c, p in enumerate(make_page_list(m)):
+        if c < 154: continue #only 13 differences for first 154 files
         filename = f._make_href(p)
         print c , filename
         if filename[:11] == "PRO.NOR.SOP": continue
         lpcbrowser_dus = get_lpcbrowser_dus(m, p)
-        compare_dus(filename, lpcbrowser_dus)
-    print "Identical:", identical, "Different:", different
+        compare_dus(filename, lpcbrowser_dus, counts)
+    print counts
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
