@@ -49,18 +49,19 @@ div.titleblock, div.footerblock
     text-align:center;
 }
 
-div.main, div.alternate
+div.main, div.alternate, div.group
 {
-    border-top: dotted green 1px;
+    border-top: solid green 2px;
     padding-bottom: 2em;
 }
 
 
-div.group
+div.group div.main, div.group div.alternate
 {
     border-top: dotted green 1px;
-    padding-bottom: 2em;
 }
+
+
 
 div.alternate
 {
@@ -543,7 +544,7 @@ div.tags a
     text-decoration: none;
     background-color: white;
     font-size: 0.85em;
-    border-bottom: 1px dotted green;
+    border-bottom: 1px solid green;
 }
 
 div.tags a.alternate
@@ -556,7 +557,7 @@ div.tags a.active
 {
     color: black;
     padding-top: 5px;
-    border-bottom: 1px solid white;
+    border-bottom: 2px solid white;
 
 }
 
