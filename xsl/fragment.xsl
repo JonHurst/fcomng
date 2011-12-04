@@ -81,7 +81,8 @@
     <xsl:when test="@type='keyboard' or @type='key' or
                     @type='instrument' or @type='announcement' or
                     @type = 'panel' or @type='indicator' or
-                    @type = 'l-light'">
+                    @type = 'l-light' or @type='aural-w' or
+                    @type = 'tech-label' or @type = 'callout'">
       <xsl:apply-templates/>
     </xsl:when>
     <xsl:otherwise>
@@ -1095,7 +1096,6 @@
 <!-- not implemented: tr-data -->
 <!-- not implemented: env-data -->
 <!-- not implemented: heading-data -->
-<!-- not implemented: bulletin-data -->
 <!-- not implemented: approbation-frame -->
 
 <xsl:template match="bulletin-data">
@@ -1126,7 +1126,7 @@
 <xsl:template match="applicable-to">
   <!-- subset of standard block elements -->
   <div class="applicable">
-    <h1>Applicability:</h1>
+    <h1>Applicable to:</h1>
     <xsl:apply-templates/>
   </div>
 </xsl:template>
@@ -1179,9 +1179,7 @@
   (((para|unlist|numlist|warning|caution|note)+|table|graphref|
   launcher|equal)+|desc-cond|ex-desc-cond|workex-item)+)-->
   <div class="example">
-    <xsl:if test="not(title)">
-      <h1>Example</h1>
-    </xsl:if>
+    <h1>Example</h1>
     <xsl:apply-templates/>
   </div>
 </xsl:template>
