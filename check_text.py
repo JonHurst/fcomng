@@ -107,12 +107,12 @@ def compare_dus(filename, lpcbrowser_dus, counts):
             du.text = unicode(du.text, "utf-8")
         hurst_text = re.sub(u"[\=\s \u200B:\u2222\u2022]+", "", du.text).upper()
         if hurst_text == lpcbrowser_dus.get(ident):
-            print ident, "identical", counts
+            # print ident, "identical", counts
             counts[0] += 1
         else:
             print filename
             if not lpcbrowser_dus.has_key(ident):
-                print ident, "not found in LPC browser\n", counts
+                # print ident, "not found in LPC browser\n", counts
                 counts[2] += 1
                 continue
             counts[1] += 1
