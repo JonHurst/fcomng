@@ -507,7 +507,10 @@
       <h1><xsl:value-of select="$group_title"/></h1>
     </xsl:when>
   </xsl:choose>
-  <xsl:apply-templates select="descbody|descitem"/>
+  <xsl:if test="not(contains(title, 'Paper') and
+                contains(title, 'Only'))">
+    <xsl:apply-templates select="descbody|descitem"/>
+  </xsl:if>
 </xsl:template>
 
 
