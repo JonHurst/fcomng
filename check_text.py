@@ -149,9 +149,7 @@ def _process_lpcbrowser_group(ident, dus):
 
 def _process_lpcbrowser_du(ident, dus):
     candidate_files = glob.glob(lpcbrowser_data_path + ident + "*.xhtml")
-    if not candidate_files:
-        dus[ident] = "^"
-        return
+    if not candidate_files: return
     candidate_files.sort()
     _process_lpcbrowser_file(candidate_files[-1], dus)
 
