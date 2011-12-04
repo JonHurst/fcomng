@@ -369,17 +369,8 @@
 
 <xsl:template match="title">
   <!-- (Standard inline elements)* -->
-  <xsl:if test=".. != /">
-    <h1><xsl:apply-templates/></h1>
-  </xsl:if>
-</xsl:template>
-
-
-<xsl:template match="title" mode="singleton">
-  <!-- (Standard inline elements)* -->
   <h1><xsl:apply-templates/></h1>
 </xsl:template>
-
 
 
 <xsl:template match="item">
@@ -503,9 +494,23 @@
      desc-cond/intro | desc-cond/condbody) *-->
 <!-- hatref not implemented -->
 <!-- perfoapplication not implemented -->
-
-<xsl:template match="description|descbody|ex-desc-cond">
+<xsl:template match="description">
   <!-- description: (reason?,title, (descbody|descitem),descitem*) -->
+  <xsl:param name="group_pos"/>
+  <xsl:param name="group_title"/>
+  <xsl:choose>
+    <xsl:when test="$group_pos = -1">
+      <xsl:apply-templates select="title"/>
+    </xsl:when>
+    <xsl:when test="$group_pos = 0">
+      <h1><xsl:value-of select="$group_title"/></h1>
+    </xsl:when>
+  </xsl:choose>
+  <xsl:apply-templates select="descbody|descitem"/>
+</xsl:template>
+
+
+<xsl:template match="descbody|ex-desc-cond">
   <!-- descbody: (standard_block|desc-cond|ex-desc-cond) -->
   <!-- ex-desc-cond: (desc-cond,desc-cond+) -->
   <xsl:apply-templates/>
@@ -554,29 +559,43 @@
 <xsl:template match="normalproc">
   <!--(reason?,xtitle,procdesc?,
   (procbody|procitem),procitem*)-->
-  <xsl:apply-templates/>
+  <xsl:param name="group_pos"/>
+  <xsl:param name="group_title"/>
+  <xsl:if test="$group_pos = -1">
+    <xsl:apply-templates select="xtitle"/>
+  </xsl:if>
+  <xsl:if test="$group_pos = 0">
+    <h1><xsl:value-of select="$group_title"/></h1>
+  </xsl:if>
+
+  <xsl:apply-templates select="procdesc|procbody|procitem"/>
 </xsl:template>
 
 
-<xsl:template match="xtitle" mode="singleton">
+<xsl:template match="xtitle">
   <!-- (ecamsystem?,title,subtitle*) -->
   <h1>
+    <xsl:attribute name="class">
+      <xsl:choose>
+        <xsl:when test="title/@ecamimportance='A'">
+          <xsl:text>amber</xsl:text>
+        </xsl:when>
+        <xsl:when test="title/@ecamimportance='R'">
+          <xsl:text>red</xsl:text>
+        </xsl:when>
+      </xsl:choose>
+    </xsl:attribute>
     <xsl:if test="ecamsystem">
       <span class="ecam_underline">
         <xsl:value-of select="ecamsystem"/>
       </span>
       <xsl:text> </xsl:text>
     </xsl:if>
-    <xsl:apply-templates select="title" mode="xtitle"/>
+    <xsl:apply-templates select="title/node()"/>
+    <xsl:for-each select="subtitle">
+      <xsl:apply-templates/>
+    </xsl:for-each>
   </h1>
-  <xsl:for-each select="subtitle">
-    <h2><xsl:apply-templates/></h2>
-  </xsl:for-each>
-</xsl:template>
-<xsl:template match="xtitle"/>
-
-<xsl:template match="title" mode="xtitle">
-  <xsl:apply-templates/>
 </xsl:template>
 
 
@@ -782,8 +801,15 @@
 
 
 <xsl:template match="abnormalproc|emergencyproc">
-  <xsl:apply-templates/>
+<!-- abnormalproc: ((reason?,xtitle,annunciation?,procdesc?,procbody?,procitem*,fwspage?)) -->
+<!-- emergencyproc: ((reason?,xtitle,annunciation?,procdesc?,procbody?,procitem*, fwspage?)) -->
+  <xsl:param name="group_pos"/>
+  <xsl:if test="$group_pos &lt; 1">
+    <xsl:apply-templates select="xtitle"/>
+  </xsl:if>
+  <xsl:apply-templates select="annunciation|procdesc|procbody|procitem|fwspage"/>
 </xsl:template>
+
 
 <xsl:template match="land">
   <p>
@@ -802,10 +828,38 @@
 </xsl:template>
 
 
+<xsl:template match="performance">
+  <!-- (reason?,title, (perfbody|perfitem),perfitem*) -->
+  <xsl:param name="group_pos"/>
+  <xsl:param name="group_title"/>
+  <xsl:if test="$group_pos = -1">
+    <xsl:apply-templates select="title"/>
+  </xsl:if>
+  <xsl:if test="$group_pos = 0">
+    <h1><xsl:value-of select="$group_title"/></h1>
+  </xsl:if>
+  <xsl:apply-templates select="perfbody|perfitem"/>
+</xsl:template>
+
+
+<xsl:template match="limitation">
+<!-- (reason?,title, (limitbody|limititem),limititem*) -->
+  <xsl:param name="group_pos"/>
+  <xsl:param name="group_title"/>
+  <xsl:if test="$group_pos = -1">
+    <xsl:apply-templates select="title"/>
+  </xsl:if>
+  <xsl:if test="$group_pos = 0">
+    <h1><xsl:value-of select="$group_title"/></h1>
+  </xsl:if>
+  <xsl:apply-templates select="limitbody|limititem"/>
+</xsl:template>
+
+
 <xsl:template match="equ-l|equ-r|row-header|
-		     limitation|limitbody|
+		     limitbody|
 		     perf|value|limititem|
-		     performance|perfbody|perfitem">
+		     perfbody|perfitem">
   <xsl:apply-templates/>
 </xsl:template>
 
@@ -1032,7 +1086,9 @@
   <!-- (reason?,title,
   (tr-data|env-data|heading-data|bulletin-data),approbation-frame?
   ,approbation-area?)-->
-  <xsl:apply-templates/>
+  <xsl:apply-templates select="title"/>
+  <h2>Approved by: -<xsl:value-of select="approbation-area/approved-by/job-title"/></h2>
+  <xsl:apply-templates select="bulletin-data"/>
 </xsl:template>
 
 <!-- approbation/* -->

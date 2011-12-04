@@ -134,9 +134,6 @@
     <xsl:attribute name="id">
       <xsl:value-of select="@id"/>
     </xsl:attribute>
-    <h1 class="group_heading">
-      <xsl:value-of select="@title"/>
-   </h1>
     <xsl:apply-templates/>
   </div>
 </xsl:template>
@@ -222,24 +219,28 @@
         </xsl:if>
       </div>
     </div>
-   <xsl:if test="not(ancestor::group)">
-     <xsl:choose>
-       <xsl:when test="@href != ''">
-           <xsl:apply-templates select="document(@href)/*/title|document(@href)/*/xtitle" mode="singleton"/>
-       </xsl:when>
-       <xsl:otherwise>
-         <h1><xsl:value-of select="@title"/></h1>
-       </xsl:otherwise>
-     </xsl:choose>
-   </xsl:if>
    <xsl:choose>
      <xsl:when test="@href != ''">
-       <xsl:apply-templates select="document(@href)"/>
+       <xsl:apply-templates select="document(@href)/*">
+         <xsl:with-param name="group_pos">
+           <xsl:choose>
+             <xsl:when test="ancestor::group">
+               <xsl:value-of select="count(../preceding-sibling::du_container)"/>
+             </xsl:when>
+             <xsl:otherwise>-1</xsl:otherwise>
+           </xsl:choose>
+         </xsl:with-param>
+         <xsl:with-param name="group_title">
+           <xsl:value-of select="ancestor::group/@title"/>
+         </xsl:with-param>
+       </xsl:apply-templates>
      </xsl:when>
      <xsl:when test="@tdu">
+       <h1><xsl:value-of select="@title"/></h1>
        <p>TDU does not apply to selected aircraft. If applicable, use original DU.</p>
      </xsl:when>
      <xsl:otherwise>
+       <h1><xsl:value-of select="@title"/></h1>
        <p>DU does not apply to selected aircraft.</p>
      </xsl:otherwise>
    </xsl:choose>
