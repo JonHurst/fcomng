@@ -190,13 +190,12 @@ def main():
     f = factory.FCOMFactory(m)
     counts = [0, 0, 0]
     for c, p in enumerate(make_page_list(m)):
-        if c < 154: continue #only 13 differences for first 154 files
         filename = f._make_href(p)
         print c , filename
         if filename[:11] == "PRO.NOR.SOP": continue
         lpcbrowser_dus = get_lpcbrowser_dus(m, p)
         compare_dus(filename, lpcbrowser_dus, counts)
-    print counts
+    print zip(["Identical", "Different", "Not found"], counts)
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
