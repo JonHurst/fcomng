@@ -19,13 +19,9 @@
     <xsl:attribute name="id">
       <xsl:value-of select="@id"/>
     </xsl:attribute>
-    <xsl:if test="../preceding-sibling::*[1][@class='group_heading']">
-      <xsl:apply-templates select="../preceding-sibling::xhtml:h1"/>
-    </xsl:if>
   <xsl:apply-templates/>
   </dul:du>
 </xsl:template>
-
 
 <xsl:template match="text()">
   <xsl:value-of select="."/>
