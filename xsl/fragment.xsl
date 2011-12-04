@@ -851,7 +851,9 @@
 
 <xsl:template match="fwspage">
   <!-- (limitations?,deferredproc?,status?,moreinfopage?,memopage?) -->
-  <xsl:apply-templates/>
+  <div class="fwspage">
+    <xsl:apply-templates/>
+  </div>
 </xsl:template>
 
 <!-- fwspage/* -->
