@@ -757,7 +757,18 @@
 
 <xsl:template match="introblock">
   <!-- (intro, intro+) -->
-  <xsl:apply-templates/>
+  <!-- intro:standard_inline -->
+  <p class="intro">
+    <xsl:text>&#x2022; </xsl:text>
+    <xsl:for-each select="intro">
+      <xsl:if test="preceding-sibling::intro">
+        <xsl:text> </xsl:text>
+        <xsl:value-of select="../@operator"/>
+        <xsl:text> </xsl:text>
+      </xsl:if>
+      <xsl:apply-templates/>
+    </xsl:for-each>
+  </p>
 </xsl:template>
 
 
