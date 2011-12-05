@@ -47,6 +47,7 @@
 
 
 <!--Filters-->
+<xsl:template match="xhtml:h2[@class='image_title']"/>
 <xsl:template match="xhtml:p[@class='duident']"/>
 <xsl:template match="xhtml:div[@class='infocontainer']"/>
 <xsl:template match="xhtml:span[@class='sectionref']"/>
