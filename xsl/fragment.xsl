@@ -173,10 +173,18 @@
       </a>
     </xsl:when>
     <xsl:otherwise>
-      <span class="duref">Refer to <xsl:value-of select="@product"/>
-      <xsl:if test="linktext">
+      <span class="duref">
+        <xsl:text>Refer to </xsl:text>
+        <xsl:value-of select="@product"/>
         <xsl:text> / </xsl:text>
-      <xsl:value-of select="linktext"/></xsl:if>
+        <xsl:choose>
+          <xsl:when test="linktext">
+            <xsl:value-of select="linktext"/>
+          </xsl:when>
+          <xsl:otherwise>
+            <xsl:value-of select="@ref"/>
+          </xsl:otherwise>
+        </xsl:choose>
       </span>
     </xsl:otherwise>
   </xsl:choose>
