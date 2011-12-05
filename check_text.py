@@ -110,11 +110,11 @@ def compare_dus(filename, lpcbrowser_dus, counts):
             # print ident, "identical", counts
             counts[0] += 1
         else:
-            print filename
             if not lpcbrowser_dus.has_key(ident):
-                # print ident, "not found in LPC browser\n", counts
+                # print filename, ident, "not found in LPC browser\n", counts
                 counts[2] += 1
                 continue
+            print filename
             counts[1] += 1
             print ident, counts
             print "=" * 30
@@ -190,7 +190,6 @@ def main():
     for c, p in enumerate(make_page_list(m)):
         filename = f._make_href(p)
         print c , filename
-        if filename[:11] == "PRO.NOR.SOP": continue
         lpcbrowser_dus = get_lpcbrowser_dus(m, p)
         compare_dus(filename, lpcbrowser_dus, counts)
     print zip(["Identical", "Different", "Not found"], counts)
