@@ -19,77 +19,6 @@ chunk_depth = 3
 lpcbrowser_data_path = 'lpc_browser_xhtml/'
 
 
-def _recursive_process_nodes(m, f, ident):
-    if m.get_type(ident) == meta.TYPE_SECTION:
-        for c in m.get_children(ident):
-            _recursive_process_nodes(m, f, c,)
-    elif m.get_type(ident) == meta.TYPE_GROUP:
-        filelist = []
-        for duc in m.get_children(ident):
-            for c in m.get_children(duc):
-                href = f._make_href(c)
-                if href[-2:] == "NA": continue
-                filelist.append(href)
-        compare(filelist, ident + ".xhtml", m.get_title(ident))
-    elif m.get_type(ident) == meta.TYPE_DUCONTAINER:
-        for c in m.get_children(ident):
-            href = f._make_href(c)
-            if href[-2:] == "NA": continue
-            compare([f._make_href(c)], c + ".xhtml")
-
-
-def compare(hurst_list, lpcbrowser_file, grouptitle=""):
-    hurst_text = transform_hurst_list(hurst_list, grouptitle)
-    lpc_text = transform_lpcbrowser_file(lpcbrowser_file)
-    if hurst_text != lpc_text:
-        print hurst_list, lpcbrowser_file
-        print "=" * 30
-        c = index_of_first_difference(hurst_text, lpc_text)
-        print hurst_text[c:][:100].encode("utf8")
-        print "-" * 30
-        print lpc_text[c:][:100].encode("utf8")
-        print
-
-
-def transform_hurst_list(hurst_list, grouptitle):
-    source_filename = g_paths.html_output + hurst_list[0].split("#")[0]
-    idents = [X.split("#")[1] for X in hurst_list]
-    xml_string = subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + hurst_xsl, '-'],
-                                  stdin=subprocess.PIPE, stdout=subprocess.PIPE
-                                  ).communicate(file(source_filename).read())[0]
-    hurst_xml = et.fromstring(xml_string)
-    retval = unicode(grouptitle)
-    for du in hurst_xml.findall("{http://www.hursts.eclipse.co.uk/dul}du"):
-        ident = du.attrib["id"]
-        if ident in idents:
-            hurst_text = du.text
-            if type(du.text) != unicode:
-                hurst_text = unicode(du.text, "utf-8")
-            retval += hurst_text
-
-    return re.sub(u"[\=\s \u200B:\u2222\u2022]+", "", retval).upper()
-
-
-def transform_lpcbrowser_file(lpcbrowser_file):
-    filename = lpcbrowser_data_path + lpcbrowser_file
-    if not os.path.exists(filename): return "^"
-    lpc_text = unicode(subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + lpcbrowser_xsl, '-'],
-                                        stdin=subprocess.PIPE, stdout=subprocess.PIPE
-                                        ).communicate(file(lpcbrowser_file).read())[0], 'utf-8')
-    lpc_text = re.sub(u"[\=\s :\u200B\u2222\u2022]+", "", lpc_text).upper()
-    return lpc_text
-
-
-
-def index_of_first_difference(hurst_text, lpc_text):
-    pos = 0
-    for c, char in enumerate(hurst_text):
-        pos = c
-        if (c == len(lpc_text) or
-            lpc_text[c] != char): break
-    return pos
-
-
 def display_differences(a, b):
     context = 20
     sm = difflib.SequenceMatcher(None, a, b)
@@ -192,7 +121,6 @@ def get_lpcbrowser_dus(m, ident):
                 _process_lpcbrowser_du(c, dus)
     _recursive_add_lpcbrowser_du(ident)
     return dus
-
 
 
 def make_page_list(m):
