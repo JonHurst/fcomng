@@ -78,6 +78,10 @@
       <xsl:apply-templates/>
       <xsl:text> rotary selector</xsl:text>
     </xsl:when>
+    <xsl:when test="@type = 'cb'">
+      <xsl:apply-templates/>
+      <xsl:text> C/B</xsl:text>
+    </xsl:when>
     <xsl:when test="@type='keyboard' or @type='key' or
                     @type='instrument' or @type='announcement' or
                     @type = 'panel' or @type='indicator' or
