@@ -7,6 +7,8 @@
 <xsl:output method="xml" version="1.0" encoding="utf-8"/>
 <xsl:strip-space elements="*"/>
 
+<xsl:param name="synthesis" select="'False'"/>
+
 <xsl:template match="/">
   <dul:dus>
     <xsl:apply-templates select="/xhtml:html/xhtml:body/xhtml:div[@id='body_content']"/>
@@ -40,6 +42,10 @@
 
 
 <xsl:template match="xhtml:td[@class='asterisk']"/>
-<xsl:template match="xhtml:em[@class='refint_ftnote']"/>
-<xsl:template match="xhtml:td[@class='ftnote']"/>
+<xsl:template match="xhtml:em[@class='refint_ftnote']|xhtml:td[@class='ftnote']">
+  <xsl:if test="$synthesis = 'False'">
+    <xsl:apply-templates/>
+  </xsl:if>
+</xsl:template>
+
 </xsl:stylesheet>

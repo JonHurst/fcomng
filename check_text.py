@@ -126,8 +126,11 @@ def compare_dus(filename, lpcbrowser_dus, counts):
 
 
 
-def _process_lpcbrowser_file(filename, dus):
-    xml_string = subprocess.Popen(["xsltproc", "--nonet", "--novalid", g_paths.xsldir + lpcbrowser_xsl, '-'],
+def _process_lpcbrowser_file(filename, dus, synthesis_group=False):
+    extra_args = []
+    if synthesis_group:
+        extra_args = ["--stringparam", "synthesis", "True"]
+    xml_string = subprocess.Popen(["xsltproc", "--nonet", "--novalid"] + extra_args + [g_paths.xsldir + lpcbrowser_xsl, '-'],
                                   stdin=subprocess.PIPE, stdout=subprocess.PIPE
                                   ).communicate(file(filename).read())[0]
     lpc_xml = et.fromstring(xml_string)
@@ -141,10 +144,18 @@ def _process_lpcbrowser_file(filename, dus):
             dus[duid] = dus[duid][:-5]
 
 
-def _process_lpcbrowser_group(ident, dus):
+def _process_lpcbrowser_group(ident, dus, m):
+    #If we're processing a group, it may be a group of DUs containing synthesisitem,
+    #in which case we need to ignore footnotes and footnote refs. Thus, check the first
+    #DU of the first DU_Container of the group for the phrase <!DOCTYPE synthesisitem.
+    duident = m.get_children(m.get_children(ident)[0])[0]
+    idstr = open(g_paths.dus + m.get_filename(duident)).read(200)
+    synthesis_group = False
+    if idstr.find("<!DOCTYPE synthesisitem") != -1:
+        synthesis_group = True
     candidate_files = glob.glob(lpcbrowser_data_path + ident + "*.xhtml")
     for filename in candidate_files:
-        _process_lpcbrowser_file(filename, dus)
+        _process_lpcbrowser_file(filename, dus, synthesis_group)
 
 
 def _process_lpcbrowser_du(ident, dus):
@@ -161,7 +172,7 @@ def get_lpcbrowser_dus(m, ident):
             for c in m.get_children(ident):
                 _recursive_add_lpcbrowser_du(c)
         elif m.get_type(ident) == meta.TYPE_GROUP:
-            _process_lpcbrowser_group(ident, dus)
+            _process_lpcbrowser_group(ident, dus, m)
         elif m.get_type(ident) == meta.TYPE_DUCONTAINER:
             for c in m.get_children(ident):
                 _process_lpcbrowser_du(c, dus)
