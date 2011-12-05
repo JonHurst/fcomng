@@ -311,16 +311,13 @@ class FCOMMeta:
         path_reo = re.compile(r"//([^\[]*)[^']*'([^']*)")
         for rev in rev_marks.findall("rev"):
             mo = path_reo.match(rev.attrib["path"])
-            if not mo: print "regexp error"; continue
+            if not mo: print "regexp error", rev.attrib["path"]; continue
             change = rev.attrib["chg"]
             if change == "E": continue #not interested if only change is aircraft affected
             self.revdict[mo.group(2)] = _RevisionRecord(
                 mo.group(1),
                 change,
                 True if rev.attrib["anchor"] == "true" else False)
-
-
-
 
 
     def get_fleet(self):
