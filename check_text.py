@@ -90,6 +90,27 @@ def index_of_first_difference(hurst_text, lpc_text):
     return pos
 
 
+def display_differences(a, b):
+    context = 20
+    sm = difflib.SequenceMatcher(None, a, b)
+    matching_blocks = sm.get_matching_blocks()
+    apos, bpos = 0, 0
+    for block in matching_blocks:
+        adiff = a[apos:block[0]]
+        bdiff = b[bpos:block[1]]
+        if adiff or bdiff:
+            astr =  "A %s | %s | %s" % (a[max(0, apos - context):apos],
+                                  adiff,
+                                  a[block[0]: min(len(a), block[0] + context)])
+            bstr =  "B %s | %s | %s" % (b[max(0, bpos - context):bpos],
+                                  bdiff,
+                                  b[block[1]: min(len(a), block[1] + context)])
+            print astr.encode("utf8")
+            print "-" * 30
+            print bstr.encode("utf-8")
+            print
+        apos = block[0] + block[2]
+        bpos = block[1] + block[2]
 
 
 def compare_dus(filename, lpcbrowser_dus, counts):
@@ -114,16 +135,9 @@ def compare_dus(filename, lpcbrowser_dus, counts):
                 # print filename, ident, "not found in LPC browser\n", counts
                 counts[2] += 1
                 continue
-            print filename
             counts[1] += 1
-            print ident, counts
-            print "=" * 30
-            c = index_of_first_difference(hurst_text, lpcbrowser_dus[ident])
-            print hurst_text[c:][:100].encode("utf8")
-            print "-" * 30
-            print lpcbrowser_dus[ident][c:][:100].encode("utf8")
-            print
-
+            print filename, ident, counts
+            display_differences(hurst_text, lpcbrowser_dus[ident])
 
 
 def _process_lpcbrowser_file(filename, dus, synthesis_group=False):
