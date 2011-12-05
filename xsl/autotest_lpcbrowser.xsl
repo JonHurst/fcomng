@@ -40,5 +40,6 @@
 
 
 <xsl:template match="xhtml:td[@class='asterisk']"/>
-
+<xsl:template match="xhtml:em[@class='refint_ftnote']"/>
+<xsl:template match="xhtml:td[@class='ftnote']"/>
 </xsl:stylesheet>

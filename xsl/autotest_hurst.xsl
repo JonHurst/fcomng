@@ -68,6 +68,12 @@
     (<xsl:apply-templates select="../../xhtml:p[@class='intro']"/>)
   </xsl:for-each>
 </xsl:template>
-
-
+<xsl:template match="xhtml:thead">
+  <xsl:if test="not(ancestor::xhtml:div[@class='synthesisitem']) or
+                ancestor::xhtml:div[@class='synthesisitem']/preceding-sibling::xhtml:h1">
+    <xsl:apply-templates/>
+  </xsl:if>
+</xsl:template>
+<xsl:template match="xhtml:a[@class='footnoteref']"/>
+<xsl:template match="xhtml:div[@class='footnotes']"/>
 </xsl:stylesheet>
