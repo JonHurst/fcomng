@@ -432,7 +432,10 @@
 
 <xsl:template match="illustration">
   <!-- illustration: (title?, (sheet+)) -->
-  <xsl:apply-templates/>
+  <xsl:if test="title">
+    <h2 class="image_title"><xsl:apply-templates select="title/node()"/></h2>
+  </xsl:if>
+  <xsl:apply-templates select="sheet"/>
 </xsl:template>
 
 
