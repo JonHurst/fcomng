@@ -63,8 +63,10 @@
   <xsl:text>Other inop SYS</xsl:text>
 </xsl:template>
 <xsl:template match="xhtml:div[@class='condsys']">
-  <xsl:apply-templates select="xhtml:div[@class='condbody']"/>
-  (<xsl:apply-templates select="xhtml:p[@class='intro']"/>)
+  <xsl:for-each select="xhtml:div[@class='condbody']/xhtml:div[@class='sys']">
+    <xsl:apply-templates/>
+    (<xsl:apply-templates select="../../xhtml:p[@class='intro']"/>)
+  </xsl:for-each>
 </xsl:template>
 
 
