@@ -1198,7 +1198,19 @@
 
 <xsl:template match="synthesisitem">
   <!-- (reason?,title,table) -->
-  <xsl:apply-templates/>
+  <xsl:param name="group_pos"/>
+  <xsl:param name="group_title"/>
+  <xsl:choose>
+    <xsl:when test="$group_pos = -1">
+      <xsl:apply-templates select="title"/>
+    </xsl:when>
+    <xsl:when test="$group_pos = 0">
+      <h1><xsl:value-of select="$group_title"/></h1>
+    </xsl:when>
+  </xsl:choose>
+  <div class="synthesisitem">
+    <xsl:apply-templates select="table"/>
+  </div>
 </xsl:template>
 
 <!-- procsynthesis -->
