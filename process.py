@@ -14,7 +14,7 @@ def main():
         print "Usage: ", sys.argv[0], "start_file output_dir"
         sys.exit(1)
     g_paths.initialise(*sys.argv)
-    fcm = FCOMMeta(True)
+    fcm = FCOMMeta(False)
     ff = FCOMFactory(fcm)
     ff.build_fcom()
 
