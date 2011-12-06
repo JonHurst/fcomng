@@ -53,7 +53,9 @@
 <xsl:template match="xhtml:p[@class='duident']"/>
 <xsl:template match="xhtml:div[@class='infocontainer']"/>
 <xsl:template match="xhtml:span[@class='sectionref']"/>
-<xsl:template match="xhtml:th[@class='callout']"/>
+<xsl:template match="xhtml:th[@class='callout']">
+  (<xsl:apply-templates/>)
+</xsl:template>
 <xsl:template match="xhtml:div[@class='deferred-proc']/xhtml:h1"/>
 <xsl:template match="xhtml:div[@class='status']/xhtml:h1"/>
 <xsl:template match="xhtml:div[@class='limitations']/xhtml:h1"/>

@@ -50,7 +50,7 @@
 </xsl:template>
 
 
-<xsl:template match="xhtml:td[@class='asterisk']"/>
+<!-- <xsl:template match="xhtml:td[@class='asterisk']"/> -->
 <xsl:template match="xhtml:em[@class='refint_ftnote']|xhtml:td[@class='ftnote']">
   <xsl:if test="$synthesis = 'False'">
     <xsl:apply-templates/>
