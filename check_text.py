@@ -19,6 +19,17 @@ chunk_depth = 3
 lpcbrowser_data_path = 'lpc_browser_xhtml/'
 
 
+def _factory_error_reason():
+    error_reason = {}
+    for line in file("error-reasons"):
+        duid, reason = line.split(" ", 1)
+        error_reason[duid] = reason
+    def _error_reason(duid):
+        return error_reason.get(duid, "")
+    return _error_reason
+error_reason = _factory_error_reason()
+
+
 def display_differences(a, b):
     context = 20
     sm = difflib.SequenceMatcher(None, a, b)
@@ -64,10 +75,15 @@ def compare_dus(filename, lpcbrowser_dus, counts):
                 # print filename, ident, "not found in LPC browser\n", counts
                 counts[2] += 1
                 continue
-            counts[1] += 1
-            print filename, ident, counts
+            print "\n", filename, ident
+            known_error = error_reason(ident)
+            if known_error:
+                print "+ Known error:", known_error
+                counts[3] += 1
+            else:
+                counts[1] += 1
             display_differences(hurst_text, lpcbrowser_dus[ident])
-
+            print counts, "\n"
 
 def _process_lpcbrowser_file(filename, dus, synthesis_group=False):
     extra_args = []
@@ -139,13 +155,13 @@ def make_page_list(m):
 def main():
     m = meta.FCOMMeta(True)
     f = factory.FCOMFactory(m)
-    counts = [0, 0, 0]
+    counts = [0, 0, 0, 0]
     for c, p in enumerate(make_page_list(m)):
         filename = f._make_href(p)
         print c , filename
         lpcbrowser_dus = get_lpcbrowser_dus(m, p)
         compare_dus(filename, lpcbrowser_dus, counts)
-    print zip(["Identical", "Different", "Not found"], counts)
+    print zip(["Identical", "Different", "Not found", "Known error"], counts)
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
