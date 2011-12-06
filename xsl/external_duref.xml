@@ -1,0 +1,18 @@
+<external>
+  <duref ref="QRH/00010654">QRH/Landing distance without autobrake - Conf Full</duref>
+  <duref ref="QRH/00010790">QRH/Loss of FMS data in descent/ approach (severe reset)</duref>
+  <duref ref="QRH/00010843">QRH/NAV FM/GPS POS DISAGREE</duref>
+  <duref ref="QRH/00010848">QRH/Eng Dual Failure - No fuel remaining</duref>
+  <duref ref="QRH/00010849">QRH/Eng Dual Failure - Fuel remaining</duref>
+  <duref ref="QRH/00010873">QRH/Ldg Conf/Appr Spd/Ldg dist on dry runways following failures - Introduction</duref>
+  <duref ref="QRH/00010931">QRH/Emergency evacuation</duref>
+  <duref ref="QRH/00010998">QRH/Required equipment for Cat2 and Cat3</duref>
+  <duref ref="QRH/00010999">QRH/Speeds</duref>
+  <duref ref="QRH/00011009">QRH/Optimum &amp; maximum altitudes</duref>
+  <duref ref="QRH/00012036">QRH/Eng dual failure - Fuel remaining</duref>
+  <duref ref="QRH/00012037">QRH/Eng dual failure - Fuel remaining</duref>
+  <duref ref="QRH/00012039">QRH/Eng dual failure - No fuel remaining</duref>
+  <duref ref="QRH/00012040">QRH/Eng dual failure - No fuel remaining</duref>
+  <duref ref="QRH/00012568">QRH/VAPP Calculation</duref>
+  <duref ref="AFM/00006966">AFM/Modes - EHS Enhanced Surveillance</duref>
+</external>

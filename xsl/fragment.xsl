@@ -175,14 +175,28 @@
     <xsl:otherwise>
       <span class="duref">
         <xsl:text>Refer to </xsl:text>
-        <xsl:value-of select="@product"/>
-        <xsl:text> / </xsl:text>
         <xsl:choose>
           <xsl:when test="linktext">
+            <xsl:value-of select="@product"/>
+            <xsl:text>/</xsl:text>
             <xsl:value-of select="linktext"/>
           </xsl:when>
           <xsl:otherwise>
-            <xsl:value-of select="@ref"/>
+            <xsl:variable name="fullref">
+              <xsl:value-of select="@product"/>/<xsl:value-of select="@ref"/>
+            </xsl:variable>
+            <xsl:variable name="reftext">
+              <xsl:value-of select="document('external_duref.xml')/external/duref[@ref=$fullref]"/>
+            </xsl:variable>
+            <xsl:message><xsl:value-of select="$fullref"/>: <xsl:value-of select="$reftext"/></xsl:message>
+            <xsl:choose>
+              <xsl:when test="$reftext">
+                <xsl:value-of select="$reftext"/>
+              </xsl:when>
+              <xsl:otherwise>
+                <xsl:value-of select="fullref"/>
+              </xsl:otherwise>
+            </xsl:choose>
           </xsl:otherwise>
         </xsl:choose>
       </span>
