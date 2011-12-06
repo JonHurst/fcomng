@@ -36,6 +36,15 @@
 <xsl:template match="xhtml:div[@class='DUInfo']"/>
 
 
+<xsl:template match="xhtml:div[@class='graphrefcenter']//xhtml:img">
+  <xsl:value-of select="substring-before(@src, '.png')"/>
+</xsl:template>
+
+<xsl:template match="xhtml:img[@class='graphrefthumbnail']">
+  <xsl:value-of select="substring-before(@src, '_thumbnail.png')"/>
+</xsl:template>
+
+
 <xsl:template match="text()">
     <xsl:value-of select="."/>
 </xsl:template>

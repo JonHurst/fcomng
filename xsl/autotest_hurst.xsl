@@ -45,9 +45,11 @@
   <xsl:apply-templates/>
 </xsl:template>
 
+<xsl:template match="xhtml:div[@class='image']/xhtml:img">
+  <xsl:value-of select="substring-before(@src, '.cgm')"/>
+</xsl:template>
 
 <!--Filters-->
-<xsl:template match="xhtml:h2[@class='image_title']"/>
 <xsl:template match="xhtml:p[@class='duident']"/>
 <xsl:template match="xhtml:div[@class='infocontainer']"/>
 <xsl:template match="xhtml:span[@class='sectionref']"/>
