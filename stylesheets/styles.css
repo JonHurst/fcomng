@@ -415,12 +415,12 @@ table.cr td
     padding:0.5em 0;
 }
 
-td.cr-left:
+td.cr-left
 {
     margin-right:1em;
 }
 
-td.cr-right:
+td.cr-right
 {
     margin-left:1em;
 }
