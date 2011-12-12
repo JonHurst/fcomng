@@ -37,11 +37,11 @@
 
 
 <xsl:template match="xhtml:div[@class='graphrefcenter']//xhtml:img">
-  <xsl:value-of select="substring-before(@src, '.png')"/>
+  <xsl:value-of select="@src"/>
 </xsl:template>
 
 <xsl:template match="xhtml:img[@class='graphrefthumbnail']">
-  <xsl:value-of select="substring-before(@src, '_thumbnail.png')"/>
+  <xsl:value-of select="concat(substring-before(@src, '_thumbnail.png'), '.png')"/>
 </xsl:template>
 
 

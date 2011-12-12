@@ -46,7 +46,7 @@
 </xsl:template>
 
 <xsl:template match="xhtml:div[@class='image']/xhtml:img">
-  <xsl:value-of select="substring-before(@src, '.cgm')"/>
+  <xsl:value-of select="@src"/>
 </xsl:template>
 
 <!--Filters-->
