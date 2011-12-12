@@ -413,7 +413,7 @@ class FCOMFactory:
                     pngzoom_filename = pngzoom.get("href")
                     if not os.path.exists(g_paths.image_output + pngzoom_filename):
                         shutil.copyfile(g_paths.image_library + pngzoom_filename, g_paths.image_output + pngzoom_filename)
-                    tag += '<p><a href="../images/' + pngzoom_filename + '">Zoom</a></p>'
+                    tag += '<p><a class="zoom" href="../images/' + pngzoom_filename + '">Zoom</a></p>'
             return tag
         return cgmtopng
 

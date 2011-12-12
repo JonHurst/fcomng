@@ -46,7 +46,7 @@
 </xsl:template>
 
 <xsl:template match="xhtml:div[@class='image']/xhtml:img">
-  <xsl:value-of select="@src"/>
+  <xsl:value-of select="substring-after(@src, '/images/')"/>
 </xsl:template>
 
 <!--Filters-->
@@ -88,5 +88,7 @@
     <xsl:apply-templates/>
   </xsl:if>
 </xsl:template>
+
+<xsl:template match="xhtml:a[@class='zoom']"/>
 
 </xsl:stylesheet>
