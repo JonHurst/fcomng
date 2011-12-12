@@ -8,11 +8,15 @@ import subprocess
 import re
 import tempfile
 import meta
+import hashlib
+import shutil
 
 class FCOMFactory:
 
     def __init__(self, fcm):
         global g_paths
+        self.errorlog = open("build-error.log", "w")
+        self.cgmtopng = self._manufacture_cgmtopng()
         self.fcm = fcm #instance of FCOMMeta
         versiondate = g_paths.control[-12:-4]
         self.versionstring = versiondate[:4] + "-" + versiondate[4:6] + "-" + versiondate[6:]
@@ -21,7 +25,6 @@ class FCOMFactory:
 
 
     def build_fcom(self):
-        self.errorlog = open("build-error.log", "w")
         self.write_fleet_js()
         content_pages = []
         for ident in self.fcm.get_root_nodes():
@@ -168,6 +171,8 @@ class FCOMFactory:
         page_string = self._process_links(page_string)
         #insert link bar
         page_string = page_string.replace("<!--linkbar-->", self._build_linkbar(sid))
+        #convert cgm images to png images
+        page_string = re.sub("<img[^>]*></img>", self.cgmtopng, page_string)
         #write the file
         of = open(g_paths.html_output + filename, "w")
         of.write(page_string)
@@ -359,6 +364,58 @@ class FCOMFactory:
         else:
             return "%s: %s" % (prefix, self.fcm.get_title(ident))
 
+
+
+
+    def _manufacture_cgmtopng(self):
+        global g_paths
+        ili = et.ElementTree(None, g_paths.image_library +"image-list.xml")
+        cgm_index = {}
+        for el in ili.findall("cgmfile"):
+            cgm_index[el.get("href")] = el
+        def cgmtopng(matchobj):
+            #matchobj for re <img[^>]*></img>
+            tag =  matchobj.group(0)
+            cgm_filename = os.path.basename(re.search('src="([^"]*)"', tag).group(1))
+            #check it is a file we can work with
+            if cgm_filename[-3:] != "cgm": return tag #not a cgm
+            if not cgm_index.has_key(cgm_filename): #is a cgm, but not in library
+                print >> self.errorlog, "Warning:", cgm_filename, "not in library"
+                return tag
+            #pass through class attribute (e.g. class="symbol")
+            class_attrib_mo = re.search('class="[^"]*"',tag)
+            class_attrib = ""
+            if class_attrib_mo:
+                class_attrib = class_attrib_mo.group()
+            cgm_element = cgm_index[cgm_filename]
+            #check md5sum of cgm file
+            md5sum = hashlib.md5(file(g_paths.illustrations + cgm_filename).read()).hexdigest()
+            if md5sum != cgm_element.get("md5"):
+                print >> self.errorlog, "Warning:", cgm_filename, "has incorrect checksum"
+            png_elements = cgm_element.findall("pngfile")
+            png, pngzoom = None, None
+            for p in png_elements:
+                if p.get("role") == "xhtml":
+                    png = p
+                elif p.get("role") == "xhtml.zoom":
+                    pngzoom = p
+            if png != None:
+                png_filename = png.get("href")
+                if not os.path.exists(g_paths.image_output + png_filename):
+                    shutil.copyfile(g_paths.image_library + png_filename, g_paths.image_output + png_filename)
+                width, height = png.get("size").split("x")
+                tag = "<img %s src='../images/%s' width='%s' height='%s' alt='png'/>" % (
+                    class_attrib,
+                    png_filename,
+                    width,
+                    height)
+                if pngzoom != None:
+                    pngzoom_filename = pngzoom.get("href")
+                    if not os.path.exists(g_paths.image_output + pngzoom_filename):
+                        shutil.copyfile(g_paths.image_library + pngzoom_filename, g_paths.image_output + pngzoom_filename)
+                    tag += '<p><a href="../images/' + pngzoom_filename + '">Zoom</a></p>'
+            return tag
+        return cgmtopng
 
 
 
