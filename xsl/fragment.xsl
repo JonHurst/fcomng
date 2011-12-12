@@ -498,7 +498,7 @@
 	<th class="callout"><xsl:apply-templates select="gritem"/></th>
 	<td class="callout">
 	  <xsl:if test="title">
-	    <h1><xsl:apply-templates select="title"/></h1>
+	    <xsl:apply-templates select="title"/>
 	  </xsl:if>
 	<xsl:apply-templates select="itembody"/></td>
       </tr>
@@ -676,9 +676,7 @@
   <!-- (title?, (action,action+)) -->
   <div class="actionblock">
     <xsl:if test="title">
-      <h2>
-	<xsl:apply-templates select="title"></xsl:apply-templates>
-      </h2>
+      <h2><xsl:apply-templates select="title"/></h2>
     </xsl:if>
     <xsl:for-each select="action">
       <xsl:apply-templates/>
@@ -686,6 +684,9 @@
   </div>
 </xsl:template>
 
+<xsl:template match="action-block/title">
+  <xsl:apply-templates/>
+</xsl:template>
 
 <xsl:template match="limit">
   <!-- ((lit-limit|perf-value),comment?) -->
