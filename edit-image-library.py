@@ -89,11 +89,17 @@ def add_image(cgmfile, library_path):
     image_list.write(filename)
 
 
+def recalculate_png_checksums(library_path):
+    filename = library_path + "image-list.xml"
+    image_list = xml.etree.ElementTree.parse(filename)
+    for png in image_list.findall("//pngfile"):
+        png.attrib["md5"] = hashlib.md5(file(library_path + png.attrib["href"]).read()).hexdigest()
+    image_list.write(filename)
 
 
 if __name__ == "__main__":
     parser = optparse.OptionParser(description="Edit the image library",
-                                   usage="%prog add|rm [options] CGMFILE")
+                                   usage="%prog add|rm|pngcs [options] [CGMFILE]")
     parser.add_option("--library-path", dest="library_path", default=png_directory)
     options, args = parser.parse_args()
     if args[0] == "add":
@@ -103,5 +109,7 @@ if __name__ == "__main__":
             print "CGMFILE must be specified"
     elif args[0] == "rm":
         print "Not implemented yet!"
+    elif args[0] == "pngcs":
+        recalculate_png_checksums(options.library_path)
     else:
-        print "Action must be add or rm"
+        print "Action must be add, rm or pngcs"
