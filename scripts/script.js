@@ -94,7 +94,7 @@ function initial_fold() {
       }
     }
   }
-  add_eventlisteners_for_ipad();
+  add_eventlisteners();
   //With long pages the ...#duid... url was jumping to the wrong place - force
   //it into view after processing is complete
   var linkjump = window.location.hash.slice(1);
@@ -204,13 +204,53 @@ function change_reg(ob) {
 }
 
 
-function add_eventlisteners_for_ipad() {
-  //adds an empty click function handler to all ducontainer and infocontainer divs - apparently
+function add_eventlisteners() {
+  //adds an click handler to all ducontainer and infocontainer divs - apparently
   //this triggers correct hover behaviour on iDevices
   var divs = document.getElementsByTagName("div");
   for(var c=0; c<divs.length; c++) {
     if(divs[c].className == "infocontainer" || divs[c].className == "du_container") {
-      divs[c].onclick = function() {};
+      divs[c].onclick = on_div_click;
     }
   }
+}
+
+
+function on_div_click(mouse_event) {
+  if(this.className == "du_container" && mouse_event.ctrlKey && this.firstChild.className == "tags") {
+    var tags = this.firstChild.childNodes;
+    var active_tag = 0;
+    for(var i=0; i<tags.length; i++) {
+      if(tags[i].className.indexOf("active") != -1) {
+        active_tag = i;
+      }
+      tags[i].className = tags[i].className.replace(new RegExp(" active\\b"), "");
+    }
+    if(mouse_event.shiftKey){
+      active_tag -= 1;
+      if(active_tag == -1) {
+        active_tag += tags.length;
+      }
+    }
+    else {
+      active_tag += 1;
+      if(active_tag == tags.length) {
+        active_tag = 0;
+      }
+    }
+    tags[active_tag].className += " active";
+    //get id of du to unfold
+    var duid = tags[active_tag].href.split("#")[1];
+    //fold as required
+    var du = this.childNodes[1];
+    while(du) {
+      if(du.id == duid)
+        du.className = du.className.replace(new RegExp(" folded\\b"), "");
+      else if(du.className.indexOf("folded") == -1) {
+        du.className += " folded";
+      }
+      du = du.nextSibling;
+    }
+  }
+  return true;
 }
