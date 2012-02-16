@@ -15,7 +15,7 @@ import glob
 
 hurst_xsl = 'autotest_hurst.xsl'
 lpcbrowser_xsl = 'autotest_lpcbrowser.xsl'
-chunk_depth = 3
+chunk_depth = 4
 lpcbrowser_data_path = 'lpc_browser_xhtml/'
 
 
