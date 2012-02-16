@@ -72,7 +72,7 @@ def compare_dus(filename, lpcbrowser_dus, counts):
             counts[0] += 1
         else:
             if not lpcbrowser_dus.has_key(ident):
-                # print filename, ident, "not found in LPC browser\n", counts
+                print filename, ident, "not found in LPC browser\n", counts
                 counts[2] += 1
                 continue
             print "\n", filename, ident
@@ -84,6 +84,7 @@ def compare_dus(filename, lpcbrowser_dus, counts):
                 counts[1] += 1
             display_differences(hurst_text, lpcbrowser_dus[ident])
             print counts, "\n"
+
 
 def _process_lpcbrowser_file(filename, dus, synthesis_group=False):
     extra_args = []
