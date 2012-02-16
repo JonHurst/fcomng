@@ -195,7 +195,7 @@
                 <xsl:value-of select="$reftext"/>
               </xsl:when>
               <xsl:otherwise>
-                <xsl:value-of select="fullref"/>
+                <xsl:value-of select="$fullref"/>
               </xsl:otherwise>
             </xsl:choose>
           </xsl:otherwise>
