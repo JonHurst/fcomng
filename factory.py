@@ -21,7 +21,7 @@ class FCOMFactory:
         versiondate = g_paths.control[-12:-4]
         self.versionstring = versiondate[:4] + "-" + versiondate[4:6] + "-" + versiondate[6:]
         self.revisions = []
-        self.chunk_depth = 3
+        self.chunk_depth = 4
 
 
     def build_fcom(self):
