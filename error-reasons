@@ -19,6 +19,8 @@
 00010142.0001001 easyJet inserted passage detailing why SOP section has been removed
 00011951.0010001 LPC Browser uses "See" rather than "Refer to" in this DU. PDF uses "refer to" and the LPC Browser uses "refer to" everywhere else.
 00011951.0002001 LPC Browser uses "See" rather than "Refer to" in this DU. PDF uses "refer to" and the LPC Browser uses "refer to" everywhere else.
+00012212.0002001 LPC Browser uses "See" rather than "Refer to" in this DU. PDF uses "refer to" and the LPC Browser uses "refer to" everywhere else.
+00012212.0004001 LPC Browser uses "See" rather than "Refer to" in this DU. PDF uses "refer to" and the LPC Browser uses "refer to" everywhere else.
 00012087.0037001 QRH references too deep in LPC browser
 00012090.0032001 QRH references too deep in LPC browser
 00012122.0002001 LPC Browser misses out warnings, cautions and notes form synthesisitem tables
@@ -35,4 +37,11 @@
 00013772.0001001 LPC Browser sometimes omits illustration titles.
 00012095.0002001 LPC Browser sometimes omits illustration titles.
 00013106.0001001 LPC Browser sometimes omits illustration titles.
+00012715.0006001 LPC Browser sometimes omits illustration titles.
 00013515.0001001 Image title below diagram in LPC Browser
+00011321.0001001 LPC Browser has FWSPAGE title here, but nowhere else
+00013994.0001001 LPC Browser treats linktext with FCOM/ at it's start as a special case and removes this part
+00013528.0003001 LPC Browser transform generates text - this is patched in, but cannot precede 'reason for issue'
+00013609.0001001 LPC Browser transform generates text - this is patched in, but cannot precede 'reason for issue'
+00013694.0001001 LPC Browser transform generates text - this is patched in, but cannot precede 'reason for issue'
+00013697.0001001 LPC Browser transform generates text - this is patched in, but cannot precede 'reason for issue'
