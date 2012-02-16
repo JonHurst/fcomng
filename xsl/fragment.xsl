@@ -86,7 +86,8 @@
                     @type='instrument' or @type='announcement' or
                     @type = 'panel' or @type='indicator' or
                     @type = 'l-light' or @type='aural-w' or
-                    @type = 'tech-label' or @type = 'callout'">
+                    @type = 'tech-label' or @type = 'callout' or
+                    @type = 'computer'">
       <xsl:apply-templates/>
     </xsl:when>
     <xsl:otherwise>
