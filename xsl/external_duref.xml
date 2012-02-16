@@ -8,11 +8,16 @@
   <duref ref="QRH/00010931">QRH/Emergency evacuation</duref>
   <duref ref="QRH/00010998">QRH/Required equipment for Cat2 and Cat3</duref>
   <duref ref="QRH/00010999">QRH/Speeds</duref>
+  <duref ref="QRH/00011000">QRH/VAPP Determination</duref>
   <duref ref="QRH/00011009">QRH/Optimum &amp; maximum altitudes</duref>
   <duref ref="QRH/00012036">QRH/Eng dual failure - Fuel remaining</duref>
   <duref ref="QRH/00012037">QRH/Eng dual failure - Fuel remaining</duref>
   <duref ref="QRH/00012039">QRH/Eng dual failure - No fuel remaining</duref>
   <duref ref="QRH/00012040">QRH/Eng dual failure - No fuel remaining</duref>
   <duref ref="QRH/00012568">QRH/VAPP Calculation</duref>
+  <duref ref="QRH/00014207">QRH/Fuel Penalty Factors/ECAM Alert Table</duref>
   <duref ref="AFM/00006966">AFM/Modes - EHS Enhanced Surveillance</duref>
+  <duref ref="MMEL/00012623">MMEL/ECAM and MAINTENANCE STATUS</duref>
+  <duref ref="MMEL/00007755">MMEL</duref>
+  <duref ref="FCTM/00013840">FCTM/COCKPIT WINDSHIELD/WINDOW CRACKED</duref>
 </external>
