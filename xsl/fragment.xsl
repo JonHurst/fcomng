@@ -1122,7 +1122,9 @@
   (tr-data|env-data|heading-data|bulletin-data),approbation-frame?
   ,approbation-area?)-->
   <xsl:apply-templates select="title"/>
-  <h2>Approved by: -<xsl:value-of select="approbation-area/approved-by/job-title"/></h2>
+  <xsl:if test="approbation-area/approved-by/job-title">
+    <h2>Approved by: -<xsl:value-of select="approbation-area/approved-by/job-title"/></h2>
+  </xsl:if>
   <xsl:apply-templates select="bulletin-data"/>
 </xsl:template>
 
