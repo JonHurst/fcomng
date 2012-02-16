@@ -17,11 +17,12 @@
 
 
 <xsl:template match="xhtml:div[@id='body_content']">
-  <xsl:for-each select="xhtml:table">
+  <!--2011-11 introduced revmark divs. Entire DU may be contained within such a div now-->
+  <xsl:for-each select="xhtml:table|xhtml:div[@class='revmark_new' or @class='revmark']/xhtml:table">
     <dul:du>
       <xsl:attribute name="id">
         <xsl:value-of select="xhtml:tbody/xhtml:tr/xhtml:td/
-                              xhtml:div[@class='DUInfo']/xhtml:table/
+                              xhtml:div[@class='DUInfo']//xhtml:table[@class='table_duinfo']/
                               xhtml:tbody/xhtml:tr/xhtml:td/text()[1]"/>
       </xsl:attribute>
       <xsl:attribute name="title">
@@ -49,10 +50,23 @@
     <xsl:value-of select="."/>
 </xsl:template>
 
+<!--Remove revision markers from comparison-->
+<xsl:template match="xhtml:div[@class='revmark']/xhtml:div[@class='highlight']"/>
+
+<!--2011-11 introduced a TDU link-->
+<!--Might be worth trying to convert this into my format for comparison at some point-->
+<xsl:template match="xhtml:div[@class='duLinkedToTdu']"/>
 
 <!-- <xsl:template match="xhtml:td[@class='asterisk']"/> -->
 <xsl:template match="xhtml:em[@class='refint_ftnote']|xhtml:td[@class='ftnote']">
   <xsl:if test="$synthesis = 'False'">
+    <xsl:apply-templates/>
+  </xsl:if>
+</xsl:template>
+
+<!--201111 introduced a 'To OEB' button-->
+<xsl:template match="xhtml:td[@class='align_right_nowrap']/xhtml:em[@class='bold']">
+  <xsl:if test="text()!='To OEB'">
     <xsl:apply-templates/>
   </xsl:if>
 </xsl:template>

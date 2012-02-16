@@ -27,6 +27,11 @@
   <xsl:value-of select="."/>
 </xsl:template>
 
+<!--LPC Browser has started inserting actual dashes for NDASH-->
+<xsl:template match="xhtml:ul[@class='NDASH']/xhtml:li">
+  <xsl:text>-</xsl:text>
+  <xsl:apply-templates/>
+</xsl:template>
 
 <!--LPC Browser puts table titles underneath -->
 <xsl:template match="xhtml:div[@class='table']">
