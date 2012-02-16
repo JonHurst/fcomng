@@ -9,3 +9,4 @@ scripts/fleet.js
 pickles
 build-error.log
 unit-test-target
+lpc_browser_xhtml
