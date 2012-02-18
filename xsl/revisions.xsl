@@ -68,6 +68,13 @@
       <xsl:copy-of select="@href"/>
       <xsl:value-of select="@title"/>
     </a>
+    <xsl:if test="hl">
+      <ul>
+        <xsl:for-each select="hl">
+          <li><xsl:value-of select="text()"/></li>
+        </xsl:for-each>
+      </ul>
+    </xsl:if>
   </li>
 </xsl:template>
 

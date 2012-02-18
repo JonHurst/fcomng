@@ -99,6 +99,9 @@ class _DU(_Node):
             if r.attrib["chg"][-1:] == "N": path += "/"
             self.revs.append(path + "/text()")
         self.revs.sort()
+        self.hl = []
+        for h in e.findall("revisions/content-revisions/highlights/highlight/authoring/parahl"):
+            self.hl.append(h.text.replace("\n", " "))
 
 
     def _get_msns(self, e):
@@ -387,6 +390,10 @@ class FCOMMeta:
 
     def get_du_revs(self, ident):
         return self.nodes[ident].revs
+
+
+    def get_du_highlights(self, ident):
+        return self.nodes[ident].hl
 
 
     def get_overriding(self, ident):

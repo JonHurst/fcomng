@@ -293,6 +293,10 @@ class FCOMFactory:
                                      "duid": ident,
                                      "href": self._make_href(self.fcm.get_parent(ident)),#href is for container
                                      "title": self.fcm.get_title(ident)})
+                    for hl in self.fcm.get_du_highlights(ident):
+                        tb.start("hl")
+                        tb.data(hl)
+                        tb.end("hl")
                     tb.end("rev")
         elif (self.fcm.get_type(ident) == meta.TYPE_SECTION and
               self.fcm.get_type(self.fcm.get_children(ident)[0]) != meta.TYPE_SECTION):
